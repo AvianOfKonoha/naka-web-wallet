@@ -1,4 +1,4 @@
-# 🧾 Ethereum Smart Contract Frontend
+# 🧾 Vault Smart Contract Frontend
 **Built with Vue + Vite + TypeScript + Web3.js**
 
 This frontend application was rewritten from a minimal Vite setup into a Vue-based client that interacts with Ethereum smart contracts using **Web3.js** and **MetaMask**. It includes functionality to deterministically compute contract addresses using **RLP encoding** and **Keccak-256 hashing**—entirely within the browser, with no backend.
