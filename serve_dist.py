@@ -5,7 +5,7 @@ import mimetypes
 from urllib.parse import unquote
 
 PORT = 8000
-MOUNT_PATH = "/"
+MOUNT_PATH = "/naka-dapp-vue"
 DIST_DIR = "dist"
 
 # Fix MIME type for JS modules
