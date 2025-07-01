@@ -5,7 +5,7 @@ import mimetypes
 from urllib.parse import unquote
 
 PORT = 8000
-MOUNT_PATH = "/withdraw-app"
+MOUNT_PATH = "/withdraw"
 DIST_DIR = "dist"
 
 # Fix MIME type for JS modules
