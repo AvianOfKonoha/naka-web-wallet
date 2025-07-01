@@ -1,0 +1,1 @@
+import{_ as t,c as e,a as c,o}from"./index-BRSYhlSM.js";const a={},n={class:"contracts"};function r(_,s){return o(),e("div",n,s[0]||(s[0]=[c("h1",null,"This is a contracts page",-1)]))}const l=t(a,[["render",r]]);export{l as default};
