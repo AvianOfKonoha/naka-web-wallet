@@ -104,10 +104,10 @@ export const useContractsStore = defineStore('contracts', {
       );
       const sender = account.address;
 
-      /** The contract address is derived from the creator’s address and their nonce. When the contract is deployed, Ethereum computes the contract's address deterministically:
-       * sender(creator's address) = the deploying account's Ethereum address (20 bytes)
+      /** The contract address is derived from the creator’s address and their nonce. When the contract is deployed, the network computes the contract's address deterministically:
+       * sender(creator's address) = the deploying account's network address (20 bytes)
        * nonce = number of transactions sent from the creator (as an integer)
-       * rlp.encode([...]) = Recursive Length Prefix encoding of the array [sender, nonce]. RLP - Ethereum’s serialization method - encodes data structures into bytes.
+       * rlp.encode([...]) = Recursive Length Prefix encoding of the array [sender, nonce]. RLP - Network’s serialization method - encodes data structures into bytes.
        * */
       this.decodeContractAddressFromDeployer(
         sender,
@@ -152,7 +152,7 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
-    /** Fetch an ABI from Polygon scan by attaching two dynamic parameters to the Polygon Scan API request: 1. the address of the contract and 2. your API key. You specify both in their respective input fields. */
+    /** Fetch an ABI from Polygon scan by attaching two dynamic parameters to the Polygon Scan API request: #1 the address of the contract and #2 your API key. You specify both in their respective input fields. */
     async getAbiFromPolygonScan(address: string) {
       /** Construct a Polygon Scan API url with two dynamic arguments */
       const apiUrl = `https://api.polygonscan.com/api?module=contract&action=getabi&address=${address}&apikey=${this.inputs.apiKey}`;
