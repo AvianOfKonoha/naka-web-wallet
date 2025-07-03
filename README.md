@@ -10,7 +10,7 @@ This frontend application was rewritten from a minimal Vite setup into a Vue-bas
 
 You can access the deployed version of this app here:
 
-🔗 **[https://avianofkonoha.github.io/withdraw](https://avianofkonoha.github.io/withdraw)**
+🔗 **[https://avianofkonoha.github.io/dapp-withdraw](https://avianofkonoha.github.io/dapp-withdraw)**
 
 > Make sure your MetaMask wallet is installed and unlocked in your browser to interact with the app.
 
