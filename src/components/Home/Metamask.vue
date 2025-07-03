@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
+import {ref} from 'vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -75,16 +76,14 @@ const contractsStore = useContractsStore();
               </clipPath>
             </defs>
           </svg>
-          <span class="button__text">{{
+          <!--          -->
+          <span class="button__text" ref="buttonText">{{
             !contractsStore.signature.value || !contractsStore.metamaskAccount
-              ? 'Connected'
+              ? 'Connect'
               : 'Connected'
           }}</span>
         </button>
       </div>
-      <p class="account" v-if="contractsStore.metamaskAccount">
-        Your address: {{ contractsStore.metamaskAccount }}
-      </p>
     </div>
   </div>
 </template>

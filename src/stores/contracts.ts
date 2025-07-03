@@ -1,5 +1,9 @@
 import {defineStore} from 'pinia';
-import type {IContractsLoading, IContractsStore} from '@/types/contracts.ts';
+import type {
+  IContractsLoading,
+  IContractsModal,
+  IContractsStore
+} from '@/types/contracts.ts';
 import {Web3} from 'web3';
 import {keccak256} from 'js-sha3';
 import {encode} from 'rlp';
@@ -9,6 +13,8 @@ export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
     web3: null,
     metamaskAccount: '',
+    chainId: null,
+    balance: null,
     allAccounts: [],
     signature: {
       message: 'Please sign this message to confirm you own this wallet',
@@ -34,6 +40,9 @@ export const useContractsStore = defineStore('contracts', {
     },
     deployer: {
       contractAddress: ''
+    },
+    modal: {
+      connect: false
     }
   }),
   getters: {},
@@ -46,6 +55,13 @@ export const useContractsStore = defineStore('contracts', {
       this.loading = {
         ...this.loading,
         ...loader
+      };
+    },
+
+    updateModal(modal: Partial<IContractsModal>) {
+      this.modal = {
+        ...this.modal,
+        ...modal
       };
     },
 
@@ -68,7 +84,7 @@ export const useContractsStore = defineStore('contracts', {
 
       /** If the user has already connected their MetaMask and their address is saved to the state end propagation */
       if (this.metamaskAccount && this.signature.value) {
-        toast.info("You're already connected");
+        this.updateModal({connect: true});
         return;
       }
 
@@ -84,11 +100,17 @@ export const useContractsStore = defineStore('contracts', {
         /** Set the state of the metamask account connected to the network */
         this.allAccounts = accounts;
         this.metamaskAccount = accounts[0];
+
+        /** Prompt a user to sign a message via their Metamask using their private key to prove ownership of their wallet without spending any tokens or sending a transaction */
         this.signature.value = await this.web3.eth.personal.sign(
           this.signature.message,
           this.metamaskAccount,
           '123456'
         );
+
+        /** Extract the chain id of the current account from the MetaMask */
+        const chainId = await this.web3.eth.getChainId();
+        this.chainId = Number(chainId);
       } catch (error) {
         toast.error(`${(error as Error).message}`);
       }
@@ -248,6 +270,12 @@ export const useContractsStore = defineStore('contracts', {
       } finally {
         this.updateLoading({factory: false});
       }
+    },
+
+    disconnectMetamask() {
+      this.metamaskAccount = '';
+      this.chainId = null;
+      this.signature.value = '';
     }
   }
 });

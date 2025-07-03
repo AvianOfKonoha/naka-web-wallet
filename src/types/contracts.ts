@@ -31,14 +31,21 @@ export interface IContractsSignature {
   value: string;
 }
 
+export interface IContractsModal {
+  connect: boolean;
+}
+
 export interface IContractsStore {
   web3: Web3 | null;
   metamaskAccount: string;
   allAccounts: string[];
+  chainId: number | null;
+  balance: number | null;
   signature: IContractsSignature;
   inputs: IContractsInputs;
   loading: IContractsLoading;
   transactionHash: IContractsHash;
   factory: IContractsFactory;
   deployer: IContractsDeployer;
+  modal: IContractsModal;
 }

@@ -1,12 +1,91 @@
 <script setup lang="ts">
 import {RouterLink} from 'vue-router';
 import {useContractsStore} from '@/stores/contracts.ts';
+import Modal from '@/components/UI/Modal.vue';
+import {ref} from 'vue';
+import {copyToClipboard} from '@/utils/helpers.ts';
 
 /*Global state*/
 const contractsStore = useContractsStore();
+
+/*Local state*/
+const addressRef = ref(null);
+
+/*Modal*/
+const toggleConnectModal = (active: boolean) => {
+  contractsStore.updateModal({connect: active});
+};
+
+const disconnectMetamask = () => {
+  contractsStore.updateModal({connect: false});
+  contractsStore.disconnectMetamask();
+};
+
+const copyAddress = () => {
+  copyToClipboard(contractsStore.metamaskAccount);
+};
 </script>
 
 <template>
+  <!-- Modal -->
+  <Modal
+    v-if="contractsStore.modal.connect"
+    class="modal__connect"
+    :toggleActive="toggleConnectModal"
+  >
+    <div class="connect__header">Connected</div>
+    <div class="connect__profile">
+      <div class="profile"></div>
+      <div class="chain"></div>
+    </div>
+    <div class="connect__address" @click="copyAddress">
+      <span>
+        {{
+          `${contractsStore.metamaskAccount.substring(0, 6)}••••${contractsStore.metamaskAccount.slice(-4)}`
+        }}
+      </span>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M1.04199 1.66797C1.04199 1.32279 1.32181 1.04297 1.66699 1.04297H13.3337C13.6788 1.04297 13.9587 1.32279 13.9587 1.66797V6.04297H18.3337C18.6788 6.04297 18.9587 6.32279 18.9587 6.66797V18.3346C18.9587 18.6798 18.6788 18.9596 18.3337 18.9596H6.66699C6.32181 18.9596 6.04199 18.6798 6.04199 18.3346V13.9596H1.66699C1.32181 13.9596 1.04199 13.6798 1.04199 13.3346V1.66797ZM7.29199 13.9596V17.7096H17.7087V7.29297H13.9587V13.3346C13.9587 13.6798 13.6788 13.9596 13.3337 13.9596H7.29199ZM12.7087 2.29297H2.29199V12.7096H12.7087V2.29297Z"
+        />
+      </svg>
+    </div>
+    <div class="connect__amount"></div>
+    <div class="connect__button">
+      <button
+        type="button"
+        aria-label="Disconnect from MetaMask"
+        @click="disconnectMetamask"
+        class="button__default"
+      >
+        <svg
+          aria-hidden="true"
+          width="15"
+          height="14"
+          viewBox="0 0 15 14"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M4 0C1.79086 0 0 1.79086 0 4V10C0 12.2091 1.79086 14 4 14H6C6.55228 14 7 13.5523 7 13C7 12.4477 6.55228 12 6 12H4C2.89543 12 2 11.1046 2 10V4C2 2.89543 2.89543 2 4 2H6C6.55228 2 7 1.55228 7 1C7 0.447715 6.55228 0 6 0H4ZM11.7071 3.29289C11.3166 2.90237 10.6834 2.90237 10.2929 3.29289C9.90237 3.68342 9.90237 4.31658 10.2929 4.70711L11.5858 6H9.5H6C5.44772 6 5 6.44772 5 7C5 7.55228 5.44772 8 6 8H9.5H11.5858L10.2929 9.29289C9.90237 9.68342 9.90237 10.3166 10.2929 10.7071C10.6834 11.0976 11.3166 11.0976 11.7071 10.7071L14.7071 7.70711C15.0976 7.31658 15.0976 6.68342 14.7071 6.29289L11.7071 3.29289Z"
+          ></path>
+        </svg>
+        <span>Disconnect</span>
+      </button>
+    </div>
+  </Modal>
+
+  <!-- Header -->
   <header>
     <div class="header__wrapper">
       <nav>
@@ -69,7 +148,7 @@ const contractsStore = useContractsStore();
               {{
                 !contractsStore.signature.value ||
                 !contractsStore.metamaskAccount
-                  ? 'Connected'
+                  ? 'Connect'
                   : 'Connected'
               }}
             </span>
