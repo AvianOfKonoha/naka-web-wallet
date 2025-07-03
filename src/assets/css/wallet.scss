@@ -1,0 +1,42 @@
+@use 'sass:map';
+@use 'framework' as framework;
+
+.home {
+  @include framework.flex-layout(flex, center, unset, unset);
+  &__box {
+    width: min(750px, 100%);
+    padding: calc(#{framework.$defaultPadding} * 3);
+    background-color: map.get(framework.$colors, 'gray-50');
+    border-radius: calc(#{framework.$defaultRem} * 1.5);
+    @include framework.grid-gap(framework.$defaultGridGap);
+    &--title {
+      @include framework.font-style('44', 'primary');
+      font-weight: 300;
+    }
+    &--text {
+      @include framework.font-style('default', 'gray-400');
+      padding-bottom: calc(#{framework.$defaultPadding} * 3.5);
+    }
+    &--button {
+      @include framework.flex-layout(flex, center, unset, unset);
+    }
+  }
+  &__button {
+    &--connect {
+      width: min(350px, 100%);
+      @include framework.flex-layout(flex, center, center, unset);
+      @include framework.font-style('18', 'gray-50');
+      &.connected {
+        span {
+          color: map.get(framework.$colors, 'green-200');
+        }
+      }
+      svg {
+        position: absolute;
+        left: 18px;
+        width: 22px;
+        height: 22px;
+      }
+    }
+  }
+}

@@ -9,6 +9,11 @@ export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
     web3: null,
     metamaskAccount: '',
+    allAccounts: [],
+    signature: {
+      message: 'Please sign this message to confirm you own this wallet',
+      value: ''
+    },
     inputs: {
       privateKey: '',
       nonce: '',
@@ -55,13 +60,35 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      /*const signedAddress = this.web3.eth.accounts.recover(
+        this.signature.message,
+        this.signature.value
+      );
+      console.log('Recovered address:', signedAddress);*/
+
+      /** If the user has already connected their MetaMask and their address is saved to the state end propagation */
+      if (this.metamaskAccount && this.signature.value) {
+        toast.info("You're already connected");
+        return;
+      }
+
       try {
         /** Extract the metamask account's address and display it */
         await window.ethereum.request({method: 'eth_requestAccounts'});
         const accounts = await this.web3.eth.getAccounts();
 
+        if (!accounts.length) {
+          throw new Error('No accounts found.');
+        }
+
         /** Set the state of the metamask account connected to the network */
-        this.metamaskAccount = 'Connected: ' + accounts.join(', ');
+        this.allAccounts = accounts;
+        this.metamaskAccount = accounts[0];
+        this.signature.value = await this.web3.eth.personal.sign(
+          this.signature.message,
+          this.metamaskAccount,
+          '123456'
+        );
       } catch (error) {
         toast.error(`${(error as Error).message}`);
       }

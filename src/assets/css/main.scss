@@ -1,35 +1,138 @@
-@use 'base.scss';
+@use 'sass:map';
+@use 'framework' as framework;
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+/*Fonts*/
+@font-face {
+  font-family: NeueMontreal;
+  src: url('../fonts/ppneuemontreal-thin.woff');
+  font-weight: 300;
+  font-display: swap;
 }
 
-a,
-.green {
+@font-face {
+  font-family: NeueMontreal;
+  src: url('../fonts/ppneuemontreal-book.woff');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: NeueMontreal;
+  src: url('../fonts/ppneuemontreal-medium.woff');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: NeueMontreal;
+  src: url('../fonts/ppneuemontreal-bold.woff');
+  font-weight: 700;
+  font-display: swap;
+}
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+a {
   text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+  color: var(--theme-color);
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+h1,
+h2,
+h3,
+h4,
+h5,
+p {
+  font-weight: 400;
+  margin: unset;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: map.get(framework.$colors, 'white');
+  @include framework.font-style('default', 'primary');
+  line-height: 1;
+  font-family: 'NeueMontreal', sans-serif;
+}
+
+button,
+input,
+textarea,
+select,
+option {
+  font-family: 'NeueMontreal', sans-serif;
+}
+
+button {
+  border: unset;
+  outline: unset;
+  background: none;
+  cursor: pointer;
+  padding: unset;
+  @include framework.font-style('12', 'primary');
+}
+
+.button {
+  &__default {
+    border-radius: 100vh;
+    background-color: map.get(framework.$colors, 'gray-800');
+    @include framework.font-style('12', 'gray-50');
+    padding: 10px calc(#{framework.$defaultPadding} * 0.75);
+    font-weight: 500;
+    position: relative;
   }
 }
 
-@media (min-width: 1024px) {
-  body {
+header {
+  display: flex;
+  justify-content: center;
+  .header {
+    &__wrapper {
+      padding: calc(#{framework.$defaultPadding} / 2)
+        calc(#{framework.$defaultPadding} * 3);
+      width: min(1300px, 100%);
+      nav {
+        @include framework.flex-layout(
+          flex,
+          space-between,
+          center,
+          framework.$defaultGridGap
+        );
+      }
+      &--connect {
+        .button {
+          &__connect {
+            width: max(192px, 100%);
+            display: flex;
+            position: relative;
+            justify-content: center;
+            &--icon {
+              position: absolute;
+              left: 12px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+main {
+  &.naka {
     display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    justify-content: center;
+    padding-top: calc(#{framework.$defaultPadding} * 6);
+    .naka {
+      &__wrap {
+        width: min(1300px, 100%);
+      }
+    }
   }
 }

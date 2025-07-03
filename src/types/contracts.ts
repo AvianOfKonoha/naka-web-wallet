@@ -26,9 +26,16 @@ export interface IContractsDeployer {
   contractAddress: string;
 }
 
+export interface IContractsSignature {
+  message: string;
+  value: string;
+}
+
 export interface IContractsStore {
   web3: Web3 | null;
   metamaskAccount: string;
+  allAccounts: string[];
+  signature: IContractsSignature;
   inputs: IContractsInputs;
   loading: IContractsLoading;
   transactionHash: IContractsHash;
