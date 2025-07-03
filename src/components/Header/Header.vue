@@ -2,14 +2,10 @@
 import {RouterLink} from 'vue-router';
 import {useContractsStore} from '@/stores/contracts.ts';
 import Modal from '@/components/UI/Modal.vue';
-import {ref} from 'vue';
 import {copyToClipboard} from '@/utils/helpers.ts';
 
 /*Global state*/
 const contractsStore = useContractsStore();
-
-/*Local state*/
-const addressRef = ref(null);
 
 /*Modal*/
 const toggleConnectModal = (active: boolean) => {
