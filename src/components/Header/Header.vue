@@ -10,7 +10,7 @@ const contractsStore = useContractsStore();
   <header>
     <div class="header__wrapper">
       <nav>
-        <RouterLink to="/">
+        <RouterLink to="/" class="nav__logo">
           <img src="@/assets/img/naka.svg" alt="Logo" width="81" height="19" />
         </RouterLink>
         <div class="header__wrapper--connect">
@@ -30,6 +30,7 @@ const contractsStore = useContractsStore();
               viewBox="0 0 16 16"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              class="button__connect--icon"
               v-if="
                 contractsStore.signature.value && contractsStore.metamaskAccount
               "

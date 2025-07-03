@@ -12,6 +12,7 @@
     &--title {
       @include framework.font-style('44', 'primary');
       font-weight: 300;
+      line-height: 1;
     }
     &--text {
       @include framework.font-style('default', 'gray-400');
@@ -26,6 +27,8 @@
       width: min(350px, 100%);
       @include framework.flex-layout(flex, center, center, unset);
       @include framework.font-style('18', 'gray-50');
+      padding: 18px;
+      height: 56px;
       &.connected {
         span {
           color: map.get(framework.$colors, 'green-200');
@@ -36,6 +39,28 @@
         left: 18px;
         width: 22px;
         height: 22px;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 575px) {
+  .home {
+    &__button {
+      &--connect {
+        width: 100%;
+      }
+    }
+    &__box {
+      padding: calc(#{framework.$defaultPadding} * 1.5);
+      &--text {
+        padding-bottom: calc(#{framework.$defaultPadding} * 2.5);
+      }
+      &--title {
+        font-size: map.get(framework.$textSizes, '36');
+      }
+      .account {
+        word-break: break-all;
       }
     }
   }

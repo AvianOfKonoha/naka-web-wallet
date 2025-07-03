@@ -83,7 +83,7 @@ const contractsStore = useContractsStore();
         </button>
       </div>
       <p class="account" v-if="contractsStore.metamaskAccount">
-        Connected: {{ contractsStore.metamaskAccount }}
+        Your address: {{ contractsStore.metamaskAccount }}
       </p>
     </div>
   </div>
