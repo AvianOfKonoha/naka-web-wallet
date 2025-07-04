@@ -25,7 +25,7 @@ You can access the deployed version of this app here:
 - ⚡ Instant development with Vite
 - 🧩 Written in **TypeScript** for type safety and scalability
 - 🌐 Clean, static frontend suitable for GitHub Pages
-- 🗄️ Hosted at `/withdraw` path to enable scoped deployments
+- 🗄️ Hosted at `/dapp-withdraw` path to enable scoped deployments
 
 ---
 
