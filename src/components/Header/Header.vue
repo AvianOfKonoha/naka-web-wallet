@@ -25,11 +25,11 @@ const copyAddress = () => {
 
 const updateNetwork = () => {
   /** If the metamask doesn't exist end propagation and prompt the user to install it */
-  if (!window.ethereum) {
+  if (!contractsStore.provider) {
     return;
   }
 
-  window.ethereum.on('chainChanged', async (chainId: string) => {
+  contractsStore.provider.on('chainChanged', async (chainId: string) => {
     /** If the user has not made the first connection to the metamask wallet end propagation */
     if (!contractsStore.metamaskAccount) {
       return;
@@ -46,11 +46,11 @@ const updateNetwork = () => {
 
 const onAccountsChanged = () => {
   /** If the metamask doesn't exist end propagation and prompt the user to install it */
-  if (!window.ethereum) {
+  if (!contractsStore.provider) {
     return;
   }
 
-  window.ethereum.on('accountsChanged', (accounts: string[]) => {
+  contractsStore.provider.on('accountsChanged', (accounts: string[]) => {
     /** If the accounts array is populated simply return and don't do anything */
     if (accounts.length) {
       return;
