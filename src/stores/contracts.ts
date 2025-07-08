@@ -10,6 +10,7 @@ import {keccak256} from 'js-sha3';
 import {encode} from 'rlp';
 import {toast} from 'vue3-toastify';
 import {NETWORKS} from '@/utils/constants.ts';
+import {metamaskSdk} from '@/utils/metamask.ts';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
@@ -69,7 +70,8 @@ export const useContractsStore = defineStore('contracts', {
   },
   actions: {
     initializeWeb3() {
-      this.web3 = new Web3(window.ethereum);
+      this.provider = window.ethereum || metamaskSdk.getProvider();
+      this.web3 = new Web3(this.provider);
     },
 
     updateWeb3(constructor: any) {
@@ -132,7 +134,7 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Extract the metamask account's address and display it */
-        await window.ethereum.request({method: 'eth_requestAccounts'});
+        await this.provider.request({method: 'eth_requestAccounts'});
       } catch (error) {
         toast.error(`${(error as Error).message}`);
       }
@@ -144,7 +146,7 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       /** Notify the user to install Metamask in case the ethereum constructor does not exist */
-      if (!window.ethereum) {
+      if (!this.provider) {
         toast.error('Please install MetaMask!');
         return;
       }
@@ -163,7 +165,7 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Extract the metamask account's address and display it */
-        await window.ethereum.request({method: 'eth_requestAccounts'});
+        await this.provider.request({method: 'eth_requestAccounts'});
         const accounts = await this.web3.eth.getAccounts();
 
         if (!accounts.length) {

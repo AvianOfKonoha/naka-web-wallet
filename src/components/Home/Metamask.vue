@@ -8,14 +8,15 @@ const contractsStore = useContractsStore();
 
 /*Methods*/
 const connectMobile = async () => {
-  console.log('provider: ', provider);
-  if (!provider) {
-    toast.error('No provider');
+  const ethereum = metamaskSdk.getProvider();
+
+  if (!ethereum) {
+    return;
   }
 
   try {
-    await metamaskSdk.connect();
-    await provider?.request({method: 'eth_requestAccounts'});
+    // await metamaskSdk.connect();
+    const accounts = await ethereum.request({method: 'eth_requestAccounts'});
   } catch (error) {
     console.error(error);
   }
