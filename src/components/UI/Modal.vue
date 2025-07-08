@@ -15,7 +15,12 @@ const closeModal = () => {
   <div class="modal__wrap">
     <div class="modal__backdrop" @click="closeModal"></div>
     <div class="modal__box" :class="props.class">
-      <button type="button" aria-label="Close modal" class="modal__close">
+      <button
+        type="button"
+        aria-label="Close modal"
+        class="modal__close"
+        @click="closeModal"
+      >
         <svg
           width="14"
           height="14"
