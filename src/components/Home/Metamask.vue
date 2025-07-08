@@ -101,12 +101,6 @@ onMounted(() => {
           }}</span>
         </button>
       </div>
-      <button
-        class="button__default home__button--connect"
-        @click="connectMobile"
-      >
-        Mobile connect 4
-      </button>
     </div>
   </div>
 </template>
