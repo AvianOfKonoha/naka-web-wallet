@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
-import {provider} from "@/utils/metamask.ts";
+import {provider} from '@/utils/metamask.ts';
+import {toast} from 'vue3-toastify';
 
 /*Global state*/
 const contractsStore = useContractsStore();
 
 /*Methods*/
 const connectMobile = async () => {
-  if(!provider){
+  if (!provider) {
+    toast.error('No provider');
     return;
   }
 
   try {
-    await provider.request({ method: 'eth_requestAccounts' });
+    await provider.request({method: 'eth_requestAccounts'});
   } catch (error) {
     console.error(error);
   }
-}
+};
 </script>
 
 <template>
@@ -89,7 +91,6 @@ const connectMobile = async () => {
               </clipPath>
             </defs>
           </svg>
-          <!--          -->
           <span class="button__text" ref="buttonText">{{
             !contractsStore.signature.value || !contractsStore.metamaskAccount
               ? 'Connect'
@@ -97,7 +98,12 @@ const connectMobile = async () => {
           }}</span>
         </button>
       </div>
-      <button @click="connectMobile">Mobile connect</button>
+      <button
+        class="button__default home__button--connect"
+        @click="connectMobile"
+      >
+        Mobile connect
+      </button>
     </div>
   </div>
 </template>
