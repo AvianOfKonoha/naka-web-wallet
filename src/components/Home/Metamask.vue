@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
-import {provider} from '@/utils/metamask.ts';
+import {metamaskSdk, provider} from '@/utils/metamask.ts';
 import {toast} from 'vue3-toastify';
 
 /*Global state*/
@@ -8,13 +8,15 @@ const contractsStore = useContractsStore();
 
 /*Methods*/
 const connectMobile = async () => {
-  if (!provider) {
+  console.log('provider: ', provider);
+  /*if (!provider) {
     toast.error('No provider');
     return;
-  }
+  }*/
 
   try {
-    await provider.request({method: 'eth_requestAccounts'});
+    await metamaskSdk.connect();
+    await provider?.request({method: 'eth_requestAccounts'});
   } catch (error) {
     console.error(error);
   }

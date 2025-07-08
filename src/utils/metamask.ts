@@ -1,9 +1,9 @@
-import {MetaMaskSDK} from "@metamask/sdk";
+import {MetaMaskSDK} from '@metamask/sdk';
 
-const sdk = new MetaMaskSDK({
-    dappMetadata: {
-        name: 'Naka Web Wallet DApp',
-        url: window.location.origin,
-    },
+export const metamaskSdk = new MetaMaskSDK({
+  dappMetadata: {
+    name: 'Naka Web Wallet DApp',
+    url: window.location.origin
+  }
 });
-export const provider = sdk.getProvider(); // EIP-6963 provider
+export const provider = metamaskSdk.getProvider(); // EIP-6963 provider

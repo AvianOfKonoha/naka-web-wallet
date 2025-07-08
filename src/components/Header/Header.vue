@@ -26,7 +26,6 @@ const copyAddress = () => {
 const updateNetwork = () => {
   /** If the metamask doesn't exist end propagation and prompt the user to install it */
   if (!window.ethereum) {
-    toast.error('Please install MetaMask!');
     return;
   }
 
@@ -48,7 +47,6 @@ const updateNetwork = () => {
 const onAccountsChanged = () => {
   /** If the metamask doesn't exist end propagation and prompt the user to install it */
   if (!window.ethereum) {
-    toast.error('Please install MetaMask!');
     return;
   }
 
