@@ -14,7 +14,7 @@ const connectMobile = async () => {
   }
 
   try {
-    // await metamaskSdk.connect();
+    await metamaskSdk.connect();
     await provider?.request({method: 'eth_requestAccounts'});
   } catch (error) {
     console.error(error);
