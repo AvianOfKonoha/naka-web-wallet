@@ -10,7 +10,6 @@ import {keccak256} from 'js-sha3';
 import {encode} from 'rlp';
 import {toast} from 'vue3-toastify';
 import {NETWORKS} from '@/utils/constants.ts';
-import {metamaskSdk} from '@/utils/metamask.ts';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
