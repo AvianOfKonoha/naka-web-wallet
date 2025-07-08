@@ -69,8 +69,8 @@ export const useContractsStore = defineStore('contracts', {
     }
   },
   actions: {
-    initializeWeb3() {
-      this.provider = window.ethereum || metamaskSdk.getProvider();
+    initializeWeb3(provider?: any) {
+      this.provider = window.ethereum || provider;
       this.web3 = new Web3(this.provider);
     },
 
@@ -329,7 +329,6 @@ export const useContractsStore = defineStore('contracts', {
         const contractAddress = await factoryContract.methods
           .deployedContracts(0)
           .call();
-        console.log('address:', contractAddress);
 
         // Option 2: From an emitted event
         /*const events = await factory.getPastEvents('ContractCreated', {

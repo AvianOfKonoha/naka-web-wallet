@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
 import {metamaskSdk, provider} from '@/utils/metamask.ts';
-import {toast} from 'vue3-toastify';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -9,18 +8,22 @@ const contractsStore = useContractsStore();
 /*Methods*/
 const connectMobile = async () => {
   const ethereum = metamaskSdk.getProvider();
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   if (!ethereum) {
     return;
   }
 
-  try {
-    // await metamaskSdk.connect();
-    const accounts = await ethereum.request({method: 'eth_requestAccounts'});
-  } catch (error) {
-    console.error(error);
+  console.log('ethereum: ', ethereum);
+
+  if (!isMobile) {
+    return;
   }
+
+  contractsStore.initializeWeb3(ethereum);
 };
+
+connectMobile();
 </script>
 
 <template>
@@ -104,7 +107,7 @@ const connectMobile = async () => {
         class="button__default home__button--connect"
         @click="connectMobile"
       >
-        Mobile connect 2
+        Mobile connect 3
       </button>
     </div>
   </div>
