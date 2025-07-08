@@ -3,7 +3,6 @@ import {RouterLink} from 'vue-router';
 import {useContractsStore} from '@/stores/contracts.ts';
 import Modal from '@/components/UI/Modal.vue';
 import {copyToClipboard} from '@/utils/helpers.ts';
-import {toast} from 'vue3-toastify';
 import {onMounted} from 'vue';
 
 /*Global state*/
@@ -23,48 +22,10 @@ const copyAddress = () => {
   copyToClipboard(contractsStore.metamaskAccount);
 };
 
-const updateNetwork = () => {
-  /** If the metamask doesn't exist end propagation and prompt the user to install it */
-  if (!contractsStore.provider) {
-    return;
-  }
-
-  contractsStore.provider.on('chainChanged', async (chainId: string) => {
-    /** If the user has not made the first connection to the metamask wallet end propagation */
-    if (!contractsStore.metamaskAccount) {
-      return;
-    }
-
-    /** Update chain id (network) -> The chainId that gets passed through chainChanged event is of type string and a hex format (0x...). We need to parse it to an integer in order to properly map it to its name */
-    const parsedId = parseInt(chainId, 16);
-    contractsStore.updateChain(parsedId);
-
-    /** Fetch balance from the current chain */
-    await contractsStore.getBalance();
-  });
-};
-
-const onAccountsChanged = () => {
-  /** If the metamask doesn't exist end propagation and prompt the user to install it */
-  if (!contractsStore.provider) {
-    return;
-  }
-
-  contractsStore.provider.on('accountsChanged', (accounts: string[]) => {
-    /** If the accounts array is populated simply return and don't do anything */
-    if (accounts.length) {
-      return;
-    }
-
-    /** If the accounts array is empty clear the state and show the disconnected state on app */
-    disconnectMetamask();
-  });
-};
-
 /*Lifecycle hooks*/
 onMounted(() => {
-  updateNetwork();
-  onAccountsChanged();
+  contractsStore.updateNetwork();
+  contractsStore.onAccountsChanged();
 });
 </script>
 
