@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
-import {metamaskSdk, provider} from '@/utils/metamask.ts';
-import {toast} from 'vue3-toastify';
+import {metamaskSdk} from '@/utils/metamask.ts';
+import {onMounted} from 'vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -11,20 +11,17 @@ const connectMobile = async () => {
   const ethereum = metamaskSdk.getProvider();
   const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  if (!ethereum) {
-    toast.info('No ethereum');
-    return;
-  }
-
-  if (!isMobile) {
-    toast.info('Not mobile');
+  if (!ethereum || !isMobile) {
     return;
   }
 
   contractsStore.initializeWeb3(ethereum);
 };
 
-connectMobile();
+/*Lifecycle hooks*/
+onMounted(() => {
+  connectMobile();
+});
 </script>
 
 <template>
