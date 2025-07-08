@@ -1,8 +1,22 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
+import {provider} from "@/utils/metamask.ts";
 
 /*Global state*/
 const contractsStore = useContractsStore();
+
+/*Methods*/
+const connectMobile = async () => {
+  if(!provider){
+    return;
+  }
+
+  try {
+    await provider.request({ method: 'eth_requestAccounts' });
+  } catch (error) {
+    console.error(error);
+  }
+}
 </script>
 
 <template>
@@ -83,6 +97,7 @@ const contractsStore = useContractsStore();
           }}</span>
         </button>
       </div>
+      <button @click="connectMobile">Mobile connect</button>
     </div>
   </div>
 </template>
