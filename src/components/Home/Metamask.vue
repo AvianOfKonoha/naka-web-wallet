@@ -104,7 +104,7 @@ const connectMobile = async () => {
         class="button__default home__button--connect"
         @click="connectMobile"
       >
-        Mobile connect
+        Mobile connect 2
       </button>
     </div>
   </div>
