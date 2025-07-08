@@ -17,6 +17,7 @@ export const useContractsStore = defineStore('contracts', {
     metamaskAccount: '',
     chainId: null,
     balance: null,
+    provider: null,
     allAccounts: [],
     signature: {
       message: 'Please sign this message to confirm you own this wallet',
@@ -71,6 +72,10 @@ export const useContractsStore = defineStore('contracts', {
       this.web3 = new Web3(window.ethereum);
     },
 
+    updateWeb3(constructor: any) {
+      this.web3 = constructor;
+    },
+
     updateLoading(loader: Partial<IContractsLoading>) {
       this.loading = {
         ...this.loading,
@@ -117,6 +122,19 @@ export const useContractsStore = defineStore('contracts', {
         console.error((error as Error).message);
       } finally {
         this.updateLoading({balance: false});
+      }
+    },
+
+    async connectEthereumWallet() {
+      if (!this.web3) {
+        return;
+      }
+
+      try {
+        /** Extract the metamask account's address and display it */
+        await window.ethereum.request({method: 'eth_requestAccounts'});
+      } catch (error) {
+        toast.error(`${(error as Error).message}`);
       }
     },
 

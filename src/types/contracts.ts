@@ -56,4 +56,5 @@ export interface IContractsStore {
   factory: IContractsFactory;
   deployer: IContractsDeployer;
   modal: IContractsModal;
+  provider: unknown;
 }
