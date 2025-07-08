@@ -14,8 +14,6 @@ const connectMobile = async () => {
     return;
   }
 
-  console.log('ethereum: ', ethereum);
-
   if (!isMobile) {
     return;
   }
