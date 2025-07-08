@@ -11,6 +11,7 @@ export interface IContractsInputs {
 export interface IContractsLoading {
   transactionHash: boolean;
   factory: boolean;
+  balance: boolean;
 }
 
 export interface IContractsHash {
@@ -35,12 +36,19 @@ export interface IContractsModal {
   connect: boolean;
 }
 
+export interface IActiveNetwork {
+  name: string;
+  icon: string;
+  id: string;
+  symbol: string;
+}
+
 export interface IContractsStore {
   web3: Web3 | null;
   metamaskAccount: string;
   allAccounts: string[];
   chainId: number | null;
-  balance: number | null;
+  balance: string | null;
   signature: IContractsSignature;
   inputs: IContractsInputs;
   loading: IContractsLoading;

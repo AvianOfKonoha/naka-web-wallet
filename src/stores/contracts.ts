@@ -1,5 +1,6 @@
 import {defineStore} from 'pinia';
 import type {
+  IActiveNetwork,
   IContractsLoading,
   IContractsModal,
   IContractsStore
@@ -8,6 +9,7 @@ import {Web3} from 'web3';
 import {keccak256} from 'js-sha3';
 import {encode} from 'rlp';
 import {toast} from 'vue3-toastify';
+import {NETWORKS} from '@/utils/constants.ts';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
@@ -29,7 +31,8 @@ export const useContractsStore = defineStore('contracts', {
     },
     loading: {
       transactionHash: false,
-      factory: false
+      factory: false,
+      balance: false
     },
     transactionHash: {
       contractAddress: ''
@@ -45,7 +48,24 @@ export const useContractsStore = defineStore('contracts', {
       connect: false
     }
   }),
-  getters: {},
+  getters: {
+    activeNetwork: (state): IActiveNetwork => {
+      return {
+        name: NETWORKS[state.chainId as keyof typeof NETWORKS]
+          ? NETWORKS[state.chainId as keyof typeof NETWORKS].name
+          : `Unknown Chain (ID: ${state.chainId})`,
+        icon: NETWORKS[state.chainId as keyof typeof NETWORKS]
+          ? NETWORKS[state.chainId as keyof typeof NETWORKS].icon
+          : './img/icons/bitcoin-btc-logo.png',
+        id: NETWORKS[state.chainId as keyof typeof NETWORKS]
+          ? NETWORKS[state.chainId as keyof typeof NETWORKS].id
+          : 'No id',
+        symbol: NETWORKS[state.chainId as keyof typeof NETWORKS]
+          ? NETWORKS[state.chainId as keyof typeof NETWORKS].symbol
+          : 'No symbol'
+      };
+    }
+  },
   actions: {
     initializeWeb3() {
       this.web3 = new Web3(window.ethereum);
@@ -63,6 +83,41 @@ export const useContractsStore = defineStore('contracts', {
         ...this.modal,
         ...modal
       };
+    },
+
+    updateChain(chainId: number) {
+      this.chainId = chainId;
+    },
+
+    async getBalance() {
+      if (!this.web3) {
+        return;
+      }
+
+      /** Init loading */
+      this.updateLoading({balance: true});
+
+      try {
+        /** Step 1: Connect to metamask and extract balance */
+        const balance = await this.web3.eth.getBalance(this.metamaskAccount);
+        const balanceEth = this.web3.utils.fromWei(balance, 'ether');
+        this.balance = parseFloat(balanceEth).toFixed(2);
+
+        /*TODO: Add USD conversion if necessary*/
+        /** Step 2: Fetch ETH price in USD */
+        /*const res = await fetch(
+          `https://api.coingecko.com/api/v3/simple/price?ids=${this.activeNetwork.id}&vs_currencies=usd`
+        );
+        const data = await res.json();
+        const ethPrice = data.ethereum.usd;*/
+
+        /** Step 3: Multiply and fragment to 2 decimal points */
+        /*this.balance = (parseFloat(balanceEth) * ethPrice).toFixed(2);*/
+      } catch (error) {
+        console.error((error as Error).message);
+      } finally {
+        this.updateLoading({balance: false});
+      }
     },
 
     async connectMetamask() {
@@ -110,7 +165,10 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Extract the chain id of the current account from the MetaMask */
         const chainId = await this.web3.eth.getChainId();
-        this.chainId = Number(chainId);
+        this.updateChain(Number(chainId));
+
+        /** Extract the balance of the current chain in USDT */
+        await this.getBalance();
       } catch (error) {
         toast.error(`${(error as Error).message}`);
       }

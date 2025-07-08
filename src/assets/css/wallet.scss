@@ -1,6 +1,17 @@
 @use 'sass:map';
 @use 'framework' as framework;
 
+@keyframes tooltip-show-up {
+  0% {
+    scale: 0.9;
+    opacity: 0.5;
+  }
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
 .home {
   @include framework.flex-layout(flex, center, unset, unset);
   &__box {
@@ -69,6 +80,66 @@
           width: 100px;
           border-radius: 100vh;
           background: linear-gradient(180deg, #af52de 0%, #ff2d55 100%);
+          position: relative;
+          .network {
+            position: absolute;
+            bottom: 0;
+            right: 5px;
+            &__icon {
+              width: 25px;
+              height: 25px;
+              border-radius: 100vh;
+              font-size: 0;
+              padding: 2px;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+              background-color: map.get(framework.$colors, 'white');
+            }
+            &__name {
+              display: none;
+              position: absolute;
+              right: 0;
+            }
+            &:hover {
+              .network {
+                &__name {
+                  display: block;
+                  position: absolute;
+                  left: calc(100% + 5px);
+                  background-color: map.get(framework.$colors, 'white');
+                  @include framework.font-style('12', 'gray-500');
+                  padding: calc(#{framework.$defaultPadding} / 4)
+                    calc(#{framework.$defaultPadding} / 4);
+                  border-radius: 4px;
+                  box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.06);
+                  top: 0;
+                  width: max-content;
+                  animation-name: tooltip-show-up;
+                  animation-duration: 100ms;
+                  animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+                  animation-fill-mode: forwards;
+                }
+              }
+            }
+          }
+        }
+      }
+      &__amount {
+        @include framework.font-style('default', 'gray-500');
+        span {
+          position: relative;
+          &.loading {
+            &:after {
+              position: absolute;
+              height: 100%;
+              width: 100%;
+              content: '';
+              z-index: 10;
+              background-color: map.get(framework.$colors, 'gray-100');
+              border-radius: 5px;
+              left: 0;
+              top: 0;
+            }
+          }
         }
       }
       &__address {
@@ -90,6 +161,7 @@
       }
       &__button {
         width: 100%;
+        padding-top: framework.$defaultPadding;
         button {
           width: 100%;
           @include framework.flex-layout(flex, center, center, 5px);

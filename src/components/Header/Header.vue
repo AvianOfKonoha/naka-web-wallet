@@ -3,6 +3,8 @@ import {RouterLink} from 'vue-router';
 import {useContractsStore} from '@/stores/contracts.ts';
 import Modal from '@/components/UI/Modal.vue';
 import {copyToClipboard} from '@/utils/helpers.ts';
+import {toast} from 'vue3-toastify';
+import {onMounted} from 'vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -20,6 +22,52 @@ const disconnectMetamask = () => {
 const copyAddress = () => {
   copyToClipboard(contractsStore.metamaskAccount);
 };
+
+const updateNetwork = () => {
+  /** If the metamask doesn't exist end propagation and prompt the user to install it */
+  if (!window.ethereum) {
+    toast.error('Please install MetaMask!');
+    return;
+  }
+
+  window.ethereum.on('chainChanged', async (chainId: string) => {
+    /** If the user has not made the first connection to the metamask wallet end propagation */
+    if (!contractsStore.metamaskAccount) {
+      return;
+    }
+
+    /** Update chain id (network) -> The chainId that gets passed through chainChanged event is of type string and a hex format (0x...). We need to parse it to an integer in order to properly map it to its name */
+    const parsedId = parseInt(chainId, 16);
+    contractsStore.updateChain(parsedId);
+
+    /** Fetch balance from the current chain */
+    await contractsStore.getBalance();
+  });
+};
+
+const onAccountsChanged = () => {
+  /** If the metamask doesn't exist end propagation and prompt the user to install it */
+  if (!window.ethereum) {
+    toast.error('Please install MetaMask!');
+    return;
+  }
+
+  window.ethereum.on('accountsChanged', (accounts: string[]) => {
+    /** If the accounts array is populated simply return and don't do anything */
+    if (accounts.length) {
+      return;
+    }
+
+    /** If the accounts array is empty clear the state and show the disconnected state on app */
+    disconnectMetamask();
+  });
+};
+
+/*Lifecycle hooks*/
+onMounted(() => {
+  updateNetwork();
+  onAccountsChanged();
+});
 </script>
 
 <template>
@@ -31,8 +79,20 @@ const copyAddress = () => {
   >
     <div class="connect__header">Connected</div>
     <div class="connect__profile">
-      <div class="profile"></div>
-      <div class="chain"></div>
+      <div class="profile">
+        <div class="network">
+          <img
+            :src="contractsStore.activeNetwork.icon"
+            :alt="contractsStore.activeNetwork.name"
+            width="30"
+            height="30"
+            class="network__icon"
+          />
+          <div class="network__name">
+            {{ contractsStore.activeNetwork.name }}
+          </div>
+        </div>
+      </div>
     </div>
     <div class="connect__address" @click="copyAddress">
       <span>
@@ -54,7 +114,11 @@ const copyAddress = () => {
         />
       </svg>
     </div>
-    <div class="connect__amount"></div>
+    <div class="connect__amount">
+      <span :class="{loading: contractsStore.loading.balance}">
+        {{ contractsStore.balance }} {{ contractsStore.activeNetwork.symbol }}
+      </span>
+    </div>
     <div class="connect__button">
       <button
         type="button"

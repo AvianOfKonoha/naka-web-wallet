@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
-import {ref} from 'vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
