@@ -1,17 +1,12 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
-import {onMounted} from 'vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
 
 /*Callbacks*/
 contractsStore.connectMobile();
-
-/*Lifecycle hooks*/
-onMounted(() => {
-  contractsStore.checkConnection();
-});
+contractsStore.checkConnection();
 </script>
 
 <template>

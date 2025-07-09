@@ -64,7 +64,7 @@ export const useContractsStore = defineStore('contracts', {
           : 'No id',
         symbol: NETWORKS[state.chainId as keyof typeof NETWORKS]
           ? NETWORKS[state.chainId as keyof typeof NETWORKS].symbol
-          : 'No symbol'
+          : ''
       };
     }
   },
@@ -399,6 +399,8 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.initializeWeb3(ethereum);
+      this.updateNetwork();
+      this.onAccountsChanged();
     },
 
     async checkConnection() {
