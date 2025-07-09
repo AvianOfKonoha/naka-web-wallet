@@ -3,6 +3,9 @@ import {useContractsStore} from '@/stores/contracts.ts';
 
 /*Global state*/
 const contractsStore = useContractsStore();
+
+/*Callbacks*/
+contractsStore.connectMobile();
 </script>
 
 <template>
