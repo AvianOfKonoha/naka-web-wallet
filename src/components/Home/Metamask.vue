@@ -1,27 +1,8 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
-import {metamaskSdk} from '@/utils/metamask.ts';
-import {onMounted} from 'vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
-
-/*Methods*/
-const connectMobile = async () => {
-  const ethereum = metamaskSdk.getProvider();
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-  if (!ethereum || !isMobile) {
-    return;
-  }
-
-  contractsStore.initializeWeb3(ethereum);
-};
-
-/*Lifecycle hooks*/
-onMounted(() => {
-  connectMobile();
-});
 </script>
 
 <template>

@@ -8,6 +8,7 @@ const contractsStore = useContractsStore();
 
 /*Callbacks*/
 contractsStore.initializeWeb3();
+contractsStore.connectMobile();
 </script>
 
 <template>

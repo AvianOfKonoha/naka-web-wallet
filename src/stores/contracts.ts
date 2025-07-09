@@ -10,6 +10,7 @@ import {keccak256} from 'js-sha3';
 import {encode} from 'rlp';
 import {toast} from 'vue3-toastify';
 import {NETWORKS} from '@/utils/constants.ts';
+import {metamaskSdk} from '@/utils/metamask.ts';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
@@ -391,6 +392,19 @@ export const useContractsStore = defineStore('contracts', {
         this.updateModal({connect: false});
         this.disconnectMetamask();
       });
+    },
+
+    async connectMobile() {
+      const ethereum = metamaskSdk.getProvider();
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(
+        navigator.userAgent
+      );
+
+      if (!ethereum || !isMobile) {
+        return;
+      }
+
+      this.initializeWeb3(ethereum);
     }
   }
 });
