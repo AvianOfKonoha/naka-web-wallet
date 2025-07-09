@@ -3,7 +3,6 @@ import {RouterLink} from 'vue-router';
 import {useContractsStore} from '@/stores/contracts.ts';
 import Modal from '@/components/UI/Modal.vue';
 import {copyToClipboard} from '@/utils/helpers.ts';
-import {onMounted} from 'vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -22,11 +21,9 @@ const copyAddress = () => {
   copyToClipboard(contractsStore.metamaskAccount);
 };
 
-/*Lifecycle hooks*/
-onMounted(() => {
-  contractsStore.updateNetwork();
-  contractsStore.onAccountsChanged();
-});
+/*Callbacks*/
+contractsStore.updateNetwork();
+contractsStore.onAccountsChanged();
 </script>
 
 <template>
