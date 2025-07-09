@@ -151,12 +151,6 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      /*const signedAddress = this.web3.eth.accounts.recover(
-        this.signature.message,
-        this.signature.value
-      );
-      console.log('Recovered address:', signedAddress);*/
-
       /** If the user has already connected their MetaMask and their address is saved to the state end propagation */
       if (this.metamaskAccount && this.signature.value) {
         this.updateModal({connect: true});
@@ -180,7 +174,7 @@ export const useContractsStore = defineStore('contracts', {
         this.signature.value = await this.web3.eth.personal.sign(
           this.signature.message,
           this.metamaskAccount,
-          '123456'
+          ''
         );
 
         /** Extract the chain id of the current account from the MetaMask */
@@ -405,6 +399,35 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.initializeWeb3(ethereum);
+    },
+
+    async checkConnection() {
+      if (!this.web3) {
+        return;
+      }
+
+      try {
+        /** Fetch all connected account from the metamask */
+        const accounts = await window.ethereum.request({
+          method: 'eth_accounts'
+        });
+
+        /** Stop propagation if no accounts are connected to metamask */
+        if (!accounts.length) {
+          return;
+        }
+
+        /** Populated global state if metamask is already connected to one or more accounts */
+        this.metamaskAccount = accounts[0];
+        this.allAccounts = accounts;
+
+        /*const signedAddress = this.web3.eth.accounts.recover(
+          this.signature.message,
+            this.signature.value
+        );*/
+      } catch (error) {
+        console.error('Error connecting to metamask', (error as Error).message);
+      }
     }
   }
 });
