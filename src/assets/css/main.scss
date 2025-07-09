@@ -227,6 +227,13 @@ main {
     }
     &__toast {
       &--info {
+        &.Toastify {
+          &__toast-theme {
+            &--dark {
+              border-radius: 100vh;
+            }
+          }
+        }
       }
     }
   }
