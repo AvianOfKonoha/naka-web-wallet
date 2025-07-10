@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
+import {toast} from 'vue3-toastify';
 
 /*Global state*/
 const contractsStore = useContractsStore();

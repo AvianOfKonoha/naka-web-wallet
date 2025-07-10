@@ -319,3 +319,26 @@ main {
     }
   }
 }
+
+@media screen and (max-width: 480px) {
+  .Toastify {
+    .Toastify {
+      &__toast-container {
+        &--bottom-center {
+          max-width: 100%;
+          @include framework.flex-layout(flex, center, unset, unset);
+          padding: 0 framework.$defaultPadding;
+        }
+        &--top-right {
+          right: 0;
+          left: unset;
+          padding: framework.$defaultPadding;
+        }
+      }
+      &__toast {
+        max-width: 300px;
+        width: 100%;
+      }
+    }
+  }
+}
