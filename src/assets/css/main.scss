@@ -327,7 +327,7 @@ main {
         &--bottom-center {
           max-width: 100%;
           @include framework.flex-layout(flex, center, unset, unset);
-          padding: 0 framework.$defaultPadding framework.$defaultPadding;
+          padding: framework.$defaultPadding;
         }
         &--top-right {
           right: 0;
