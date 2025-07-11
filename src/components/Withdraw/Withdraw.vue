@@ -112,6 +112,7 @@ const contractsStore = useContractsStore();
             </button>
           </div>
         </div>
+        <div class="spacer"></div>
         <div class="connect__withdraw--card">
           <img
             class="card__image"

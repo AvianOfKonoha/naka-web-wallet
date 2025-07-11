@@ -195,7 +195,7 @@
     }
     &--connect {
       @include framework.grid-column-layout(
-        1fr 1fr auto,
+        1fr 1fr auto auto,
         calc(#{framework.$defaultGridGap} / 2)
       );
       .connect {
@@ -206,6 +206,14 @@
             border-radius: framework.$defaultRem;
             @include framework.grid-gap(calc(#{framework.$defaultGridGap} / 2));
             grid-template-rows: auto 1fr auto auto;
+            border: 2px solid map.get(framework.$colors, 'gray-50');
+            transition: border-color 0.1s ease;
+            cursor: pointer;
+            &:hover,
+            &:focus,
+            &:active {
+              border-color: map.get(framework.$colors, 'orange-400');
+            }
             .box {
               &__title {
                 @include framework.font-style('20', 'gray-600');
@@ -264,7 +272,6 @@
             .card {
               &__image {
                 position: absolute;
-                padding-left: framework.$defaultPadding;
                 width: 100%;
                 height: 100%;
                 border-radius: 28px;
@@ -350,18 +357,12 @@
   .withdraw {
     &__screen {
       &--connect {
-        grid-template-columns: unset;
+        grid-template-columns: 1fr 1fr auto 2fr;
         .connect {
           &__withdraw {
             &--box {
-              grid-template-rows: unset;
               position: relative;
-              padding: framework.$defaultPadding;
               .box {
-                &__chain {
-                  justify-content: unset;
-                  padding: unset;
-                }
                 &__button {
                   position: absolute;
                   top: framework.$defaultRem;
@@ -379,11 +380,43 @@
                     }
                   }
                 }
+                &__chain {
+                  padding: unset;
+                }
               }
             }
             &--card {
               width: 100%;
               height: 100%;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 991px) {
+  .withdraw {
+    &__screen {
+      &--connect {
+        grid-template-columns: unset;
+        .spacer {
+          display: none;
+        }
+        .connect {
+          &__withdraw {
+            &--box {
+              grid-template-rows: unset;
+              padding: framework.$defaultPadding;
+              .box {
+                &__chain {
+                  justify-content: unset;
+                  padding: unset;
+                }
+              }
+            }
+            &--card {
               grid-row: 1;
               padding-bottom: calc(#{framework.$defaultPadding} / 2);
               .card {
