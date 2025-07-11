@@ -22,7 +22,7 @@ contractsStore.checkConnection();
           class="button__default home__button--connect"
           :class="{
             connected:
-              contractsStore.metamaskAccount && contractsStore.signature.value
+              contractsStore.connectedAccount && contractsStore.signature.value
           }"
           @click="contractsStore.connectMetamask"
         >
@@ -33,7 +33,7 @@ contractsStore.checkConnection();
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             v-if="
-              contractsStore.signature.value && contractsStore.metamaskAccount
+              contractsStore.signature.value && contractsStore.connectedAccount
             "
           >
             <g id="Group">
@@ -56,7 +56,7 @@ contractsStore.checkConnection();
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             v-if="
-              !contractsStore.signature.value || !contractsStore.metamaskAccount
+              !contractsStore.signature.value || !contractsStore.connectedAccount
             "
           >
             <g clip-path="url(#clip0_5859_1203)">
@@ -80,7 +80,7 @@ contractsStore.checkConnection();
             </defs>
           </svg>
           <span class="button__text" ref="buttonText">{{
-            !contractsStore.signature.value || !contractsStore.metamaskAccount
+            !contractsStore.signature.value || !contractsStore.connectedAccount
               ? 'Connect'
               : 'Connected'
           }}</span>

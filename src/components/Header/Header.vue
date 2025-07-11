@@ -18,7 +18,7 @@ const disconnectMetamask = () => {
 };
 
 const copyAddress = () => {
-  copyToClipboard(contractsStore.metamaskAccount);
+  copyToClipboard(contractsStore.connectedAccount);
 };
 
 /*Callbacks*/
@@ -53,7 +53,7 @@ contractsStore.onAccountsChanged();
     <div class="connect__address" @click="copyAddress">
       <span>
         {{
-          `${contractsStore.metamaskAccount.substring(0, 6)}••••${contractsStore.metamaskAccount.slice(-4)}`
+          `${contractsStore.connectedAccount.substring(0, 6)}••••${contractsStore.connectedAccount.slice(-4)}`
         }}
       </span>
       <svg
@@ -115,7 +115,7 @@ contractsStore.onAccountsChanged();
             type="button"
             :class="{
               connected:
-                contractsStore.metamaskAccount && contractsStore.signature.value
+                contractsStore.connectedAccount && contractsStore.signature.value
             }"
             @click="contractsStore.connectMetamask"
           >
@@ -127,7 +127,7 @@ contractsStore.onAccountsChanged();
               xmlns="http://www.w3.org/2000/svg"
               class="button__connect--icon"
               v-if="
-                contractsStore.signature.value && contractsStore.metamaskAccount
+                contractsStore.signature.value && contractsStore.connectedAccount
               "
             >
               <g id="Group">
@@ -151,7 +151,7 @@ contractsStore.onAccountsChanged();
               xmlns="http://www.w3.org/2000/svg"
               v-if="
                 !contractsStore.signature.value ||
-                !contractsStore.metamaskAccount
+                !contractsStore.connectedAccount
               "
               class="button__connect--icon"
             >
@@ -163,7 +163,7 @@ contractsStore.onAccountsChanged();
             <span>
               {{
                 !contractsStore.signature.value ||
-                !contractsStore.metamaskAccount
+                !contractsStore.connectedAccount
                   ? 'Connect'
                   : 'Connected'
               }}

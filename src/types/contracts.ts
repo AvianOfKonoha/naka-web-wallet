@@ -43,9 +43,11 @@ export interface IActiveNetwork {
   symbol: string;
 }
 
+export interface IWithdrawal {}
+
 export interface IContractsStore {
   web3: Web3 | null;
-  metamaskAccount: string;
+  connectedAccount: string;
   allAccounts: string[];
   chainId: number | null;
   balance: string | null;
@@ -57,4 +59,5 @@ export interface IContractsStore {
   deployer: IContractsDeployer;
   modal: IContractsModal;
   provider: any;
+  withdrawals: IWithdrawal[];
 }

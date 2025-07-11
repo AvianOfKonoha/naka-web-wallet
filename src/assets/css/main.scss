@@ -166,7 +166,7 @@ main {
     display: flex;
     justify-content: center;
     padding: calc(#{framework.$defaultPadding} * 6)
-      calc(#{framework.$defaultPadding} * 1.5) 0;
+      calc(#{framework.$defaultPadding} * 1.5);
     .naka {
       &__wrap {
         width: min(1300px, 100%);
@@ -273,13 +273,16 @@ main {
   }
 }
 
-@media screen and (max-width: 575px) {
+@media screen and (max-width: 1200px) {
   main {
     &.naka {
-      padding-top: framework.$defaultPadding;
-      padding-bottom: framework.$defaultPadding;
+      padding-top: calc(#{framework.$defaultPadding} * 2);
+      padding-bottom: calc(#{framework.$defaultPadding} * 2);
     }
   }
+}
+
+@media screen and (max-width: 575px) {
   header {
     .header {
       &__wrapper {

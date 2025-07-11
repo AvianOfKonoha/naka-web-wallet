@@ -9,13 +9,13 @@ import {Web3} from 'web3';
 import {keccak256} from 'js-sha3';
 import {encode} from 'rlp';
 import {toast} from 'vue3-toastify';
-import {NETWORKS} from '@/utils/constants.ts';
+import {NETWORKS, polygonMainnet} from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
     web3: null,
-    metamaskAccount: '',
+    connectedAccount: '',
     chainId: null,
     balance: null,
     provider: null,
@@ -48,7 +48,8 @@ export const useContractsStore = defineStore('contracts', {
     },
     modal: {
       connect: false
-    }
+    },
+    withdrawals: []
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -72,10 +73,6 @@ export const useContractsStore = defineStore('contracts', {
     initializeWeb3(provider?: any) {
       this.provider = window.ethereum || provider;
       this.web3 = new Web3(this.provider);
-    },
-
-    updateWeb3(constructor: any) {
-      this.web3 = constructor;
     },
 
     updateLoading(loader: Partial<IContractsLoading>) {
@@ -106,7 +103,7 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Step 1: Connect to metamask and extract balance */
-        const balance = await this.web3.eth.getBalance(this.metamaskAccount);
+        const balance = await this.web3.eth.getBalance(this.connectedAccount);
         const balanceEth = this.web3.utils.fromWei(balance, 'ether');
         this.balance = parseFloat(balanceEth).toFixed(2);
 
@@ -152,12 +149,18 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       /** If the user has already connected their MetaMask and their address is saved to the state end propagation */
-      if (this.metamaskAccount && this.signature.value) {
+      if (this.connectedAccount && this.signature.value) {
         this.updateModal({connect: true});
         return;
       }
 
       try {
+        /** Force the user to switch to Polygon chain */
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{chainId: polygonMainnet.chainId}]
+        });
+
         /** Extract the metamask account's address and display it */
         await this.provider.request({method: 'eth_requestAccounts'});
         const accounts = await this.web3.eth.getAccounts();
@@ -168,12 +171,12 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Set the state of the metamask account connected to the network */
         this.allAccounts = accounts;
-        this.metamaskAccount = accounts[0];
+        this.connectedAccount = accounts[0];
 
         /** Prompt a user to sign a message via their Metamask using their private key to prove ownership of their wallet without spending any tokens or sending a transaction */
         this.signature.value = await this.web3.eth.personal.sign(
           this.signature.message,
-          this.metamaskAccount,
+          this.connectedAccount,
           ''
         );
 
@@ -185,6 +188,19 @@ export const useContractsStore = defineStore('contracts', {
         await this.getBalance();
       } catch (error) {
         toast.error(`${(error as Error).message}`);
+
+        if ((error as any).code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [polygonMainnet]
+            });
+          } catch (addError) {
+            console.error('Failed to add Polygon network:', addError);
+          }
+        } else {
+          console.error('Failed to switch network:', error);
+        }
       }
     },
 
@@ -344,9 +360,10 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     disconnectMetamask() {
-      this.metamaskAccount = '';
+      this.connectedAccount = '';
       this.chainId = null;
       this.signature.value = '';
+      this.balance = null;
     },
 
     updateNetwork() {
@@ -356,17 +373,26 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.provider.on('chainChanged', async (chainId: string) => {
-        /** If the user has not made the first connection to the metamask wallet end propagation */
-        if (!this.metamaskAccount) {
+        if (chainId === polygonMainnet.chainId) {
           return;
         }
 
+        /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
+        this.disconnectMetamask();
+
+        /*TODO: Uncomment if multiple networks are  allowed*/
+
+        /** If the user has not made the first connection to the metamask wallet end propagation */
+        /*if (!this.connectedAccount) {
+          return;
+        }*/
+
         /** Update chain id (network) -> The chainId that gets passed through chainChanged event is of type string and a hex format (0x...). We need to parse it to an integer in order to properly map it to its name */
-        const parsedId = parseInt(chainId, 16);
-        this.updateChain(parsedId);
+        /*const parsedId = parseInt(chainId, 16);
+        this.updateChain(parsedId);*/
 
         /** Fetch balance from the current chain */
-        await this.getBalance();
+        // await this.getBalance();
       });
     },
 
@@ -420,7 +446,7 @@ export const useContractsStore = defineStore('contracts', {
         }
 
         /** Populated global state if metamask is already connected to one or more accounts */
-        this.metamaskAccount = accounts[0];
+        this.connectedAccount = accounts[0];
         this.allAccounts = accounts;
 
         /*const signedAddress = this.web3.eth.accounts.recover(

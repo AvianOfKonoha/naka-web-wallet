@@ -179,6 +179,231 @@
   }
 }
 
+.withdraw {
+  &__screen {
+    @include framework.grid-gap(calc(#{framework.$defaultGridGap} * 1.5));
+    &--title {
+      @include framework.font-style('44', 'gray-600');
+      font-weight: 300;
+      line-height: 1;
+    }
+    &--subtitle {
+      @include framework.font-style('24', 'gray-400');
+    }
+    &--text {
+      @include framework.font-style('default', 'gray-400');
+    }
+    &--connect {
+      @include framework.grid-column-layout(
+        1fr 1fr auto,
+        calc(#{framework.$defaultGridGap} / 2)
+      );
+      .connect {
+        &__withdraw {
+          &--box {
+            padding: calc(#{framework.$defaultPadding} * 2);
+            background-color: map.get(framework.$colors, 'gray-50');
+            border-radius: framework.$defaultRem;
+            @include framework.grid-gap(calc(#{framework.$defaultGridGap} / 2));
+            grid-template-rows: auto 1fr auto auto;
+            .box {
+              &__title {
+                @include framework.font-style('20', 'gray-600');
+                text-transform: uppercase;
+              }
+              &__text {
+                @include framework.font-style('default', 'gray-400');
+              }
+              &__chain {
+                @include framework.flex-layout(
+                  flex,
+                  center,
+                  center,
+                  framework.$defaultGridGap
+                );
+                padding: 0 calc(#{framework.$defaultPadding} / 2);
+                &--text {
+                  @include framework.font-style('14', 'gray-400');
+                  text-transform: uppercase;
+                }
+                &--network {
+                  background-color: map.get(framework.$colors, 'gray-950');
+                  border-radius: 2px;
+                  @include framework.font-style('10', 'gray-50');
+                  padding: calc(#{framework.$defaultPadding} / 4)
+                    calc(#{framework.$defaultPadding} / 2);
+                  font-weight: 600;
+                  @include framework.flex-layout(
+                    inline-flex,
+                    unset,
+                    center,
+                    6px
+                  );
+                }
+              }
+              &__button {
+                button {
+                  height: 48px;
+                  @include framework.flex-layout(flex, center, center, unset);
+                  width: 100%;
+                  border-radius: 100vh;
+                  @include framework.font-style('default', 'gray-50');
+                  font-weight: 500;
+                  background-color: map.get(framework.$colors, 'gray-600');
+                  .arrow {
+                    display: none;
+                  }
+                }
+              }
+            }
+          }
+          &--card {
+            position: relative;
+            width: 605px;
+            height: 360px;
+            .card {
+              &__image {
+                position: absolute;
+                padding-left: framework.$defaultPadding;
+                width: 100%;
+                height: 100%;
+                border-radius: 28px;
+                background: map.get(framework.$colors, 'gray-950');
+              }
+              &__logo {
+                position: absolute;
+                top: 40px;
+                right: 40px;
+              }
+              &__balance {
+                position: absolute;
+                bottom: 40px;
+                left: calc(40px + #{framework.$defaultPadding});
+                @include framework.grid-gap(20px);
+                &--title {
+                  @include framework.font-style('18', 'gray-50');
+                }
+                &--value {
+                  @include framework.flex-layout(
+                    inline-flex,
+                    unset,
+                    flex-end,
+                    calc(#{framework.$defaultGridGap} / 1.5)
+                  );
+                  .value {
+                    &__number {
+                      @include framework.font-style('55', 'gray-50');
+                      line-height: 0.8;
+                      font-weight: 500;
+                    }
+                    &__currency {
+                      @include framework.font-style('24', 'gray-50');
+                      line-height: 1;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    &--history {
+      padding-top: calc(#{framework.$defaultPadding} / 2);
+      @include framework.grid-gap(calc(#{framework.$defaultGridGap} * 1.5));
+      .history {
+        &__title {
+          @include framework.font-style('44', 'gray-600');
+          font-weight: 300;
+          line-height: 1;
+        }
+        &__list {
+          &--empty {
+            padding: calc(#{framework.$defaultPadding} * 1.5);
+            background-color: map.get(framework.$colors, 'gray-50');
+            border: 1px solid map.get(framework.$colors, 'gray-100');
+            border-radius: framework.$defaultRem;
+            display: grid;
+            justify-items: center;
+            align-items: center;
+            .empty {
+              &__title {
+                @include framework.font-style('18', 'gray-400');
+                font-weight: 600;
+              }
+              &__text {
+                text-align: center;
+                @include framework.font-style('14', 'gray-400');
+              }
+              &__image {
+                padding-bottom: framework.$defaultPadding;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .withdraw {
+    &__screen {
+      &--connect {
+        grid-template-columns: unset;
+        .connect {
+          &__withdraw {
+            &--box {
+              grid-template-rows: unset;
+              position: relative;
+              padding: framework.$defaultPadding;
+              .box {
+                &__chain {
+                  justify-content: unset;
+                  padding: unset;
+                }
+                &__button {
+                  position: absolute;
+                  top: framework.$defaultRem;
+                  right: framework.$defaultRem;
+                  button {
+                    width: 28px;
+                    height: 28px;
+                    .button {
+                      &__text {
+                        display: none;
+                      }
+                    }
+                    .arrow {
+                      display: block;
+                    }
+                  }
+                }
+              }
+            }
+            &--card {
+              width: 100%;
+              height: 100%;
+              grid-row: 1;
+              padding-bottom: calc(#{framework.$defaultPadding} / 2);
+              .card {
+                &__image {
+                  padding: unset;
+                  height: auto;
+                  position: relative;
+                }
+                &__balance {
+                  bottom: calc(40px + calc(#{framework.$defaultPadding} / 2));
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 @media screen and (max-width: 575px) {
   .home {
     &__button {
@@ -196,6 +421,62 @@
       }
       .account {
         word-break: break-all;
+      }
+    }
+  }
+  .withdraw {
+    &__screen {
+      &--title {
+        font-size: map.get(framework.$textSizes, '36');
+      }
+      &--connect {
+        .connect {
+          &__withdraw {
+            &--card {
+              .card {
+                &__balance {
+                  left: calc(#{framework.$defaultPadding} * 1.5);
+                  bottom: calc(#{framework.$defaultPadding} * 2.5);
+                  grid-gap: calc(#{framework.$defaultPadding} / 1.5);
+                  &--value {
+                    gap: calc(#{framework.$defaultGridGap} / 2);
+                    .value {
+                      &__number {
+                        font-size: map.get(framework.$textSizes, '32');
+                      }
+                      &__currency {
+                        font-size: map.get(framework.$textSizes, '14');
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            &--box {
+              .box {
+                &__title {
+                  padding-right: calc(#{framework.$defaultPadding} * 2.5);
+                  font-size: map.get(framework.$textSizes, 'default');
+                }
+                &__text {
+                  font-size: map.get(framework.$textSizes, '12');
+                }
+                &__chain {
+                  &--text {
+                    font-size: map.get(framework.$textSizes, '12');
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      &--history {
+        .history {
+          &__title {
+            font-size: map.get(framework.$textSizes, '36');
+          }
+        }
       }
     }
   }

@@ -1,3 +1,15 @@
+export enum NetworkEnum {
+  ETHEREUM = 0,
+  GOERLI = 5,
+  OPTIMISM = 10,
+  BINANCE_SMART_CHAIN = 56,
+  BSC = 97,
+  POLYGON = 137,
+  FANTOM_OPERA = 250,
+  MEGA = 6342,
+  ARBITRUM = 42151
+}
+
 export const NETWORKS = {
   1: {
     id: 'ethereum',
@@ -95,4 +107,16 @@ export const NETWORKS = {
     name: 'Sepolia Testnet',
     icon: './img/icons/ethereum-eth-logo.png'
   }
+};
+
+export const polygonMainnet = {
+  chainId: '0x89', // 137 in hex
+  chainName: 'Polygon Mainnet',
+  nativeCurrency: {
+    name: 'MATIC',
+    symbol: 'MATIC',
+    decimals: 18
+  },
+  rpcUrls: ['https://polygon-rpc.com/'],
+  blockExplorerUrls: ['https://polygonscan.com/']
 };
