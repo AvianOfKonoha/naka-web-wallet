@@ -182,6 +182,7 @@
 .withdraw {
   &__screen {
     @include framework.grid-gap(calc(#{framework.$defaultGridGap} * 1.5));
+    user-select: none;
     &--title {
       @include framework.font-style('44', 'gray-600');
       font-weight: 300;
@@ -209,7 +210,6 @@
             border: 2px solid map.get(framework.$colors, 'gray-50');
             transition: border-color 0.1s ease;
             cursor: pointer;
-            &:hover,
             &:focus,
             &:active {
               border-color: map.get(framework.$colors, 'orange-400');
@@ -353,6 +353,24 @@
   }
 }
 
+@media screen and (min-width: 1200px) {
+  .withdraw {
+    &__screen {
+      &--connect {
+        .connect {
+          &__withdraw {
+            &--box {
+              &:hover {
+                border-color: map.get(framework.$colors, 'orange-400');
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 @media screen and (max-width: 1200px) {
   .withdraw {
     &__screen {
@@ -482,6 +500,10 @@
                       }
                     }
                   }
+                }
+                &__logo {
+                  top: 25px;
+                  right: 25px;
                 }
               }
             }
