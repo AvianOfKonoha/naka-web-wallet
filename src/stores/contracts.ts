@@ -156,7 +156,7 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Force the user to switch to Polygon chain */
-        await window.ethereum.request({
+        await this.provider.request({
           method: 'wallet_switchEthereumChain',
           params: [{chainId: polygonMainnet.chainId}]
         });
