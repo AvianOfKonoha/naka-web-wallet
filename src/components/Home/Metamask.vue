@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
+import {onMounted} from 'vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
 
 /*Callbacks*/
-contractsStore.connectMobile();
-contractsStore.checkConnection();
+onMounted(() => {
+  contractsStore.updateFirstSign(!!sessionStorage.getItem('firstSign'));
+  contractsStore.connectMobile();
+  contractsStore.checkConnection();
+});
 </script>
 
 <template>
@@ -56,7 +60,8 @@ contractsStore.checkConnection();
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             v-if="
-              !contractsStore.signature.value || !contractsStore.connectedAccount
+              !contractsStore.signature.value ||
+              !contractsStore.connectedAccount
             "
           >
             <g clip-path="url(#clip0_5859_1203)">

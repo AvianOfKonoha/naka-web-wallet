@@ -60,4 +60,5 @@ export interface IContractsStore {
   modal: IContractsModal;
   provider: any;
   withdrawals: IWithdrawal[];
+  firstSign: boolean;
 }

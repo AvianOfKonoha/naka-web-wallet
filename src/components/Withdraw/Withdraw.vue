@@ -2,9 +2,35 @@
 import NetworkIcon from '@/components/Withdraw/NetworkIcon.vue';
 import Empty from '@/components/Withdraw/List/Empty.vue';
 import {useContractsStore} from '@/stores/contracts.ts';
+import {onMounted} from 'vue';
+import {NetworkEnum, polygonMainnet} from '@/utils/constants.ts';
+import {toast} from 'vue3-toastify';
 
 /*Global state*/
 const contractsStore = useContractsStore();
+
+/*Methods*/
+const setPolygonChain = async () => {
+  if (contractsStore.chainId === NetworkEnum.POLYGON) {
+    return;
+  }
+
+  try {
+    /** Set the Metamask chain to Polygon mainnet and update chain id in global state */
+    await contractsStore.provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{chainId: polygonMainnet.chainId}]
+    });
+    await contractsStore.updateChain(NetworkEnum.POLYGON);
+    await contractsStore.getBalance();
+  } catch (error) {
+    toast.error((error as Error).message);
+  }
+};
+
+onMounted(() => {
+  setPolygonChain();
+});
 </script>
 
 <template>

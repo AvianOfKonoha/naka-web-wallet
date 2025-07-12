@@ -17,3 +17,18 @@ export const copyToClipboard = (text: string) => {
     bodyClassName: 'toast__body'
   });
 };
+
+export const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+export function isMobileChrome() {
+  const ua = navigator.userAgent;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+  const isChrome =
+    /Chrome/i.test(ua) &&
+    !/Edg/i.test(ua) &&
+    !/OPR/i.test(ua) &&
+    !/Brave/i.test(ua);
+  const isMetaMask = ua.includes('MetaMask');
+
+  return isMobile && isChrome && !isMetaMask;
+}

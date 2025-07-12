@@ -11,10 +11,12 @@ import {encode} from 'rlp';
 import {toast} from 'vue3-toastify';
 import {NETWORKS, polygonMainnet} from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
+import {isMobileChrome} from '@/utils/helpers.ts';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
     web3: null,
+    firstSign: false,
     connectedAccount: '',
     chainId: null,
     balance: null,
@@ -54,18 +56,14 @@ export const useContractsStore = defineStore('contracts', {
   getters: {
     activeNetwork: (state): IActiveNetwork => {
       return {
-        name: NETWORKS[state.chainId as keyof typeof NETWORKS]
-          ? NETWORKS[state.chainId as keyof typeof NETWORKS].name
-          : `Unknown Chain (ID: ${state.chainId})`,
-        icon: NETWORKS[state.chainId as keyof typeof NETWORKS]
-          ? NETWORKS[state.chainId as keyof typeof NETWORKS].icon
-          : './img/icons/bitcoin-btc-logo.png',
-        id: NETWORKS[state.chainId as keyof typeof NETWORKS]
-          ? NETWORKS[state.chainId as keyof typeof NETWORKS].id
-          : 'No id',
-        symbol: NETWORKS[state.chainId as keyof typeof NETWORKS]
-          ? NETWORKS[state.chainId as keyof typeof NETWORKS].symbol
-          : ''
+        name:
+          NETWORKS[state.chainId as keyof typeof NETWORKS].name ||
+          `Unknown Chain (ID: ${state.chainId})`,
+        icon:
+          NETWORKS[state.chainId as keyof typeof NETWORKS].icon ||
+          './img/icons/bitcoin-btc-logo.png',
+        id: NETWORKS[state.chainId as keyof typeof NETWORKS].id || 'No id',
+        symbol: NETWORKS[state.chainId as keyof typeof NETWORKS].symbol || ''
       };
     }
   },
@@ -80,6 +78,10 @@ export const useContractsStore = defineStore('contracts', {
         ...this.loading,
         ...loader
       };
+    },
+
+    updateFirstSign(signed: boolean) {
+      this.firstSign = signed;
     },
 
     updateModal(modal: Partial<IContractsModal>) {
@@ -102,7 +104,7 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({balance: true});
 
       try {
-        /** Step 1: Connect to metamask and extract balance */
+        /** Step 1: Connect to metamask and extract balance in ETH or its derivation */
         const balance = await this.web3.eth.getBalance(this.connectedAccount);
         const balanceEth = this.web3.utils.fromWei(balance, 'ether');
         this.balance = parseFloat(balanceEth).toFixed(2);
@@ -155,11 +157,13 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       try {
-        /** Force the user to switch to Polygon chain */
-        await this.provider.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{chainId: polygonMainnet.chainId}]
-        });
+        /** Switch the chain to Polygon mainnet - it is the chain of the Vault SC. The call to the chain change is conditioned on two things -> #1 If the user has never connected the dApp to the MetaMask and they're not on mobile device outside Metamask or the user is on desktop device the polygon chain will be switched in metamask app/extension. #2 If the user has already connected the app to the metamask the chain switcher will commence. In any other case this step will be skipped. */
+        if ((!this.firstSign && !isMobileChrome()) || this.firstSign) {
+          await this.provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{chainId: polygonMainnet.chainId}]
+          });
+        }
 
         /** Extract the metamask account's address and display it */
         await this.provider.request({method: 'eth_requestAccounts'});
@@ -179,6 +183,7 @@ export const useContractsStore = defineStore('contracts', {
           this.connectedAccount,
           ''
         );
+        sessionStorage.setItem('firstSign', 'true');
 
         /** Extract the chain id of the current account from the MetaMask */
         const chainId = await this.web3.eth.getChainId();
@@ -201,6 +206,7 @@ export const useContractsStore = defineStore('contracts', {
         } else {
           console.error('Failed to switch network:', error);
         }
+      } finally {
       }
     },
 
@@ -364,6 +370,7 @@ export const useContractsStore = defineStore('contracts', {
       this.chainId = null;
       this.signature.value = '';
       this.balance = null;
+      sessionStorage.removeItem('firstSign');
     },
 
     updateNetwork() {
