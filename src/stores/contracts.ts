@@ -201,7 +201,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Step 3: Multiply and fragment to 2 decimal points */
         /*this.balance = (parseFloat(balanceEth) * ethPrice).toFixed(2);*/
       } catch (error) {
-        console.error((error as Error).message);
+        console.error(error);
       } finally {
         this.updateLoading({balance: false});
       }
@@ -216,7 +216,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Extract the metamask account's address and display it */
         await this.provider.request({method: 'eth_requestAccounts'});
       } catch (error) {
-        toast.error(`${(error as Error).message}`);
+        toast.error(error);
       }
     },
 
@@ -273,7 +273,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Extract the balance of the current chain in USDT */
         await this.getBalance();
       } catch (error) {
-        toast.error(`${(error as Error).message}`);
+        toast.error(error);
 
         if ((error as any).code === 4902) {
           try {
@@ -370,7 +370,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Set the local state of the contract address from the receipt */
         this.transactionHash.contractAddress = receipt.contractAddress;
       } catch (error) {
-        toast.error(`${(error as Error).message}`);
+        toast.error(error);
       } finally {
         this.updateLoading({transactionHash: false});
       }
@@ -394,7 +394,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Parse the stringify ABI array */
         this.factory.factoryABI = JSON.parse(response.result);
       } catch (error) {
-        toast.error(`${(error as Error).message}`);
+        toast.error(error);
       }
     },
 
@@ -440,7 +440,7 @@ export const useContractsStore = defineStore('contracts', {
         if (!output) return;
         output.innerText = `Contract Address: ${contractAddress}`;*/
       } catch (error) {
-        toast.error(`${(error as Error).message}`);
+        toast.error(error);
       } finally {
         this.updateLoading({factory: false});
       }

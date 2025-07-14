@@ -1,8 +1,12 @@
 import {toast} from 'vue3-toastify';
 
-export const bottomToast = (message: string, className?: string) => {
+export const bottomToast = (
+  message: string,
+  autoClose: number,
+  className?: string
+) => {
   toast(message, {
-    autoClose: 1000,
+    autoClose: autoClose,
     type: 'info',
     theme: 'dark',
     position: 'bottom-center',
@@ -18,7 +22,7 @@ export const bottomToast = (message: string, className?: string) => {
  * */
 export const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
-  bottomToast('Copied to clipboard');
+  bottomToast('Copied to clipboard', 1000);
 };
 
 export const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);

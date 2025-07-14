@@ -24,6 +24,7 @@ const closeModal = () => {
 const completeWithdrawal = () => {
   bottomToast(
     'Withdraw to: b4329..7FAB has been successfully completed.',
+    3000,
     'toast__wide toast__withdrawal'
   );
   closeModal();
