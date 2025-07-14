@@ -21,6 +21,7 @@ const closeModal = () => {
   toggleModal(false);
 };
 
+/** On complete close the modal, add the withdrawal to the list in chronological order and notify the user of withdrawal completion with a toast */
 const completeWithdrawal = () => {
   bottomToast(
     'Withdraw to: b4329..7FAB has been successfully completed.',
