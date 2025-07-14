@@ -8,10 +8,6 @@ import {copyToClipboard} from '@/utils/helpers.ts';
 const contractsStore = useContractsStore();
 
 /*Modal*/
-const toggleConnectModal = (active: boolean) => {
-  contractsStore.updateModal({connect: active});
-};
-
 const disconnectMetamask = () => {
   contractsStore.updateModal({connect: false});
   contractsStore.disconnectMetamask();
@@ -31,7 +27,7 @@ contractsStore.onAccountsChanged();
   <Modal
     v-if="contractsStore.modal.connect"
     class="modal__connect"
-    :toggleActive="toggleConnectModal"
+    :closeModal="() => contractsStore.updateModal({connect: false})"
   >
     <div class="connect__header">Connected</div>
     <div class="connect__profile">
@@ -115,7 +111,8 @@ contractsStore.onAccountsChanged();
             type="button"
             :class="{
               connected:
-                contractsStore.connectedAccount && contractsStore.signature.value
+                contractsStore.connectedAccount &&
+                contractsStore.signature.value
             }"
             @click="contractsStore.connectMetamask"
           >
@@ -127,7 +124,8 @@ contractsStore.onAccountsChanged();
               xmlns="http://www.w3.org/2000/svg"
               class="button__connect--icon"
               v-if="
-                contractsStore.signature.value && contractsStore.connectedAccount
+                contractsStore.signature.value &&
+                contractsStore.connectedAccount
               "
             >
               <g id="Group">

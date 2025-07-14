@@ -1,21 +1,24 @@
 import {toast} from 'vue3-toastify';
 
-/**
- * With the power of Clipboard API the method copies the text of the sibling Element.
- * */
-export const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text);
-
-  toast('Copied to clipboard', {
+export const bottomToast = (message: string, className?: string) => {
+  toast(message, {
     autoClose: 1000,
     type: 'info',
     theme: 'dark',
     position: 'bottom-center',
     transition: 'bounce',
     hideProgressBar: true,
-    toastClassName: 'toast__wrap',
+    toastClassName: `toast__wrap ${className || ''}`,
     bodyClassName: 'toast__body'
   });
+};
+
+/**
+ * With the power of Clipboard API the method copies the text of the sibling Element.
+ * */
+export const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text);
+  bottomToast('Copied to clipboard');
 };
 
 export const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -32,3 +35,22 @@ export function isMobileChrome() {
 
   return isMobile && isChrome && !isMetaMask;
 }
+
+export const localizeDateTime = (date?: Date | null, emptyOutput?: string) => {
+  if (!date) {
+    return emptyOutput || '/';
+  }
+
+  return new Date(date).toLocaleDateString('sl-SI', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
+
+export const openNewTab = (url: string) => {
+  window.open(url, '_blank');
+};

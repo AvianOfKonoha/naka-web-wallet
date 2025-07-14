@@ -12,6 +12,17 @@
   }
 }
 
+@keyframes draw-up {
+  0% {
+    top: 100%;
+    opacity: 0.5;
+  }
+  100% {
+    top: 0;
+    opacity: 1;
+  }
+}
+
 .home {
   @include framework.flex-layout(flex, center, unset, unset);
   &__box {
@@ -78,7 +89,7 @@
         .profile {
           height: 100px;
           width: 100px;
-          border-radius: 100vh;
+          border-radius: 100dvh;
           background: linear-gradient(180deg, #af52de 0%, #ff2d55 100%);
           position: relative;
           .network {
@@ -88,7 +99,7 @@
             &__icon {
               width: 25px;
               height: 25px;
-              border-radius: 100vh;
+              border-radius: 100dvh;
               font-size: 0;
               padding: 2px;
               box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -177,6 +188,160 @@
       }
     }
   }
+  &__withdraw {
+    &--connected {
+      @include framework.grid-gap(calc(#{framework.$defaultGridGap} * 2));
+      max-width: 650px;
+      .connected {
+        &__form {
+          &--step-amount {
+            @include framework.grid-gap(calc(#{framework.$defaultGridGap} * 2));
+          }
+          &--amount {
+            @include framework.grid-column-layout(
+              1fr auto,
+              calc(#{framework.$defaultGridGap} / 2)
+            );
+            .amount {
+              &__wrap {
+                position: relative;
+                border: 1px solid map.get(framework.$colors, 'gray-100');
+                border-radius: calc(#{framework.$defaultRem} / 2);
+                overflow: hidden;
+                @include framework.grid-column-layout(
+                  1fr auto,
+                  framework.$defaultGridGap
+                );
+                align-items: center;
+                input {
+                  border: unset;
+                  padding: unset;
+                  padding-left: framework.$defaultPadding;
+                  @include framework.remove-native-focus;
+                  -moz-appearance: textfield;
+                  @include framework.font-style('default', 'gray-800');
+                  line-height: 48px;
+                  width: 100%;
+                }
+                &:focus,
+                &:focus-within {
+                  box-shadow: 0 0 0 3px
+                    rgba(map.get(framework.$colors, 'black'), 0.25);
+                  border-color: map.get(framework.$colors, 'gray-950');
+                }
+                button {
+                  &[type='reset'] {
+                    position: absolute;
+                    height: 48px;
+                    width: 32px;
+                    right: 0;
+                    @include framework.flex-layout(flex, center, center, unset);
+                    background-color: map.get(framework.$colors, 'white');
+                  }
+                }
+              }
+              &__currency {
+                padding-right: 48px;
+              }
+              &__max {
+                height: 48px;
+                width: 130px;
+                @include framework.flex-layout(flex, center, center, unset);
+                background-color: map.get(framework.$colors, 'gray-100');
+                @include framework.font-style('default', 'gray-950');
+                border-radius: 100dvh;
+                font-weight: 500;
+              }
+            }
+          }
+          &--submit {
+            padding-top: calc(#{framework.$defaultPadding} * 1.5);
+            .submit {
+              &__button {
+                height: 48px;
+                width: 100%;
+                @include framework.flex-layout(flex, center, center, unset);
+                background-color: map.get(framework.$colors, 'gray-200');
+                border: 1px solid map.get(framework.$colors, 'gray-200');
+                @include framework.font-style('default', 'gray-400');
+                border-radius: 100dvh;
+                font-weight: 500;
+                transition: all 0.2s ease;
+                &.active {
+                  border-color: map.get(framework.$colors, 'gray-950');
+                  color: map.get(framework.$colors, 'gray-950');
+                  background-color: map.get(framework.$colors, 'gray-50');
+                }
+              }
+            }
+          }
+          &--step-process {
+            @include framework.grid-gap(calc(#{framework.$defaultGridGap} * 2));
+            .process {
+              &__description {
+                @include framework.font-style('default', 'gray-800');
+              }
+              &__statement {
+                @include framework.flex-layout(
+                  flex,
+                  space-between,
+                  center,
+                  framework.$defaultGridGap
+                );
+                padding: calc(#{framework.$defaultPadding} * 1.5);
+                background-color: map.get(framework.$colors, 'gray-100');
+                border-radius: calc(#{framework.$defaultRem} / 2);
+                @include framework.font-style('18', 'gray-800');
+                font-weight: 500;
+                line-height: 1;
+              }
+              &__button {
+                padding-top: calc(#{framework.$defaultPadding} * 1.5);
+                button {
+                  height: 48px;
+                  background-color: map.get(framework.$colors, 'gray-800');
+                  @include framework.font-style('default', 'gray-50');
+                  font-weight: 500;
+                  @include framework.flex-layout(flex, center, center, unset);
+                  width: 100%;
+                  border-radius: 100dvh;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  &__withdrawal {
+    &--complete {
+      @include framework.grid-gap(calc(#{framework.$defaultGridGap} * 2));
+      max-width: 650px;
+      .complete {
+        &__description {
+          @include framework.font-style('default', 'gray-800');
+        }
+        &__button {
+          padding-top: calc(#{framework.$defaultPadding} * 1.5);
+          button {
+            width: 100%;
+            height: 48px;
+            @include framework.flex-layout(flex, center, center, unset);
+            background-color: map.get(framework.$colors, 'green-500');
+            padding: 0 calc(#{framework.$defaultPadding} * 1.5);
+            @include framework.font-style('default ', 'gray-800');
+            font-weight: 600;
+            border-radius: 100dvh;
+            transition: all 0.1s ease;
+            &:active {
+              background-color: map.get(framework.$colors, 'green-800');
+              color: map.get(framework.$colors, 'white');
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 .withdraw {
@@ -184,7 +349,7 @@
     @include framework.grid-gap(calc(#{framework.$defaultGridGap} * 1.5));
     user-select: none;
     &--title {
-      @include framework.font-style('44', 'gray-600');
+      @include framework.font-style('44', 'gray-800');
       font-weight: 300;
       line-height: 1;
     }
@@ -216,7 +381,7 @@
             }
             .box {
               &__title {
-                @include framework.font-style('20', 'gray-600');
+                @include framework.font-style('20', 'gray-800');
                 text-transform: uppercase;
               }
               &__text {
@@ -254,10 +419,10 @@
                   height: 48px;
                   @include framework.flex-layout(flex, center, center, unset);
                   width: 100%;
-                  border-radius: 100vh;
+                  border-radius: 100dvh;
                   @include framework.font-style('default', 'gray-50');
                   font-weight: 500;
-                  background-color: map.get(framework.$colors, 'gray-600');
+                  background-color: map.get(framework.$colors, 'gray-800');
                   .arrow {
                     display: none;
                   }
@@ -320,7 +485,7 @@
       @include framework.grid-gap(calc(#{framework.$defaultGridGap} * 1.5));
       .history {
         &__title {
-          @include framework.font-style('44', 'gray-600');
+          @include framework.font-style('44', 'gray-800');
           font-weight: 300;
           line-height: 1;
         }
@@ -346,6 +511,110 @@
                 padding-bottom: framework.$defaultPadding;
               }
             }
+          }
+        }
+      }
+    }
+  }
+}
+
+.withdrawal {
+  &__row {
+    &--statement {
+      padding: calc(#{framework.$defaultPadding} / 4);
+      padding-right: calc(#{framework.$defaultPadding} / 1.5);
+      border: 1px solid map.get(framework.$colors, 'gray-100');
+      border-radius: framework.$defaultRem;
+      background-color: map.get(framework.$colors, 'gray-50');
+      @include framework.grid-column-layout(
+        auto 1fr auto,
+        calc(#{framework.$defaultGridGap} / 2)
+      );
+      align-items: center;
+    }
+    &--ready {
+      @include framework.grid-column-layout(
+        1fr auto,
+        calc(#{framework.$defaultGridGap} / 2)
+      );
+      align-items: center;
+      .withdrawal {
+        &__icon {
+          &--status {
+            background-color: map.get(framework.$colors, 'green-500');
+          }
+        }
+      }
+    }
+    &--complete {
+      .withdrawal {
+        &__icon {
+          &--status {
+            background-color: map.get(framework.$colors, 'green-500');
+          }
+        }
+      }
+    }
+    &--button {
+      button {
+        background-color: map.get(framework.$colors, 'green-500');
+        height: 28px;
+        @include framework.flex-layout(flex, center, center, unset);
+        padding: 0 calc(#{framework.$defaultPadding} * 1.5);
+        @include framework.font-style('10', 'gray-800');
+        font-weight: 600;
+        border-radius: 100dvh;
+        transition: all 0.1s ease;
+        &:active {
+          background-color: map.get(framework.$colors, 'green-800');
+          color: map.get(framework.$colors, 'white');
+        }
+      }
+    }
+  }
+  &__icon {
+    width: 48px;
+    height: 48px;
+    background-color: map.get(framework.$colors, 'white');
+    border-radius: calc(#{framework.$defaultRem} / 1.5);
+    @include framework.flex-layout(flex, center, center, unset);
+    position: relative;
+    &--status {
+      width: 8px;
+      height: 8px;
+      border-radius: 100dvh;
+      background-color: map.get(framework.$colors, 'orange-200');
+      position: absolute;
+      top: 4px;
+      left: 4px;
+    }
+  }
+  &__details {
+    &--address {
+      @include framework.font-style('14', 'gray-800');
+      font-weight: 600;
+      @include framework.shorten-text(1);
+      word-break: break-all;
+    }
+    &--date {
+      @include framework.font-style('12', 'gray-400');
+    }
+  }
+  &__amount {
+    @include framework.font-style('14', 'gray-800');
+    font-weight: 600;
+    padding-left: 8px;
+  }
+}
+
+.Toastify {
+  .Toastify {
+    &__toast-container {
+      &--bottom-center {
+        .toast {
+          &__withdrawal {
+            @include framework.font-style('18', 'white');
+            font-weight: 300;
           }
         }
       }
@@ -530,6 +799,97 @@
         .history {
           &__title {
             font-size: map.get(framework.$textSizes, '36');
+          }
+        }
+      }
+    }
+  }
+  .modal {
+    &__withdraw {
+      &--backdrop {
+      }
+      &--connected {
+        padding-bottom: calc(#{framework.$defaultPadding} * 3);
+        border-bottom-right-radius: unset;
+        border-bottom-left-radius: unset;
+        position: relative;
+        box-shadow: 0 -10px 18px -6px map.get(framework.$colors, 'gray-200');
+        animation-name: draw-up;
+        &:after {
+          content: '';
+          width: 100dvh;
+          height: 100vw;
+          background-color: map.get(framework.$colors, 'white');
+          position: absolute;
+          top: 100%;
+          left: 0;
+        }
+        .connected {
+          &__form {
+            .modal {
+              &__title {
+                padding-top: calc(#{framework.$defaultPadding} * 3);
+                padding-right: unset;
+                text-align: center;
+              }
+            }
+            &--amount {
+              .amount {
+                &__max {
+                  width: 90px;
+                }
+              }
+            }
+          }
+        }
+      }
+      &--wrap {
+        padding-left: unset;
+        padding-right: unset;
+        padding-bottom: unset;
+      }
+      &--wrap-complete {
+        padding-left: unset;
+        padding-right: unset;
+        padding-bottom: unset;
+        align-items: end;
+      }
+    }
+    &__withdrawal {
+      &--complete {
+        border-bottom-left-radius: unset;
+        border-bottom-right-radius: unset;
+        padding-bottom: calc(#{framework.$defaultPadding} * 2);
+        .modal {
+          &__title {
+            padding-top: calc(#{framework.$defaultPadding} * 3);
+            padding-right: unset;
+            text-align: center;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+  .withdrawal {
+    &__row {
+      &--ready {
+        grid-template-columns: unset;
+        grid-gap: unset;
+        .withdrawal {
+          &__row {
+            &--statement {
+              border-bottom-right-radius: unset;
+              border-bottom-left-radius: unset;
+            }
+            &--button {
+              button {
+                width: 100%;
+                border-radius: framework.$defaultRem;
+                border-top-right-radius: unset;
+                border-top-left-radius: unset;
+              }
+            }
           }
         }
       }

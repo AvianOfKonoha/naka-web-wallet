@@ -5,6 +5,9 @@ import {useContractsStore} from '@/stores/contracts.ts';
 import {onMounted} from 'vue';
 import {NetworkEnum, polygonMainnet} from '@/utils/constants.ts';
 import {toast} from 'vue3-toastify';
+import Modal from '@/components/UI/Modal.vue';
+import ConnectedWallet from '@/components/Withdraw/Form/ConnectedWallet.vue';
+import Withdrawal from '@/components/Withdraw/List/Withdrawal.vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -21,19 +24,40 @@ const setPolygonChain = async () => {
       method: 'wallet_switchEthereumChain',
       params: [{chainId: polygonMainnet.chainId}]
     });
-    await contractsStore.updateChain(NetworkEnum.POLYGON);
+    contractsStore.updateChain(NetworkEnum.POLYGON);
+
+    /** Retrieve the balance from the wallet and populate the global state */
     await contractsStore.getBalance();
   } catch (error) {
     toast.error((error as Error).message);
   }
 };
 
+const closeConnectedModal = () => {
+  contractsStore.updateModal({withdrawConnected: false});
+  contractsStore.updateFormField(0, 'connected', 'amount');
+  contractsStore.updateWallet('connected', {step: 1});
+};
+
+/*Lifecycle hooks*/
 onMounted(() => {
   setPolygonChain();
 });
 </script>
 
 <template>
+  <!-- Modal -->
+  <Modal
+    class="modal__withdraw--connected"
+    wrapClass="modal__withdraw--wrap"
+    backdropClass="modal__withdraw--backdrop"
+    :closeModal="closeConnectedModal"
+    v-if="contractsStore.modal.withdrawConnected"
+  >
+    <ConnectedWallet />
+  </Modal>
+
+  <!-- Main -->
   <div class="withdraw__screen--wrap">
     <div class="withdraw__screen">
       <div class="withdraw__screen--row">
@@ -44,7 +68,10 @@ onMounted(() => {
         </div>
       </div>
       <div class="withdraw__screen--row withdraw__screen--connect">
-        <div class="connect__withdraw--box">
+        <div
+          class="connect__withdraw--box"
+          @click="contractsStore.updateModal({withdrawConnected: true})"
+        >
           <div class="box__title">Withdraw to connected wallet</div>
           <div class="box__text">
             Simply withdraw your funds to the currently connected wallet in your
@@ -174,6 +201,15 @@ onMounted(() => {
         <div class="history__title">Withdrawal History</div>
         <div class="history__list">
           <Empty v-if="!contractsStore.withdrawals.length" />
+          <div
+            class="history__list--grid"
+            v-if="contractsStore.withdrawals.length"
+          >
+            <Withdrawal
+              v-for="withdrawal in contractsStore.withdrawals"
+              :withdrawal="withdrawal"
+            />
+          </div>
         </div>
       </div>
     </div>

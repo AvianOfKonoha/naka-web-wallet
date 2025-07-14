@@ -1,9 +1,13 @@
 import {defineStore} from 'pinia';
 import type {
   IActiveNetwork,
+  IConnectedForm,
+  IContractsForms,
   IContractsLoading,
   IContractsModal,
-  IContractsStore
+  IContractsStore,
+  IContractsWallets,
+  IWallet
 } from '@/types/contracts.ts';
 import {Web3} from 'web3';
 import {keccak256} from 'js-sha3';
@@ -36,7 +40,9 @@ export const useContractsStore = defineStore('contracts', {
     loading: {
       transactionHash: false,
       factory: false,
-      balance: false
+      balance: false,
+      withdrawConnected: false,
+      withdrawExternal: false
     },
     transactionHash: {
       contractAddress: ''
@@ -49,9 +55,31 @@ export const useContractsStore = defineStore('contracts', {
       contractAddress: ''
     },
     modal: {
-      connect: false
+      connect: false,
+      withdrawConnected: false,
+      withdrawExternal: false
     },
-    withdrawals: []
+    withdrawals: [
+      {
+        address: 'b432966b510533F2e57B12558C27b2DDFE7FAB',
+        date: new Date(),
+        amount: 20,
+        status: 'ready'
+      }
+    ],
+    form: {
+      connected: {
+        amount: {
+          required: true,
+          value: 0
+        }
+      }
+    },
+    wallets: {
+      connected: {
+        step: 1
+      }
+    }
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -89,6 +117,59 @@ export const useContractsStore = defineStore('contracts', {
         ...this.modal,
         ...modal
       };
+    },
+
+    updateForm(form: Partial<IContractsForms>) {
+      this.form = {
+        ...this.form,
+        ...form
+      };
+    },
+
+    updateWallet(
+      wallet: keyof IContractsWallets,
+      walletData: Partial<IWallet>
+    ) {
+      this.wallets = {
+        ...this.wallets,
+        [wallet]: {
+          ...this.wallets[wallet],
+          ...walletData
+        }
+      };
+    },
+
+    updateFormField(
+      value: unknown,
+      form: keyof IContractsForms,
+      formKey: keyof IConnectedForm,
+      nestedKey?: any
+    ) {
+      if (nestedKey) {
+        this.updateForm({
+          [form]: {
+            ...this.form[form],
+            [formKey]: {
+              ...(this.form[form] as any)[formKey],
+              [nestedKey]: {
+                ...(this.form[form] as any)[formKey][nestedKey],
+                value: value
+              }
+            }
+          }
+        });
+        return;
+      }
+
+      this.updateForm({
+        [form]: {
+          ...this.form[form],
+          [formKey]: {
+            ...(this.form[form] as any)[formKey],
+            value: value
+          }
+        }
+      });
     },
 
     updateChain(chainId: number) {
@@ -462,6 +543,28 @@ export const useContractsStore = defineStore('contracts', {
         );*/
       } catch (error) {
         console.error('Error connecting to metamask', (error as Error).message);
+      }
+    },
+
+    async submitConnectedForm() {
+      /** Init loading */
+      this.updateLoading({withdrawConnected: true});
+
+      /*TODO: Update logic when the SC gets connected*/
+      if (this.wallets.connected.step === 1) {
+        this.updateWallet('connected', {step: 2});
+        this.updateLoading({withdrawConnected: false});
+        return;
+      }
+
+      /** Close the modal and reset the form  */
+      this.updateModal({withdrawConnected: false});
+      this.updateFormField(0, 'connected', 'amount');
+      this.updateWallet('connected', {step: 1});
+
+      try {
+      } catch (error) {
+        toast.error(error);
       }
     }
   }

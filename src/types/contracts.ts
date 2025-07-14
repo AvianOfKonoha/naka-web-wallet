@@ -1,4 +1,5 @@
 import {type ContractAbi, Web3} from 'web3';
+import type {IFormField} from '@/types/general.ts';
 
 export interface IContractsInputs {
   privateKey: string;
@@ -12,6 +13,8 @@ export interface IContractsLoading {
   transactionHash: boolean;
   factory: boolean;
   balance: boolean;
+  withdrawConnected: boolean;
+  withdrawExternal: boolean;
 }
 
 export interface IContractsHash {
@@ -34,6 +37,8 @@ export interface IContractsSignature {
 
 export interface IContractsModal {
   connect: boolean;
+  withdrawConnected: boolean;
+  withdrawExternal: boolean;
 }
 
 export interface IActiveNetwork {
@@ -43,7 +48,28 @@ export interface IActiveNetwork {
   symbol: string;
 }
 
-export interface IWithdrawal {}
+export interface IWithdrawal {
+  address: string;
+  date: Date;
+  amount: number;
+  status: string;
+}
+
+export interface IConnectedForm {
+  amount: IFormField<number>;
+}
+
+export interface IContractsForms {
+  connected: IConnectedForm;
+}
+
+export interface IWallet {
+  step: number;
+}
+
+export interface IContractsWallets {
+  connected: IWallet;
+}
 
 export interface IContractsStore {
   web3: Web3 | null;
@@ -61,4 +87,6 @@ export interface IContractsStore {
   provider: any;
   withdrawals: IWithdrawal[];
   firstSign: boolean;
+  form: IContractsForms;
+  wallets: IContractsWallets;
 }
