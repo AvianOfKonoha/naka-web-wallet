@@ -242,7 +242,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Extract the metamask account's address and display it */
         await this.provider.request({method: 'eth_requestAccounts'});
       } catch (error) {
-        toast.error(error);
+        toast.error(`${(error as Error).message}`);
       }
     },
 
@@ -299,7 +299,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Extract the balance of the current chain in USDT */
         await this.getBalance();
       } catch (error) {
-        toast.error(error);
+        toast.error(`${(error as Error).message}`);
 
         if ((error as any).code === 4902) {
           try {
@@ -396,7 +396,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Set the local state of the contract address from the receipt */
         this.transactionHash.contractAddress = receipt.contractAddress;
       } catch (error) {
-        toast.error(error);
+        toast.error(`${(error as Error).message}`);
       } finally {
         this.updateLoading({transactionHash: false});
       }
@@ -420,7 +420,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Parse the stringify ABI array */
         this.factory.factoryABI = JSON.parse(response.result);
       } catch (error) {
-        toast.error(error);
+        toast.error(`${(error as Error).message}`);
       }
     },
 
@@ -466,7 +466,7 @@ export const useContractsStore = defineStore('contracts', {
         if (!output) return;
         output.innerText = `Contract Address: ${contractAddress}`;*/
       } catch (error) {
-        toast.error(error);
+        toast.error(`${(error as Error).message}`);
       } finally {
         this.updateLoading({factory: false});
       }
@@ -599,7 +599,7 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
       } catch (error) {
-        toast.error(error);
+        toast.error(`${(error as Error).message}`);
         this.updateError({external: true});
       }
     },
@@ -642,7 +642,7 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
       } catch (error) {
-        toast.error(error);
+        toast.error(`${(error as Error).message}`);
         this.updateError({external: true});
       }
     }
