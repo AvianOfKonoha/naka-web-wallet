@@ -31,7 +31,7 @@ export function isMobileChrome() {
   const ua = navigator.userAgent;
   const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
   const isChrome =
-    /Chrome/i.test(ua) &&
+    (/Chrome/i.test(ua) || /CriOS/i.test(ua)) &&
     !/Edg/i.test(ua) &&
     !/OPR/i.test(ua) &&
     !/Brave/i.test(ua);
