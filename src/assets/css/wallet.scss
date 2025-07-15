@@ -89,7 +89,7 @@
         .profile {
           height: 100px;
           width: 100px;
-          border-radius: 100dvh;
+          border-radius: 100vh;
           background: linear-gradient(180deg, #af52de 0%, #ff2d55 100%);
           position: relative;
           .network {
@@ -99,7 +99,7 @@
             &__icon {
               width: 25px;
               height: 25px;
-              border-radius: 100dvh;
+              border-radius: 100vh;
               font-size: 0;
               padding: 2px;
               box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -249,7 +249,7 @@
                 @include framework.flex-layout(flex, center, center, unset);
                 background-color: map.get(framework.$colors, 'gray-100');
                 @include framework.font-style('default', 'gray-950');
-                border-radius: 100dvh;
+                border-radius: 100vh;
                 font-weight: 500;
               }
             }
@@ -264,7 +264,7 @@
                 background-color: map.get(framework.$colors, 'gray-200');
                 border: 1px solid map.get(framework.$colors, 'gray-200');
                 @include framework.font-style('default', 'gray-400');
-                border-radius: 100dvh;
+                border-radius: 100vh;
                 font-weight: 600;
                 transition: all 0.2s ease;
                 .loader {
@@ -308,7 +308,7 @@
                   font-weight: 500;
                   @include framework.flex-layout(flex, center, center, unset);
                   width: 100%;
-                  border-radius: 100dvh;
+                  border-radius: 100vh;
                 }
               }
             }
@@ -349,7 +349,7 @@
             padding: 0 calc(#{framework.$defaultPadding} * 1.5);
             @include framework.font-style('default ', 'gray-800');
             font-weight: 600;
-            border-radius: 100dvh;
+            border-radius: 100vh;
             transition: all 0.1s ease;
             &:active {
               background-color: map.get(framework.$colors, 'green-800');
@@ -437,7 +437,7 @@
                   height: 48px;
                   @include framework.flex-layout(flex, center, center, unset);
                   width: 100%;
-                  border-radius: 100dvh;
+                  border-radius: 100vh;
                   @include framework.font-style('default', 'gray-50');
                   font-weight: 500;
                   background-color: map.get(framework.$colors, 'gray-800');
@@ -612,7 +612,7 @@
         padding: 0 calc(#{framework.$defaultPadding} * 1.5);
         @include framework.font-style('10', 'gray-800');
         font-weight: 600;
-        border-radius: 100dvh;
+        border-radius: 100vh;
         transition: all 0.1s ease;
         &:active {
           background-color: map.get(framework.$colors, 'green-800');
@@ -631,7 +631,7 @@
     &--status {
       width: 8px;
       height: 8px;
-      border-radius: 100dvh;
+      border-radius: 100vh;
       background-color: map.get(framework.$colors, 'orange-200');
       position: absolute;
       top: 4px;
@@ -963,8 +963,6 @@
   }
   .modal {
     &__withdraw {
-      &--backdrop {
-      }
       &--connected {
         padding-bottom: calc(#{framework.$defaultPadding} * 3);
         border-bottom-right-radius: unset;
@@ -974,8 +972,8 @@
         animation-name: draw-up;
         &:after {
           content: '';
-          width: 100dvh;
-          height: 100vw;
+          width: 100vw;
+          height: 30dvh;
           background-color: map.get(framework.$colors, 'white');
           position: absolute;
           top: 100%;

@@ -248,6 +248,7 @@ export const useContractsStore = defineStore('contracts', {
 
     async connectMetamask() {
       if (!this.web3) {
+        toast.info('no Web3 provided');
         return;
       }
 

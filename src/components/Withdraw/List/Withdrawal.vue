@@ -35,9 +35,9 @@ const completeWithdrawal = () => {
 <template>
   <Modal
     :closeModal="closeModal"
-    v-if="completeModal"
     wrapClass="modal__withdraw--wrap-complete"
     class="modal__withdrawal--complete"
+    :active="completeModal"
   >
     <div class="modal__title">Complete Withdrawal</div>
     <div class="complete__description">

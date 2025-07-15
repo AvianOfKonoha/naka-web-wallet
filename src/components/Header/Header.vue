@@ -25,9 +25,9 @@ contractsStore.onAccountsChanged();
 <template>
   <!-- Modal -->
   <Modal
-    v-if="contractsStore.modal.connect"
     class="modal__connect"
     :closeModal="() => contractsStore.updateModal({connect: false})"
+    :active="contractsStore.modal.connect"
   >
     <div class="connect__header">Connected</div>
     <div class="connect__profile">

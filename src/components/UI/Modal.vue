@@ -1,15 +1,35 @@
 <script setup lang="ts">
+import {watch} from 'vue';
+
 /*Props*/
 const props = defineProps<{
   class?: string;
   wrapClass?: string;
   backdropClass?: string;
   closeModal(): void;
+  active: boolean;
 }>();
+
+/*Methods*/
+const adjustBodyOverflow = (active: boolean) => {
+  if (active) {
+    document.body.style.overflow = 'hidden';
+    return;
+  }
+  document.body.style.overflow = 'auto';
+};
+
+/*Watchers*/
+watch(
+  () => props.active,
+  (newValue) => {
+    adjustBodyOverflow(newValue);
+  }
+);
 </script>
 
 <template>
-  <div class="modal__wrap" :class="props.wrapClass">
+  <div class="modal__wrap" :class="props.wrapClass" v-if="props.active">
     <div
       class="modal__backdrop"
       @click="props.closeModal"

@@ -111,7 +111,7 @@ button {
 
 .button {
   &__default {
-    border-radius: 100dvh;
+    border-radius: 100vh;
     background-color: map.get(framework.$colors, 'gray-800');
     @include framework.font-style('12', 'gray-50');
     padding: 10px calc(#{framework.$defaultPadding} * 0.75);
@@ -195,6 +195,7 @@ main {
     left: 0;
     z-index: 100;
     padding: framework.$defaultPadding;
+    overflow: auto;
   }
   &__backdrop {
     position: absolute;
@@ -263,7 +264,7 @@ main {
         &.Toastify {
           &__toast-theme {
             &--dark {
-              border-radius: 100dvh;
+              border-radius: 100vh;
             }
           }
         }
