@@ -595,6 +595,7 @@ export const useContractsStore = defineStore('contracts', {
 
       /** Close the modal and reset the form  */
       this.updateModal({withdrawConnected: false});
+      this.updateLoading({withdrawConnected: false});
       this.updateFormField(0, 'connected', 'amount');
       this.updateWallet('connected', {step: 1});
 
