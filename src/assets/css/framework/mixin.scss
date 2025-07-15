@@ -363,7 +363,7 @@
   height: 18px;
   border: 3px solid map.get(rules.$colors, $color);
   border-bottom-color: transparent;
-  border-radius: 50%;
+  border-radius: 100vh;
   display: inline-block;
   box-sizing: border-box;
   animation: rotation 1s linear infinite;

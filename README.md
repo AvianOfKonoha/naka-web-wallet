@@ -19,9 +19,9 @@ You can access the deployed version of this app here:
 ## ⚙️ Features
 
 - 🔗 Connect to Ethereum via MetaMask using Web3.js
-- 🧠 Compute contract addresses from a deployer address and nonce using **RLP** and **Keccak-256**
-- 📬 Extract deployed contract address directly from a **transaction hash**
-- 🏗️ Retrieve contract address from a **factory contract**
+- 💼 Withdraw crypto to connected wallet
+- 💼 Withdraw crypto to external wallet
+- 📜️ View withdraw history  
 - ⚡ Instant development with Vite
 - 🧩 Written in **TypeScript** for type safety and scalability
 - 🌐 Clean, static frontend suitable for GitHub Pages

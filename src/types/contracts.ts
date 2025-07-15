@@ -59,8 +59,14 @@ export interface IConnectedForm {
   amount: IFormField<number>;
 }
 
+export interface IExternalForm {
+  amount: IFormField<number>;
+  address: IFormField<string>;
+}
+
 export interface IContractsForms {
   connected: IConnectedForm;
+  external: IExternalForm;
 }
 
 export interface IWallet {
@@ -69,6 +75,12 @@ export interface IWallet {
 
 export interface IContractsWallets {
   connected: IWallet;
+  external: IWallet;
+}
+
+export interface IContractsErrors {
+  external: boolean;
+  connected: boolean;
 }
 
 export interface IContractsStore {
@@ -89,4 +101,5 @@ export interface IContractsStore {
   firstSign: boolean;
   form: IContractsForms;
   wallets: IContractsWallets;
+  error: IContractsErrors;
 }

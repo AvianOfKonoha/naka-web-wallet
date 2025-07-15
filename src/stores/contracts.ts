@@ -2,11 +2,13 @@ import {defineStore} from 'pinia';
 import type {
   IActiveNetwork,
   IConnectedForm,
+  IContractsErrors,
   IContractsForms,
   IContractsLoading,
   IContractsModal,
   IContractsStore,
   IContractsWallets,
+  IExternalForm,
   IWallet
 } from '@/types/contracts.ts';
 import {Web3} from 'web3';
@@ -64,7 +66,7 @@ export const useContractsStore = defineStore('contracts', {
         address: 'b432966b510533F2e57B12558C27b2DDFE7FAB',
         date: new Date(),
         amount: 20,
-        status: 'ready'
+        status: 'complete'
       }
     ],
     form: {
@@ -73,12 +75,29 @@ export const useContractsStore = defineStore('contracts', {
           required: true,
           value: 0
         }
+      },
+      external: {
+        amount: {
+          required: true,
+          value: 0
+        },
+        address: {
+          required: true,
+          value: ''
+        }
       }
     },
     wallets: {
       connected: {
         step: 1
+      },
+      external: {
+        step: 1
       }
+    },
+    error: {
+      external: false,
+      connected: false
     }
   }),
   getters: {
@@ -126,6 +145,13 @@ export const useContractsStore = defineStore('contracts', {
       };
     },
 
+    updateError(error: Partial<IContractsErrors>) {
+      this.error = {
+        ...this.error,
+        ...error
+      };
+    },
+
     updateWallet(
       wallet: keyof IContractsWallets,
       walletData: Partial<IWallet>
@@ -142,7 +168,7 @@ export const useContractsStore = defineStore('contracts', {
     updateFormField(
       value: unknown,
       form: keyof IContractsForms,
-      formKey: keyof IConnectedForm,
+      formKey: keyof (IConnectedForm & IExternalForm),
       nestedKey?: any
     ) {
       if (nestedKey) {
@@ -547,6 +573,10 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async submitConnectedForm() {
+      if (this.loading.withdrawConnected || !this.form.connected.amount.value) {
+        return;
+      }
+
       /** Init loading */
       this.updateLoading({withdrawConnected: true});
 
@@ -554,6 +584,11 @@ export const useContractsStore = defineStore('contracts', {
       if (this.wallets.connected.step === 1) {
         this.updateWallet('connected', {step: 2});
         this.updateLoading({withdrawConnected: false});
+        return;
+      }
+
+      if (this.wallets.connected.step === 2 && this.error.connected) {
+        this.updateLoading({withdrawConnected: true});
         return;
       }
 
@@ -565,6 +600,50 @@ export const useContractsStore = defineStore('contracts', {
       try {
       } catch (error) {
         toast.error(error);
+        this.updateError({external: true});
+      }
+    },
+
+    async submitExternalForm() {
+      if (this.loading.withdrawExternal) {
+        return;
+      }
+
+      /** Init loading */
+      this.updateLoading({withdrawExternal: true});
+
+      /*TODO: Update logic when the SC gets connected*/
+      if (this.wallets.external.step === 1) {
+        this.updateWallet('external', {step: 2});
+        this.updateLoading({withdrawExternal: false});
+        return;
+      }
+
+      if (this.wallets.external.step === 2) {
+        if (this.form.external.address.value.length > 10) {
+          this.updateWallet('external', {step: 3});
+        } else {
+          this.updateError({external: true});
+        }
+        this.updateLoading({withdrawExternal: false});
+        return;
+      }
+
+      if (this.wallets.external.step === 3 && this.error.external) {
+        this.updateLoading({withdrawExternal: true});
+        return;
+      }
+
+      /** Close the modal and reset the form  */
+      this.updateModal({withdrawExternal: false});
+      this.updateFormField(0, 'external', 'amount');
+      this.updateFormField('', 'external', 'address');
+      this.updateWallet('external', {step: 1});
+
+      try {
+      } catch (error) {
+        toast.error(error);
+        this.updateError({external: true});
       }
     }
   }

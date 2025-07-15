@@ -22,7 +22,7 @@ export const bottomToast = (
  * */
 export const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
-  bottomToast('Copied to clipboard', 1000);
+  bottomToast('Copied to clipboard', 10000);
 };
 
 export const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);

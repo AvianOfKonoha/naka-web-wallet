@@ -99,6 +99,14 @@ button {
   cursor: pointer;
   padding: unset;
   @include framework.font-style('12', 'primary');
+  &.loading {
+    position: relative;
+  }
+  .loader {
+    @include framework.button-loader('white');
+    position: absolute;
+    right: framework.$defaultPadding;
+  }
 }
 
 .button {
