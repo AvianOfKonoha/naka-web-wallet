@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import {b} from 'vite/dist/node/moduleRunnerTransport.d-DJ_mE5sf';
-
 const props = defineProps<{
   cancelForm(): void;
   loading: boolean;
