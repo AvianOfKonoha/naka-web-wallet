@@ -309,7 +309,7 @@
                   height: 48px;
                   background-color: map.get(framework.$colors, 'gray-800');
                   @include framework.font-style('default', 'gray-50');
-                  font-weight: 500;
+                  font-weight: 600;
                   @include framework.flex-layout(flex, center, center, unset);
                   width: 100%;
                   border-radius: 100vh;
