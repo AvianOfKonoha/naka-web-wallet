@@ -581,28 +581,29 @@ export const useContractsStore = defineStore('contracts', {
       /** Init loading */
       this.updateLoading({withdrawConnected: true});
 
-      /*TODO: Update logic when the SC gets connected*/
-      if (this.wallets.connected.step === 1) {
-        this.updateWallet('connected', {step: 2});
-        this.updateLoading({withdrawConnected: false});
-        return;
-      }
-
-      if (this.wallets.connected.step === 2 && this.error.connected) {
-        this.updateLoading({withdrawConnected: true});
-        return;
-      }
-
-      /** Close the modal and reset the form  */
-      this.updateModal({withdrawConnected: false});
-      this.updateLoading({withdrawConnected: false});
-      this.updateFormField(0, 'connected', 'amount');
-      this.updateWallet('connected', {step: 1});
-
       try {
+        /*TODO: Update logic when the SC gets connected*/
+        if (this.wallets.connected.step === 1) {
+          /*TODO: Logic for amount window*/
+          this.updateWallet('connected', {step: 2});
+          return;
+        }
+
+        /*TODO: Logic for retry window*/
+        if (this.wallets.connected.step === 2 && this.error.connected) {
+          return;
+        }
+
+        /** Close the modal and reset the form  */
+        /*TODO: Logic for "I understand" window*/
+        this.updateModal({withdrawConnected: false});
+        this.updateFormField(0, 'connected', 'amount');
+        this.updateWallet('connected', {step: 1});
       } catch (error) {
         toast.error(`${(error as Error).message}`);
         this.updateError({external: true});
+      } finally {
+        this.updateLoading({withdrawConnected: false});
       }
     },
 
@@ -614,38 +615,40 @@ export const useContractsStore = defineStore('contracts', {
       /** Init loading */
       this.updateLoading({withdrawExternal: true});
 
-      /*TODO: Update logic when the SC gets connected*/
-      if (this.wallets.external.step === 1) {
-        this.updateWallet('external', {step: 2});
-        this.updateLoading({withdrawExternal: false});
-        return;
-      }
-
-      if (this.wallets.external.step === 2) {
-        if (this.form.external.address.value.length > 10) {
-          this.updateWallet('external', {step: 3});
-        } else {
-          this.updateError({external: true});
-        }
-        this.updateLoading({withdrawExternal: false});
-        return;
-      }
-
-      if (this.wallets.external.step === 3 && this.error.external) {
-        this.updateLoading({withdrawExternal: true});
-        return;
-      }
-
-      /** Close the modal and reset the form  */
-      this.updateModal({withdrawExternal: false});
-      this.updateFormField(0, 'external', 'amount');
-      this.updateFormField('', 'external', 'address');
-      this.updateWallet('external', {step: 1});
-
       try {
+        /*TODO: Update logic when the SC gets connected*/
+        if (this.wallets.external.step === 1) {
+          /*TODO: Logic for amount window*/
+          this.updateWallet('external', {step: 2});
+          return;
+        }
+
+        if (this.wallets.external.step === 2) {
+          /*TODO: Logic for address window*/
+          if (this.form.external.address.value.length > 10) {
+            this.updateWallet('external', {step: 3});
+          } else {
+            this.updateError({external: true});
+          }
+          return;
+        }
+
+        if (this.wallets.external.step === 3 && this.error.external) {
+          /*TODO: Logic for retry window*/
+          return;
+        }
+
+        /*TODO: Logic for "I understand" window*/
+        /** Close the modal and reset the form  */
+        this.updateModal({withdrawExternal: false});
+        this.updateFormField(0, 'external', 'amount');
+        this.updateFormField('', 'external', 'address');
+        this.updateWallet('external', {step: 1});
       } catch (error) {
         toast.error(`${(error as Error).message}`);
         this.updateError({external: true});
+      } finally {
+        this.updateLoading({withdrawExternal: false});
       }
     }
   }
