@@ -8,21 +8,18 @@
   font-weight: 300;
   font-display: swap;
 }
-
 @font-face {
   font-family: NeueMontreal;
   src: url('../fonts/ppneuemontreal-book.woff');
   font-weight: 400;
   font-display: swap;
 }
-
 @font-face {
   font-family: NeueMontreal;
   src: url('../fonts/ppneuemontreal-medium.woff');
   font-weight: 500;
   font-display: swap;
 }
-
 @font-face {
   font-family: NeueMontreal;
   src: url('../fonts/ppneuemontreal-bold.woff');
@@ -30,6 +27,7 @@
   font-display: swap;
 }
 
+/*Animations*/
 @keyframes show-up {
   0% {
     scale: 0.5;
@@ -40,7 +38,6 @@
     opacity: 1;
   }
 }
-
 @keyframes modal-show-up {
   0% {
     scale: 0.8;
@@ -51,7 +48,19 @@
     opacity: 1;
   }
 }
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0.8);
+  }
+}
 
+/*Main styles*/
 *,
 ::before,
 ::after {
@@ -109,6 +118,7 @@ button {
   }
 }
 
+/*Custom styles*/
 .button {
   &__default {
     border-radius: 100vh;
@@ -161,6 +171,9 @@ header {
             &--icon {
               position: absolute;
               left: 12px;
+              &.loading {
+                animation: pulse 2000ms infinite ease-in-out;
+              }
             }
           }
         }

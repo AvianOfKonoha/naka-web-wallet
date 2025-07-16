@@ -55,7 +55,7 @@ const closeExternalModal = () => {
 
 /*Lifecycle hooks*/
 onMounted(() => {
-  setPolygonChain();
+  // setPolygonChain();
 });
 </script>
 

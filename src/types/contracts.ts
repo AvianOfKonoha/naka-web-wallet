@@ -1,4 +1,4 @@
-import {type ContractAbi, Web3} from 'web3';
+import type {Contract, ContractAbi, Web3} from 'web3';
 import type {IFormField} from '@/types/general.ts';
 
 export interface IContractsInputs {
@@ -15,6 +15,7 @@ export interface IContractsLoading {
   balance: boolean;
   withdrawConnected: boolean;
   withdrawExternal: boolean;
+  connect: boolean;
 }
 
 export interface IContractsHash {
@@ -102,4 +103,6 @@ export interface IContractsStore {
   form: IContractsForms;
   wallets: IContractsWallets;
   error: IContractsErrors;
+  vaultContract: Contract<ContractAbi> | null;
+  factoryContract: Contract<ContractAbi> | null;
 }

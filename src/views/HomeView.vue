@@ -10,11 +10,19 @@ const contractStore = useContractsStore();
 <template>
   <!-- Initial box -->
   <Metamask
-    v-if="!contractStore.signature.value || !contractStore.connectedAccount"
+    v-if="
+      !contractStore.connectedAccount ||
+      !contractStore.signature.value ||
+      contractStore.loading.connect
+    "
   />
 
   <!-- Withdraw and transaction history -->
   <Withdraw
-    v-if="contractStore.signature.value && contractStore.connectedAccount"
+    v-if="
+      contractStore.signature.value &&
+      contractStore.connectedAccount &&
+      !contractStore.loading.connect
+    "
   />
 </template>

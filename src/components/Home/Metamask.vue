@@ -10,6 +10,7 @@ onMounted(() => {
   contractsStore.updateFirstSign(!!sessionStorage.getItem('firstSign'));
   contractsStore.connectMobile();
   contractsStore.checkConnection();
+  // contractsStore.connectContract();
 });
 </script>
 
@@ -153,7 +154,9 @@ onMounted(() => {
           class="button__default home__button--connect"
           :class="{
             connected:
-              contractsStore.connectedAccount && contractsStore.signature.value
+              contractsStore.connectedAccount &&
+              contractsStore.signature.value &&
+              !contractsStore.loading.connect
           }"
           @click="contractsStore.connectMetamask"
         >
@@ -164,7 +167,9 @@ onMounted(() => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             v-if="
-              contractsStore.signature.value && contractsStore.connectedAccount
+              contractsStore.connectedAccount &&
+              contractsStore.signature.value &&
+              !contractsStore.loading.connect
             "
           >
             <g id="Group">
@@ -186,9 +191,11 @@ onMounted(() => {
             viewBox="0 0 22 22"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            :class="{loading: contractsStore.loading.connect}"
             v-if="
               !contractsStore.signature.value ||
-              !contractsStore.connectedAccount
+              !contractsStore.connectedAccount ||
+              contractsStore.loading.connect
             "
           >
             <g clip-path="url(#clip0_5859_1203)">
@@ -212,7 +219,9 @@ onMounted(() => {
             </defs>
           </svg>
           <span class="button__text" ref="buttonText">{{
-            !contractsStore.signature.value || !contractsStore.connectedAccount
+            !contractsStore.signature.value ||
+            !contractsStore.connectedAccount ||
+            contractsStore.loading.connect
               ? 'Connect'
               : 'Connected'
           }}</span>

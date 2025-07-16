@@ -120,3 +120,12 @@ export const polygonMainnet = {
   rpcUrls: ['https://polygon-rpc.com/'],
   blockExplorerUrls: ['https://polygonscan.com/']
 };
+
+export const CONTRACT_ADDRESS_STAGING =
+  '0x8619dDE66AbeDf8818690F79feF00Bb433FDEA7f';
+export const CONTRACT_ADDRESS_PRODUCTION =
+  '0x68eA8A05D52CFe66031383FEA4e3256cFE9ff5Ce';
+export const USDT_ADDRESS_STAGING =
+  '0x5DC14a664d551F24e9f7A4C9c6215a84E44f0f1E';
+export const USDT_ADDRESS_PRODUCTION =
+  '0xc2132d05d31c914a87c6611c10748aeb04b58e8f';

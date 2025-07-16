@@ -15,9 +15,16 @@ import {Web3} from 'web3';
 import {keccak256} from 'js-sha3';
 import {encode} from 'rlp';
 import {toast} from 'vue3-toastify';
-import {NETWORKS, polygonMainnet} from '@/utils/constants.ts';
+import {
+  CONTRACT_ADDRESS_PRODUCTION,
+  CONTRACT_ADDRESS_STAGING,
+  NETWORKS,
+  polygonMainnet
+} from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
 import {isMobileChrome} from '@/utils/helpers.ts';
+import VaultABI from '@/assets/abi/Vault.json';
+import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
@@ -44,7 +51,8 @@ export const useContractsStore = defineStore('contracts', {
       factory: false,
       balance: false,
       withdrawConnected: false,
-      withdrawExternal: false
+      withdrawExternal: false,
+      connect: false
     },
     transactionHash: {
       contractAddress: ''
@@ -61,14 +69,7 @@ export const useContractsStore = defineStore('contracts', {
       withdrawConnected: false,
       withdrawExternal: false
     },
-    withdrawals: [
-      {
-        address: 'b432966b510533F2e57B12558C27b2DDFE7FAB',
-        date: new Date(),
-        amount: 20,
-        status: 'complete'
-      }
-    ],
+    withdrawals: [],
     form: {
       connected: {
         amount: {
@@ -98,7 +99,9 @@ export const useContractsStore = defineStore('contracts', {
     error: {
       external: false,
       connected: false
-    }
+    },
+    factoryContract: null,
+    vaultContract: null
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -258,20 +261,32 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      /** Stop propagation if the loading is already in process */
+      if (this.loading.connect) {
+        return;
+      }
+
       /** If the user has already connected their MetaMask and their address is saved to the state end propagation */
-      if (this.connectedAccount && this.signature.value) {
+      if (
+        this.connectedAccount &&
+        this.signature.value &&
+        !this.loading.connect
+      ) {
         this.updateModal({connect: true});
         return;
       }
 
+      /** Init loading */
+      this.updateLoading({connect: true});
+
       try {
         /** Switch the chain to Polygon mainnet - it is the chain of the Vault SC. The call to the chain change is conditioned on two things -> #1 If the user has never connected the dApp to the MetaMask and they're not on mobile device outside Metamask or the user is on desktop device the polygon chain will be switched in metamask app/extension. #2 If the user has already connected the app to the metamask the chain switcher will commence. In any other case this step will be skipped. */
-        if ((!this.firstSign && !isMobileChrome()) || this.firstSign) {
+        /*if ((!this.firstSign && !isMobileChrome()) || this.firstSign) {
           await this.provider.request({
             method: 'wallet_switchEthereumChain',
             params: [{chainId: polygonMainnet.chainId}]
           });
-        }
+        }*/
 
         /** Extract the metamask account's address and display it */
         await this.provider.request({method: 'eth_requestAccounts'});
@@ -299,6 +314,9 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Extract the balance of the current chain in USDT */
         await this.getBalance();
+
+        /** Make a connection to the Vault Smart Contract - Check if the metamask address has already made a contract. In case it hasn't, create a new Vault contract. Finally, save the contract to the global state */
+        await this.connectContract();
       } catch (error) {
         toast.error(`${(error as Error).message}`);
 
@@ -315,6 +333,7 @@ export const useContractsStore = defineStore('contracts', {
           console.error('Failed to switch network:', error);
         }
       } finally {
+        this.updateLoading({connect: false});
       }
     },
 
@@ -563,11 +582,6 @@ export const useContractsStore = defineStore('contracts', {
         /** Populated global state if metamask is already connected to one or more accounts */
         this.connectedAccount = accounts[0];
         this.allAccounts = accounts;
-
-        /*const signedAddress = this.web3.eth.accounts.recover(
-          this.signature.message,
-            this.signature.value
-        );*/
       } catch (error) {
         console.error('Error connecting to metamask', (error as Error).message);
       }
@@ -649,6 +663,56 @@ export const useContractsStore = defineStore('contracts', {
         this.updateError({external: true});
       } finally {
         this.updateLoading({withdrawExternal: false});
+      }
+    },
+
+    async connectContract() {
+      if (!this.web3) {
+        return;
+      }
+
+      /*TODO: replace contract with production on deploy*/
+      /** Initialize factory contract by providing the registry ABI and the factory contract's address to the contract class then save it to the global state */
+      this.factoryContract = new this.web3.eth.Contract(
+        VaultRegistryABI,
+        CONTRACT_ADDRESS_STAGING
+      );
+
+      let loadingToast;
+
+      try {
+        /** Check if the currently connected wallet address already created a Vault smart contract. Stop propagation if so, otherwise create a new Vault smart contract. */
+        const exists = await this.factoryContract.methods
+          .isVaultAvaliable(this.connectedAccount)
+          .call();
+
+        if (exists) {
+          return;
+        }
+
+        loadingToast = toast.loading('Connecting to the contract...');
+
+        /** Create a Vault smart contract */
+        const tx = await this.factoryContract.methods
+          .createVault(this.connectedAccount)
+          .send({from: this.connectedAccount, gas: '1'})
+          .on('transactionHash', (hash) => {
+            console.log('Tx hash:', hash);
+          })
+          .on('receipt', (receipt) => {
+            console.log('Receipt:', receipt);
+          })
+          .on('error', (error) => {
+            console.error('Transaction failed:', error.message, error);
+          });
+        console.log('transaction hash: ', tx.transactionHash);
+        console.log('data: ', tx);
+
+        toast.remove(loadingToast);
+        toast.success(`Vault contract successfully created:`);
+      } catch (error) {
+        toast.remove(loadingToast);
+        console.error('Error connecting to Vault: ', (error as Error).message);
       }
     }
   }

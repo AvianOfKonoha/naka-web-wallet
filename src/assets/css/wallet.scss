@@ -74,6 +74,9 @@
         left: 18px;
         width: 22px;
         height: 22px;
+        &.loading {
+          animation: pulse 2000ms infinite ease-in-out;
+        }
       }
     }
   }
