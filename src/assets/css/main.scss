@@ -188,7 +188,7 @@ main {
     display: grid;
     justify-items: center;
     align-items: center;
-    height: 100dvh;
+    height: 100svh;
     width: 100%;
     position: fixed;
     top: 0;
@@ -218,7 +218,7 @@ main {
     animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
     animation-fill-mode: forwards;
     overflow: auto;
-    max-height: 90dvh;
+    max-height: 90svh;
   }
   &__close {
     width: 32px;
