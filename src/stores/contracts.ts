@@ -681,10 +681,16 @@ export const useContractsStore = defineStore('contracts', {
       let loadingToast;
 
       try {
+        console.log(
+          'check: ',
+          await this.web3.eth.getCode(CONTRACT_ADDRESS_STAGING)
+        );
+
         /** Check if the currently connected wallet address already created a Vault smart contract. Stop propagation if so, otherwise create a new Vault smart contract. */
         const exists = await this.factoryContract.methods
           .isVaultAvaliable(this.connectedAccount)
           .call();
+        console.log('exists: ', exists);
 
         if (exists) {
           return;
@@ -695,15 +701,10 @@ export const useContractsStore = defineStore('contracts', {
         /** Create a Vault smart contract */
         const tx = await this.factoryContract.methods
           .createVault(this.connectedAccount)
-          .send({from: this.connectedAccount, gas: '1'})
-          .on('transactionHash', (hash) => {
-            console.log('Tx hash:', hash);
-          })
-          .on('receipt', (receipt) => {
-            console.log('Receipt:', receipt);
-          })
-          .on('error', (error) => {
-            console.error('Transaction failed:', error.message, error);
+          .send({
+            from: this.connectedAccount,
+            gas: '300000',
+            gasPrice: this.web3.utils.toWei('10', 'gwei')
           });
         console.log('transaction hash: ', tx.transactionHash);
         console.log('data: ', tx);
