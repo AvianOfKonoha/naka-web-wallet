@@ -105,7 +105,7 @@ onMounted(() => {
           buttonText="Withdraw external"
         />
         <div class="spacer"></div>
-        <Card :amount="120" />
+        <Card :amount="contractsStore.contractBalance" />
       </div>
       <div class="withdraw__screen--row withdraw__screen--history">
         <div class="history__title">Withdrawal History</div>

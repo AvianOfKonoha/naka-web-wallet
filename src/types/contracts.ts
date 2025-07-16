@@ -89,7 +89,8 @@ export interface IContractsStore {
   connectedAccount: string;
   allAccounts: string[];
   chainId: number | null;
-  balance: string | null;
+  balance: string;
+  contractBalance: string;
   signature: IContractsSignature;
   inputs: IContractsInputs;
   loading: IContractsLoading;

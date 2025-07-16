@@ -111,9 +111,7 @@ contractsStore.onAccountsChanged();
             type="button"
             :class="{
               connected:
-                contractsStore.connectedAccount &&
-                contractsStore.signature.value &&
-                !contractsStore.loading.connect
+                contractsStore.vaultContract && !contractsStore.loading.connect
             }"
             @click="contractsStore.connectMetamask"
           >
@@ -125,9 +123,7 @@ contractsStore.onAccountsChanged();
               xmlns="http://www.w3.org/2000/svg"
               class="button__connect--icon"
               v-if="
-                contractsStore.connectedAccount &&
-                contractsStore.signature.value &&
-                !contractsStore.loading.connect
+                contractsStore.vaultContract && !contractsStore.loading.connect
               "
             >
               <g id="Group">
@@ -151,9 +147,7 @@ contractsStore.onAccountsChanged();
               xmlns="http://www.w3.org/2000/svg"
               :class="{loading: contractsStore.loading.connect}"
               v-if="
-                !contractsStore.signature.value ||
-                !contractsStore.connectedAccount ||
-                contractsStore.loading.connect
+                !contractsStore.vaultContract || contractsStore.loading.connect
               "
               class="button__connect--icon"
             >
@@ -164,9 +158,7 @@ contractsStore.onAccountsChanged();
             </svg>
             <span>
               {{
-                !contractsStore.signature.value ||
-                !contractsStore.connectedAccount ||
-                contractsStore.loading.connect
+                !contractsStore.vaultContract || contractsStore.loading.connect
                   ? 'Connect'
                   : 'Connected'
               }}

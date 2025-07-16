@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*Props*/
-const props = defineProps<{amount: number}>();
+const props = defineProps<{amount: number | string}>();
 </script>
 
 <template>
@@ -29,7 +29,9 @@ const props = defineProps<{amount: number}>();
     <div class="card__balance">
       <div class="card__balance--title">Balance</div>
       <div class="card__balance--value">
-        <div class="value__number">{{ props.amount.toFixed(2) }}</div>
+        <div class="value__number">
+          {{ parseFloat(`${props.amount}`).toFixed(2) }}
+        </div>
         <div class="value__currency">USD₮</div>
       </div>
     </div>

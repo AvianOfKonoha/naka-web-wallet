@@ -32,7 +32,8 @@ export const useContractsStore = defineStore('contracts', {
     firstSign: false,
     connectedAccount: '',
     chainId: null,
-    balance: null,
+    balance: '',
+    contractBalance: '',
     provider: null,
     allAccounts: [],
     signature: {
@@ -266,12 +267,8 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      /** If the user has already connected their MetaMask and their address is saved to the state end propagation */
-      if (
-        this.connectedAccount &&
-        this.signature.value &&
-        !this.loading.connect
-      ) {
+      /** If the user has already connected their MetaMask, signed the wallet and created a Vault contract, end propagation */
+      if (this.vaultContract && !this.loading.connect) {
         this.updateModal({connect: true});
         return;
       }
@@ -281,6 +278,7 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Switch the chain to Polygon mainnet - it is the chain of the Vault SC. The call to the chain change is conditioned on two things -> #1 If the user has never connected the dApp to the MetaMask and they're not on mobile device outside Metamask or the user is on desktop device the polygon chain will be switched in metamask app/extension. #2 If the user has already connected the app to the metamask the chain switcher will commence. In any other case this step will be skipped. */
+        /*TODO: uncomment when you're ready to deploy to prod*/
         /*if ((!this.firstSign && !isMobileChrome()) || this.firstSign) {
           await this.provider.request({
             method: 'wallet_switchEthereumChain',
@@ -318,19 +316,18 @@ export const useContractsStore = defineStore('contracts', {
         /** Make a connection to the Vault Smart Contract - Check if the metamask address has already made a contract. In case it hasn't, create a new Vault contract. Finally, save the contract to the global state */
         await this.connectContract();
       } catch (error) {
-        toast.error(`${(error as Error).message}`);
+        if ((error as any).code !== 4902) {
+          toast.error(`${(error as Error).message}`);
+          return;
+        }
 
-        if ((error as any).code === 4902) {
-          try {
-            await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [polygonMainnet]
-            });
-          } catch (addError) {
-            console.error('Failed to add Polygon network:', addError);
-          }
-        } else {
-          console.error('Failed to switch network:', error);
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [polygonMainnet]
+          });
+        } catch (addError) {
+          console.error('Failed to add Polygon network:', addError);
         }
       } finally {
         this.updateLoading({connect: false});
@@ -496,7 +493,10 @@ export const useContractsStore = defineStore('contracts', {
       this.connectedAccount = '';
       this.chainId = null;
       this.signature.value = '';
-      this.balance = null;
+      this.balance = '';
+      this.contractBalance = '';
+      this.vaultContract = null;
+      this.factoryContract = null;
       sessionStorage.removeItem('firstSign');
     },
 
@@ -671,43 +671,55 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      /*TODO: replace contract with production on deploy*/
       /** Initialize factory contract by providing the registry ABI and the factory contract's address to the contract class then save it to the global state */
       this.factoryContract = new this.web3.eth.Contract(
         VaultRegistryABI,
-        CONTRACT_ADDRESS_STAGING
+        CONTRACT_ADDRESS_STAGING //TODO: replace contract with production on deploy
       );
 
-      let loadingToast;
+      const loadingToast = toast.loading('Connecting to the contract...');
 
       try {
-        console.log(
-          'check: ',
-          await this.web3.eth.getCode(CONTRACT_ADDRESS_STAGING)
-        );
-
         /** Check if the currently connected wallet address already created a Vault smart contract. Stop propagation if so, otherwise create a new Vault smart contract. */
-        const exists = await this.factoryContract.methods
-          .isVaultAvaliable(this.connectedAccount)
+        const vaultAddress: string = await this.factoryContract.methods
+          .getVaultAddressByOwner(this.connectedAccount)
           .call();
-        console.log('exists: ', exists);
+        const vaultExists = parseInt(vaultAddress, 16);
 
-        if (exists) {
+        /** If the Vault contract has already been created stop propagation otherwise proceed to Vault creation */
+        if (vaultExists) {
+          /** Remove loader */
+          toast.remove(loadingToast);
+
+          /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
+          this.vaultContract = new this.web3.eth.Contract(
+            VaultABI,
+            vaultAddress
+          );
+
+          /** Set the balance */
+          const balance = await this.web3.eth.getBalance(vaultAddress);
+          this.contractBalance = this.web3.utils.fromWei(balance, 'ether');
           return;
         }
 
-        loadingToast = toast.loading('Connecting to the contract...');
+        /** Estimate gas from the contract */
+        const estimatedGas = await this.factoryContract.methods
+          .createVault(this.connectedAccount)
+          .estimateGas({from: this.connectedAccount});
 
-        /** Create a Vault smart contract */
+        /** Make a request to "createVault" method on the factory contract to create a new Vault contract that will connect to the wallet address and the user will be able to withdraw funds from */
         const tx = await this.factoryContract.methods
           .createVault(this.connectedAccount)
           .send({
             from: this.connectedAccount,
-            gas: '300000',
-            gasPrice: this.web3.utils.toWei('10', 'gwei')
+            gas: `${estimatedGas}`,
+            // maxFeePerGas: this.web3.utils.toWei('50', 'gwei'),
+            // maxPriorityFeePerGas: this.web3.utils.toWei('2', 'gwei')
+            gasPrice: this.web3.utils.toWei('2', 'gwei')
           });
         console.log('transaction hash: ', tx.transactionHash);
-        console.log('data: ', tx);
+        console.log('transaction data: ', tx);
 
         toast.remove(loadingToast);
         toast.success(`Vault contract successfully created:`);

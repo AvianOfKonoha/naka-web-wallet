@@ -91,7 +91,7 @@ export const NETWORKS = {
   },
   80002: {
     id: 'polygon', // CoinGecko uses "polygon" for Amoy too
-    symbol: 'MATIC',
+    symbol: 'POL',
     name: 'Amoy Testnet',
     icon: './img/icons/polygon-matic-logo.png'
   },
