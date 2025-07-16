@@ -980,15 +980,6 @@
         position: relative;
         box-shadow: 0 -10px 18px -6px map.get(framework.$colors, 'gray-200');
         animation-name: draw-up;
-        /*&:after {
-          content: '';
-          width: 100vw;
-          height: 30dvh;
-          background-color: map.get(framework.$colors, 'white');
-          position: absolute;
-          top: 100%;
-          left: 0;
-        }*/
         .connected {
           &__form {
             .modal {
