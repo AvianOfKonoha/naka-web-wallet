@@ -195,7 +195,6 @@ main {
     left: 0;
     z-index: 100;
     padding: framework.$defaultPadding;
-    overflow: auto;
   }
   &__backdrop {
     position: absolute;
@@ -218,6 +217,8 @@ main {
     animation-duration: 200ms;
     animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
     animation-fill-mode: forwards;
+    overflow: auto;
+    max-height: 90dvh;
   }
   &__close {
     width: 32px;
