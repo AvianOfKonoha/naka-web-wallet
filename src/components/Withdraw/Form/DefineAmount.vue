@@ -14,14 +14,8 @@ const preventNegative = (event: any) => {
   /** Get inserted value from the input */
   const value = parseFloat(event.target.value);
 
-  /** If the inserted value is not a number replace it with zero and update the global state */
-  if (isNaN(value)) {
-    event.target.value = 0;
-    props.resetAmount();
-  }
-
   /** If the inserted value is equal or bigger than zero stop propagation */
-  if (value >= 0) {
+  if (value >= 0 || isNaN(value)) {
     return;
   }
 

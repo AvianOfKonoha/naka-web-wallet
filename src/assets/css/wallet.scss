@@ -42,10 +42,10 @@
     }
     &--text {
       @include framework.font-style('default', 'gray-400');
-      padding-bottom: calc(#{framework.$defaultPadding} * 3.5);
     }
     &--button {
       @include framework.flex-layout(flex, center, unset, unset);
+      padding-top: calc(#{framework.$defaultPadding} * 3.5);
     }
   }
   &__button {
@@ -892,9 +892,6 @@
     }
     &__box {
       padding: calc(#{framework.$defaultPadding} * 1.5);
-      &--text {
-        padding-bottom: calc(#{framework.$defaultPadding} * 2.5);
-      }
       &--title {
         font-size: map.get(framework.$textSizes, '36');
       }
@@ -906,6 +903,9 @@
         svg {
           grid-row: 1;
         }
+      }
+      &--button {
+        padding-top: calc(#{framework.$defaultPadding} * 2.5);
       }
     }
   }
