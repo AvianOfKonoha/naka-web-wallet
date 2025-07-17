@@ -768,7 +768,6 @@ export const useContractsStore = defineStore('contracts', {
         const vaultAddress: string = await this.factoryContract.methods
           .getVaultAddressByOwner(this.connectedAccount)
           .call();
-        console.log('vault address: ', vaultAddress);
         const vaultExists = parseInt(vaultAddress, 16);
 
         /** If the Vault contract has already been created stop propagation otherwise proceed to Vault creation */
