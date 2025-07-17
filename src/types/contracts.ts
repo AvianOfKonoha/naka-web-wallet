@@ -84,6 +84,13 @@ export interface IContractsErrors {
   connected: boolean;
 }
 
+export interface ITransactionGas {
+  gas: number;
+  gasPrice: number;
+  maxFeePerGas: number;
+  maxPriorityFeePerGas: number;
+}
+
 export interface IContractsStore {
   web3: Web3 | null;
   connectedAccount: string;
@@ -106,4 +113,5 @@ export interface IContractsStore {
   error: IContractsErrors;
   vaultContract: Contract<ContractAbi> | null;
   factoryContract: Contract<ContractAbi> | null;
+  transactionGas: ITransactionGas | null;
 }

@@ -16,13 +16,11 @@ import {keccak256} from 'js-sha3';
 import {encode} from 'rlp';
 import {toast} from 'vue3-toastify';
 import {
-  CONTRACT_ADDRESS_PRODUCTION,
   CONTRACT_ADDRESS_STAGING,
   NETWORKS,
   polygonMainnet
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
-import {isMobileChrome} from '@/utils/helpers.ts';
 import VaultABI from '@/assets/abi/Vault.json';
 import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
 
@@ -102,7 +100,8 @@ export const useContractsStore = defineStore('contracts', {
       connected: false
     },
     factoryContract: null,
-    vaultContract: null
+    vaultContract: null,
+    transactionGas: null
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -316,7 +315,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Make a connection to the Vault Smart Contract - Check if the metamask address has already made a contract. In case it hasn't, create a new Vault contract. Finally, save the contract to the global state */
         await this.connectContract();
       } catch (error) {
-        if ((error as any).code !== 4902) {
+        if ((error as any).cause?.code !== 4902) {
           toast.error(`${(error as Error).message}`);
           return;
         }
@@ -666,6 +665,91 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
+    async getEstimatedGas() {
+      if (!this.web3) {
+        return;
+      }
+
+      /** Initialize the last number of block to filter through on block explorer */
+      const blocksToScan = 30;
+
+      try {
+        /** Fetch the latest block */
+        const latest = await this.web3.eth.getBlockNumber();
+
+        /** Set the array to be populated with gas */
+        const gasUsed = [];
+
+        /** Fill in the gas used in the last 30 blocks */
+        for (let i = 0; i < blocksToScan; i++) {
+          const block = await this.web3.eth.getBlock(Number(latest) - i, true);
+
+          for (const tx of block.transactions) {
+            // 1️⃣  must target our VaultRegistry
+            // 2️⃣  must have the createVault method selector
+            // const receipt = await this.web3.eth.getTransactionReceipt(tx.hash);
+            gasUsed.push({
+              gas: Number(tx['gas' as keyof typeof tx]),
+              gasPrice: Number(tx['gasPrice' as keyof typeof tx]),
+              maxFeePerGas: Number(tx['maxFeePerGas' as keyof typeof tx]),
+              maxPriorityFeePerGas: Number(
+                tx['maxPriorityFeePerGas' as keyof typeof tx]
+              )
+            });
+          }
+        }
+
+        if (!gasUsed.length) {
+          throw new Error('No createVault txs found in last 30 blocks');
+        }
+
+        this.transactionGas = {
+          gas: Math.floor(
+            gasUsed
+              .filter((item) => !isNaN(item.gas))
+              .reduce((a, b) => a + b.gas, 0) / gasUsed.length
+          ),
+          gasPrice: Math.floor(
+            gasUsed
+              .filter((item) => !isNaN(item.gasPrice))
+              .reduce((a, b) => a + b.gasPrice, 0) / gasUsed.length
+          ),
+          maxFeePerGas: Math.floor(
+            gasUsed
+              .filter((item) => !isNaN(item.maxFeePerGas))
+              .reduce((a, b) => a + b.maxFeePerGas, 0) / gasUsed.length
+          ),
+          maxPriorityFeePerGas: Math.floor(
+            gasUsed
+              .filter((item) => !isNaN(item.maxPriorityFeePerGas))
+              .reduce((a, b) => a + b.maxPriorityFeePerGas, 0) / gasUsed.length
+          )
+        };
+      } catch (error) {
+        console.error('Error estimating gas: ', (error as Error).message);
+      }
+    },
+
+    async setVaultContract(address: string) {
+      if (!this.web3) {
+        return;
+      }
+
+      try {
+        /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
+        this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
+
+        /** Set the balance */
+        const balance = await this.web3.eth.getBalance(address);
+        this.contractBalance = this.web3.utils.fromWei(balance, 'ether');
+      } catch (error) {
+        console.error(
+          'Error setting vault contract: ',
+          (error as Error).message
+        );
+      }
+    },
+
     async connectContract() {
       if (!this.web3) {
         return;
@@ -684,6 +768,7 @@ export const useContractsStore = defineStore('contracts', {
         const vaultAddress: string = await this.factoryContract.methods
           .getVaultAddressByOwner(this.connectedAccount)
           .call();
+        console.log('vault address: ', vaultAddress);
         const vaultExists = parseInt(vaultAddress, 16);
 
         /** If the Vault contract has already been created stop propagation otherwise proceed to Vault creation */
@@ -691,40 +776,57 @@ export const useContractsStore = defineStore('contracts', {
           /** Remove loader */
           toast.remove(loadingToast);
 
-          /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
-          this.vaultContract = new this.web3.eth.Contract(
-            VaultABI,
-            vaultAddress
-          );
-
-          /** Set the balance */
-          const balance = await this.web3.eth.getBalance(vaultAddress);
-          this.contractBalance = this.web3.utils.fromWei(balance, 'ether');
+          await this.setVaultContract(vaultAddress);
           return;
         }
 
         /** Estimate gas from the contract */
-        const estimatedGas = await this.factoryContract.methods
+        /*const estimatedGas = await this.factoryContract.methods
           .createVault(this.connectedAccount)
-          .estimateGas({from: this.connectedAccount});
+          .estimateGas({from: this.connectedAccount});*/
 
         /** Make a request to "createVault" method on the factory contract to create a new Vault contract that will connect to the wallet address and the user will be able to withdraw funds from */
+        await this.getEstimatedGas();
+
         const tx = await this.factoryContract.methods
           .createVault(this.connectedAccount)
           .send({
             from: this.connectedAccount,
-            gas: `${estimatedGas}`,
-            // maxFeePerGas: this.web3.utils.toWei('50', 'gwei'),
-            // maxPriorityFeePerGas: this.web3.utils.toWei('2', 'gwei')
-            gasPrice: this.web3.utils.toWei('2', 'gwei')
+            gas: this.transactionGas?.gas
+              ? `${this.transactionGas.gas}`
+              : undefined,
+            maxFeePerGas: this.transactionGas?.maxFeePerGas
+              ? `${this.transactionGas.maxFeePerGas}`
+              : undefined,
+            maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
+              ? `${this.transactionGas.maxPriorityFeePerGas}`
+              : undefined
           });
-        console.log('transaction hash: ', tx.transactionHash);
-        console.log('transaction data: ', tx);
+
+        if (!tx.events) {
+          throw new Error(
+            'Something went wrong while creating the Vault contract. Try again.'
+          );
+        }
+
+        await this.setVaultContract(tx.events.ContractInitialized.address);
 
         toast.remove(loadingToast);
         toast.success(`Vault contract successfully created:`);
       } catch (error) {
         toast.remove(loadingToast);
+
+        if ((error as any).cause?.code === -32603) {
+          toast.error("Couldn't connect to the contract.");
+          return;
+        }
+
+        toast.error(
+          (error as Error).message.replace(
+            'Returned error: MetaMask Tx Signature: ',
+            ''
+          )
+        );
         console.error('Error connecting to Vault: ', (error as Error).message);
       }
     }
