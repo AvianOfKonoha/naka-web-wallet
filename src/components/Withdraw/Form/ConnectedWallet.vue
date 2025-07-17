@@ -19,6 +19,14 @@ const cancelForm = () => {
   contractsStore.updateWallet('connected', {step: 1});
   contractsStore.updateFormField(0, 'connected', 'amount');
 };
+
+const setMaxAmount = () => {
+  contractsStore.updateFormField(
+    contractsStore.contractBalance.usdt,
+    'connected',
+    'amount'
+  );
+};
 </script>
 
 <template>
@@ -30,6 +38,7 @@ const cancelForm = () => {
       v-if="contractsStore.wallets.connected.step === 1"
       :resetAmount="resetAmount"
       :amountData="contractsStore.form.connected.amount"
+      :setMax="setMaxAmount"
       :loading="contractsStore.loading.withdrawConnected"
     />
     <Processing

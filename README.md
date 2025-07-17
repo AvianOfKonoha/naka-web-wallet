@@ -40,41 +40,92 @@ The following methods are available on the **Vault smart contract**, allowing th
 
 ---
 
-### 📖 Public Getter Methods / Properties
+## 🏦 Core Vault Methods
 
 | Method | Description |
 |--------|-------------|
-| `getVaultVersion()` | Returns the version of the vault contract |
-| `getProtocolTokenAddress()` | Returns the address of the protocol token |
-| `getMaxPaymentProcessorAllowedSingleAmount()` | Returns the maximum allowed single payment amount |
-| `getMaxPaymentProcessorAllowedDailyAmount()` | Returns the maximum allowed daily payment amount |
-| `getAvaliableCardKeysCount()` | Returns the total number of available card keys |
-| `isCardKeyActive(address cardKey_)` | Checks if a specific card key is active |
-| `getCardKey(address cardKey_)` | Returns details about a specific card key |
-| `getCardKeyByIndex(uint256 index)` | Returns card key details by index |
-| `getCardKeys(uint16 page_, uint16 pageSize_, bool activeOnly_)` | Returns paginated list of card keys |
-| `getProcessPaymentProtocolTokenAmount(bytes32 merchantId_, uint256 paymentAmount_)` | Calculates protocol token amount for a payment |
-| `getProcessPaymentProtocolTokenReservation()` | Returns total amount of protocol tokens reserved for payments |
-| `getWithdrawProtocolTokenReservation()` | Returns withdrawal reservation data |
-| `getProtocolTokenBalances()` | Returns detailed protocol token balance information |
-| `getProtocolTokenBalancesWithLimitsCheck(uint256 paymentProtocolTokenAmountForNewReservation_)` | Returns balance info with payment limit checks |
+| `deposit(token, amount)` | Deposit native or ERC-20 tokens into the vault (payable). |
+| `withdraw(token, recipient, amount)` | Withdraw tokens directly to a recipient. |
+| `withdrawRequest(token, recipient, amount)` | Request a delayed withdrawal. |
+| `cancelWithdrawRequest(token)` | Cancel a previously requested withdrawal. |
+| `getWithdrawProtocolTokenReservation()` | View pending withdrawal amount and unlock time. |
+| `getProtocolTokenBalances()` | Get all protocol token balances and reservations. |
 
 ---
 
-### 🔐 Owner Management Methods
-
-These methods require owner-level access and are used to manage the vault's internal configuration:
+## 💳 Card Key Management
 
 | Method | Description |
 |--------|-------------|
-| `addCardKey(address cardKey_, bool active_)` | Adds a new card key to the vault |
-| `setCardKeyActive(address cardKey_, bool active_)` | Activates or deactivates a card key |
-| `withdrawRequest(address token_, address recipient_, uint256 amount_)` | Initiates a withdrawal request |
-| `cancelWithdrawRequest(address token_)` | Cancels an existing withdrawal request |
-| `withdraw(address token_, address recipient_, uint256 amount_)` | Executes a withdrawal after the lock period |
-| `setMaxPaymentProcessorAllowedSingleAmount(uint256 amount_)` | Sets the maximum single payment amount |
-| `setMaxPaymentProcessorAllowedDailyAmount(uint256 amount_)` | Sets the maximum daily payment amount |
-| `deposit(address token_, uint256 amount_)` | Deposits tokens into the vault |
+| `addCardKey(cardKey, active)` | Add a new card key address and set its active status. |
+| `setCardKeyActive(cardKey, active)` | Enable or disable an existing card key. |
+| `getCardKey(cardKey)` | Fetch a card key's status. |
+| `getCardKeyByIndex(index)` | Get a card key address by index. |
+| `getCardKeys(page, pageSize, activeOnly)` | Paginated list of card keys (optionally filter active only). |
+| `getAvaliableCardKeysCount()` | Count of active/available card keys. |
+| `isCardKeyActive(cardKey)` | Check if a card key is active. |
+
+---
+
+## 💸 Merchant & Payment Flow
+
+| Method | Description |
+|--------|-------------|
+| `addProcessPaymentReservation(...)` | Create a payment reservation for a merchant. |
+| `cancelProcessPaymentReservation(gatewayPaymentId)` | Cancel a pending payment reservation. |
+| `executeProcessPayment(gatewayPaymentId)` | Finalize a reserved payment. |
+| `getProcessPaymentProtocolTokenAmount(merchantId, amount)` | Compute the token cost for a payment. |
+| `getProcessPaymentProtocolTokenReservation()` | Total reserved tokens for pending payments. |
+| `checkLimitsAndSignitures(...)` | Validate limits and signature of a payment. |
+| `verifySignitures(...)` | Verify and recover signed payment amount. |
+
+---
+
+## 🔐 Ownership & Admin
+
+| Method | Description |
+|--------|-------------|
+| `owner()` | Get the current owner address. |
+| `pendingOwner()` | View address of the pending ownership candidate. |
+| `acceptOwnership()` | Accept pending ownership transfer. |
+| `transferOwnership(newOwner)` | Start ownership transfer process. |
+| `renounceOwnership()` | Permanently give up contract ownership. |
+
+---
+
+## ⚙️ KYC & Vault Initialization
+
+| Method | Description |
+|--------|-------------|
+| `init(owner, registry, level)` | One-time contract initializer. |
+| `isInitialized()` | Check if the vault is initialized. |
+| `getVaultKYCLevel()` | Get the current KYC level of the vault. |
+| `setVaultKYCLevel(level, sig, signer)` | Update KYC level via signed payload. |
+| `isKYCLevelValid()` | Verify if the KYC level is still valid. |
+
+---
+
+## 🌉 Bridge Support
+
+| Method | Description |
+|--------|-------------|
+| `bridgeWithdraw(...)` | Perform a cross-chain bridge withdrawal. |
+| `bridgeWithdrawRequest(...)` | Request a bridge-based withdrawal. |
+| `getProtocolTokenBridgeAddress()` | Address of the bridge target. |
+| `getProtocolTokenIsWrapped()` | Check if the token is a wrapped asset. |
+
+---
+
+## 🧾 View & Utility Methods
+
+| Method | Description |
+|--------|-------------|
+| `getVaultVersion()` | Returns vault version (pure). |
+| `getProtocolTokenAddress()` | ERC-20 address used as protocol token. |
+| `getVaultRegistryAddress()` | Address of the connected registry. |
+| `getProtocolTokenBalancesWithLimitsCheck(amount)` | Check balances with a simulated reservation. |
+| `getPaymentProcessorHash(...)` | Generate a hash for payment verification. |
+| `supportsInterface(interfaceId)` | ERC165 support checker. |
 
 ---
 

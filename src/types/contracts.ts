@@ -91,13 +91,18 @@ export interface ITransactionGas {
   maxPriorityFeePerGas: number;
 }
 
+export interface IVaultBalance {
+  eth: number;
+  usdt: number;
+}
+
 export interface IContractsStore {
   web3: Web3 | null;
   connectedAccount: string;
   allAccounts: string[];
   chainId: number | null;
   balance: string;
-  contractBalance: string;
+  contractBalance: IVaultBalance;
   signature: IContractsSignature;
   inputs: IContractsInputs;
   loading: IContractsLoading;

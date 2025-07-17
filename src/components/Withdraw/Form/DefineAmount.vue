@@ -6,6 +6,7 @@ const props = defineProps<{
   resetAmount(): void;
   amountData: IFormField<number>;
   loading?: boolean;
+  setMax(): void;
 }>();
 
 /*Methods*/
@@ -76,7 +77,12 @@ const resetValue = () => {
           </svg>
         </button>
       </div>
-      <button type="button" aria-label="Set max amount" class="amount__max">
+      <button
+        type="button"
+        aria-label="Set max amount"
+        class="amount__max"
+        @click="props.setMax"
+      >
         MAX
       </button>
     </div>

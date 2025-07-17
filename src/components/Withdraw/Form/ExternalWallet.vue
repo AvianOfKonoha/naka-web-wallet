@@ -29,6 +29,14 @@ const cancelForm = () => {
   contractsStore.updateFormField(0, 'external', 'amount');
   contractsStore.updateFormField('', 'external', 'address');
 };
+
+const setMaxAmount = () => {
+  contractsStore.updateFormField(
+    contractsStore.contractBalance.usdt,
+    'external',
+    'amount'
+  );
+};
 </script>
 
 <template>
@@ -39,6 +47,7 @@ const cancelForm = () => {
     <DefineAmount
       :amountData="contractsStore.form.external.amount"
       :resetAmount="resetAmount"
+      :setMax="setMaxAmount"
       v-if="contractsStore.wallets.external.step === 1"
     />
     <DefineAddress

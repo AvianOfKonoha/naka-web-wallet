@@ -23,6 +23,7 @@ import {
 import {metamaskSdk} from '@/utils/metamask.ts';
 import VaultABI from '@/assets/abi/Vault.json';
 import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
+import type {IVaultBalance} from '@/types/vault.ts';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
@@ -31,7 +32,10 @@ export const useContractsStore = defineStore('contracts', {
     connectedAccount: '',
     chainId: null,
     balance: '',
-    contractBalance: '',
+    contractBalance: {
+      eth: 0,
+      usdt: 0
+    },
     provider: null,
     allAccounts: [],
     signature: {
@@ -203,6 +207,20 @@ export const useContractsStore = defineStore('contracts', {
 
     updateChain(chainId: number) {
       this.chainId = chainId;
+    },
+
+    async convertToUsdt(balanceEth: string) {
+      try {
+        const res = await fetch(
+          `https://api.coingecko.com/api/v3/simple/price?ids=${this.activeNetwork.id}&vs_currencies=usd`
+        );
+        const data = await res.json();
+        const ethPrice = data.ethereum.usd;
+
+        return (parseFloat(balanceEth) * parseFloat(ethPrice)).toFixed(2);
+      } catch (error) {
+        console.error('Error converting to USDT: ', (error as Error).message);
+      }
     },
 
     async getBalance() {
@@ -493,7 +511,10 @@ export const useContractsStore = defineStore('contracts', {
       this.chainId = null;
       this.signature.value = '';
       this.balance = '';
-      this.contractBalance = '';
+      this.contractBalance = {
+        eth: 0,
+        usdt: 0
+      };
       this.vaultContract = null;
       this.factoryContract = null;
       sessionStorage.removeItem('firstSign');
@@ -739,9 +760,15 @@ export const useContractsStore = defineStore('contracts', {
         /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
         this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
 
-        /** Set the balance */
-        const balance = await this.web3.eth.getBalance(address);
-        this.contractBalance = this.web3.utils.fromWei(balance, 'ether');
+        /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
+        const balance: IVaultBalance = await this.vaultContract.methods
+          .getProtocolTokenBalances()
+          .call();
+
+        this.contractBalance = {
+          ...this.contractBalance,
+          usdt: Number(balance.avaliableBalance)
+        };
       } catch (error) {
         console.error(
           'Error setting vault contract: ',
@@ -774,7 +801,6 @@ export const useContractsStore = defineStore('contracts', {
         if (vaultExists) {
           /** Remove loader */
           toast.remove(loadingToast);
-
           await this.setVaultContract(vaultAddress);
           return;
         }
