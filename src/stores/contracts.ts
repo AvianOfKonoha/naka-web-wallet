@@ -18,12 +18,14 @@ import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_STAGING,
   NETWORKS,
-  polygonMainnet
+  polygonMainnet,
+  USDT_ADDRESS_STAGING
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
 import VaultABI from '@/assets/abi/Vault.json';
 import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
 import type {IVaultBalance} from '@/types/vault.ts';
+import {formatNumberToUint256, formatUint256toNumber} from '@/utils/helpers.ts';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
@@ -55,7 +57,8 @@ export const useContractsStore = defineStore('contracts', {
       balance: false,
       withdrawConnected: false,
       withdrawExternal: false,
-      connect: false
+      connect: false,
+      history: false
     },
     transactionHash: {
       contractAddress: ''
@@ -77,13 +80,13 @@ export const useContractsStore = defineStore('contracts', {
       connected: {
         amount: {
           required: true,
-          value: 0
+          value: null
         }
       },
       external: {
         amount: {
           required: true,
-          value: 0
+          value: null
         },
         address: {
           required: true,
@@ -170,6 +173,19 @@ export const useContractsStore = defineStore('contracts', {
           ...walletData
         }
       };
+    },
+
+    resetConnectedForm() {
+      this.updateError({connected: false});
+      this.updateWallet('connected', {step: 1});
+      this.updateFormField(null, 'connected', 'amount');
+    },
+
+    resetExternalForm() {
+      this.updateError({external: false});
+      this.updateWallet('external', {step: 1});
+      this.updateFormField(null, 'external', 'amount');
+      this.updateFormField('', 'external', 'address');
     },
 
     updateFormField(
@@ -608,7 +624,18 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async submitConnectedForm() {
-      if (this.loading.withdrawConnected || !this.form.connected.amount.value) {
+      if (
+        this.loading.withdrawConnected ||
+        !this.form.connected.amount.value ||
+        this.contractBalance.usdt < this.form.connected.amount.value ||
+        !this.vaultContract
+      ) {
+        return;
+      }
+
+      /** If the request for withdrawal failed the user has been sent to the retry screen. The retry function takes the user back to the beginning of the form and resets the state */
+      if (this.error.connected) {
+        this.resetConnectedForm();
         return;
       }
 
@@ -616,33 +643,61 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({withdrawConnected: true});
 
       try {
-        /*TODO: Update logic when the SC gets connected*/
+        /** On amount screen call the "withdrawRequest" method from the Vault SC. On success the withdraw request is pending for an hour before the user can complete it */
         if (this.wallets.connected.step === 1) {
-          /*TODO: Logic for amount window*/
+          /** Make a withdraw request to Vault SC */
+          await this.vaultContract.methods
+            .withdrawRequest(
+              USDT_ADDRESS_STAGING,
+              this.connectedAccount,
+              formatNumberToUint256(this.form.connected.amount.value, 6)
+            )
+            .send({
+              from: this.connectedAccount,
+              gas: this.transactionGas?.gas
+                ? `${this.transactionGas.gas}`
+                : undefined,
+              maxFeePerGas: this.transactionGas?.maxFeePerGas
+                ? `${this.transactionGas.maxFeePerGas}`
+                : undefined,
+              maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
+                ? `${this.transactionGas.maxPriorityFeePerGas}`
+                : undefined
+            });
+
+          /** Update global state for Vault balance */
+          await this.getVaultBalance();
+
+          /** Proceed to the next step */
           this.updateWallet('connected', {step: 2});
           return;
         }
 
-        /*TODO: Logic for retry window*/
-        if (this.wallets.connected.step === 2 && this.error.connected) {
-          return;
-        }
-
         /** Close the modal and reset the form  */
-        /*TODO: Logic for "I understand" window*/
         this.updateModal({withdrawConnected: false});
-        this.updateFormField(0, 'connected', 'amount');
+        this.updateFormField(null, 'connected', 'amount');
         this.updateWallet('connected', {step: 1});
       } catch (error) {
+        console.error('Error submitting form: ', (error as Error).message);
         toast.error(`${(error as Error).message}`);
-        this.updateError({external: true});
+        this.updateError({connected: true});
+
+        /** Estimate gas from the last 30 blocks on the chain */
+        await this.getEstimatedGas();
       } finally {
         this.updateLoading({withdrawConnected: false});
       }
     },
 
     async submitExternalForm() {
-      if (this.loading.withdrawExternal) {
+      if (!this.form.external.amount.value) {
+        return;
+      }
+
+      if (
+        this.loading.withdrawExternal ||
+        this.contractBalance.usdt < this.form.external.amount.value
+      ) {
         return;
       }
 
@@ -675,7 +730,7 @@ export const useContractsStore = defineStore('contracts', {
         /*TODO: Logic for "I understand" window*/
         /** Close the modal and reset the form  */
         this.updateModal({withdrawExternal: false});
-        this.updateFormField(0, 'external', 'amount');
+        this.updateFormField(null, 'external', 'amount');
         this.updateFormField('', 'external', 'address');
         this.updateWallet('external', {step: 1});
       } catch (error) {
@@ -751,6 +806,31 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
+    async getVaultBalance() {
+      if (!this.vaultContract) {
+        return;
+      }
+
+      try {
+        /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
+        const balance: IVaultBalance = await this.vaultContract.methods
+          .getProtocolTokenBalances()
+          .call();
+
+        const converted = formatUint256toNumber(balance.avaliableBalance, 6);
+
+        this.contractBalance = {
+          ...this.contractBalance,
+          usdt: converted
+        };
+      } catch (error) {
+        console.error(
+          'Error fetching vault balance: ',
+          (error as Error).message
+        );
+      }
+    },
+
     async setVaultContract(address: string) {
       if (!this.web3) {
         return;
@@ -760,15 +840,10 @@ export const useContractsStore = defineStore('contracts', {
         /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
         this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
 
-        /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
-        const balance: IVaultBalance = await this.vaultContract.methods
-          .getProtocolTokenBalances()
-          .call();
+        await this.getWithdrawalHistory();
 
-        this.contractBalance = {
-          ...this.contractBalance,
-          usdt: Number(balance.avaliableBalance)
-        };
+        /** Fetch Vault balance */
+        await this.getVaultBalance();
       } catch (error) {
         console.error(
           'Error setting vault contract: ',
@@ -800,18 +875,15 @@ export const useContractsStore = defineStore('contracts', {
         /** If the Vault contract has already been created stop propagation otherwise proceed to Vault creation */
         if (vaultExists) {
           /** Remove loader */
-          toast.remove(loadingToast);
           await this.setVaultContract(vaultAddress);
+          toast.remove(loadingToast);
           return;
         }
 
-        /** Estimate gas from the contract */
-        /*const estimatedGas = await this.factoryContract.methods
-          .createVault(this.connectedAccount)
-          .estimateGas({from: this.connectedAccount});*/
+        /** Estimate gas from the last 30 blocks on the chain */
+        await this.getEstimatedGas();
 
         /** Make a request to "createVault" method on the factory contract to create a new Vault contract that will connect to the wallet address and the user will be able to withdraw funds from */
-        await this.getEstimatedGas();
 
         const tx = await this.factoryContract.methods
           .createVault(this.connectedAccount)
@@ -853,6 +925,30 @@ export const useContractsStore = defineStore('contracts', {
           )
         );
         console.error('Error connecting to Vault: ', (error as Error).message);
+      }
+    },
+
+    async getWithdrawalHistory() {
+      if (!this.vaultContract) {
+        return;
+      }
+
+      try {
+        const withdrawals = await (this.vaultContract as any).getPastEvents(
+          'WithdrawRequest',
+          {
+            fromBlock: 23988284,
+            toBlock: 'latest'
+          }
+        );
+
+        console.log('events: ', withdrawals);
+      } catch (error) {
+        toast.error(`${(error as Error).message}`);
+        console.error(
+          'Error fetching withdrawal history: ',
+          (error as Error).message
+        );
       }
     }
   }

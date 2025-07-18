@@ -9,7 +9,7 @@ const contractsStore = useContractsStore();
 
 /*Methods*/
 const resetAmount = () => {
-  contractsStore.updateFormField(0, 'connected', 'amount');
+  contractsStore.updateFormField(null, 'connected', 'amount');
 };
 
 const cancelForm = () => {
@@ -17,7 +17,7 @@ const cancelForm = () => {
   contractsStore.updateError({connected: false});
   contractsStore.updateLoading({withdrawConnected: false});
   contractsStore.updateWallet('connected', {step: 1});
-  contractsStore.updateFormField(0, 'connected', 'amount');
+  contractsStore.updateFormField(null, 'connected', 'amount');
 };
 
 const setMaxAmount = () => {
@@ -35,7 +35,10 @@ const setMaxAmount = () => {
     @submit.prevent="contractsStore.submitConnectedForm"
   >
     <DefineAmount
-      v-if="contractsStore.wallets.connected.step === 1"
+      v-if="
+        contractsStore.wallets.connected.step === 1 &&
+        !contractsStore.error.connected
+      "
       :resetAmount="resetAmount"
       :amountData="contractsStore.form.connected.amount"
       :setMax="setMaxAmount"
@@ -49,10 +52,7 @@ const setMaxAmount = () => {
       "
     />
     <Unsuccessful
-      v-if="
-        contractsStore.wallets.connected.step === 2 &&
-        contractsStore.error.connected
-      "
+      v-if="contractsStore.error.connected"
       :cancelForm="cancelForm"
       :loading="contractsStore.loading.withdrawConnected"
     />

@@ -141,7 +141,7 @@ const copyAddress = () => {
     <div class="process__statement">
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
-        {{ props.form.amount.value.toFixed(2) }} USD₮
+        {{ props.form.amount.value?.toFixed(2) }} USD₮
       </div>
     </div>
     <div class="connected__form--submit">

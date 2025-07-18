@@ -58,3 +58,11 @@ export const localizeDateTime = (date?: Date | null, emptyOutput?: string) => {
 export const openNewTab = (url: string) => {
   window.open(url, '_blank');
 };
+
+export const formatUint256toNumber = (value: bigint, decimals: number) => {
+  return Number(BigInt(value)) / 10 ** decimals;
+};
+
+export const formatNumberToUint256 = (value: number, decimals: number) => {
+  return BigInt(value) * BigInt(10 ** decimals);
+};

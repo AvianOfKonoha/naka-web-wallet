@@ -1,21 +1,33 @@
 <script setup lang="ts">
 import type {IFormField} from '@/types/general.ts';
+import {ref, watch} from 'vue';
+import {useContractsStore} from '@/stores/contracts.ts';
 
 /*Props */
 const props = defineProps<{
   resetAmount(): void;
-  amountData: IFormField<number>;
+  amountData: IFormField<number | null>;
   loading?: boolean;
   setMax(): void;
 }>();
 
+/*Global state*/
+const contractsStore = useContractsStore();
+
+/*Local state*/
+const errorActive = ref(false);
+
 /*Methods*/
+const updateError = (active: boolean) => {
+  errorActive.value = active;
+};
+
 const preventNegative = (event: any) => {
   /** Get inserted value from the input */
   const value = parseFloat(event.target.value);
 
   /** If the inserted value is equal or bigger than zero stop propagation */
-  if (value >= 0 || isNaN(value)) {
+  if (value >= 0 || isNaN(value) || !value) {
     return;
   }
 
@@ -24,16 +36,32 @@ const preventNegative = (event: any) => {
   props.resetAmount();
 };
 
-const resetValue = () => {
-  props.resetAmount();
+const checkBalance = () => {
+  if (!props.amountData.value) {
+    return;
+  }
+
+  if (contractsStore.contractBalance.usdt >= props.amountData.value) {
+    updateError(false);
+    return;
+  }
+  updateError(true);
 };
+
+/*Watchers*/
+watch(
+  () => props.amountData.value,
+  (newValue) => {
+    checkBalance();
+  }
+);
 </script>
 
 <template>
   <div class="connected__form--step-amount">
     <div class="modal__title">Define amount</div>
     <div class="connected__form--amount">
-      <div class="amount__wrap">
+      <div class="amount__wrap" :class="{error: errorActive}">
         <input
           type="number"
           :required="props.amountData.required"
@@ -48,7 +76,7 @@ const resetValue = () => {
           v-if="props.amountData.value"
           type="reset"
           aria-label="Reset amount"
-          @click="resetValue"
+          @click="props.resetAmount"
         >
           <svg
             width="14"
@@ -79,13 +107,19 @@ const resetValue = () => {
       >
         MAX
       </button>
+      <div class="error__text" v-if="errorActive">
+        The entered amount is higher than your balance
+      </div>
     </div>
     <div class="connected__form--submit">
       <button
         class="submit__button"
         type="submit"
         aria-label="Submit form"
-        :class="{active: props.amountData.value, loading: props.loading}"
+        :class="{
+          active: props.amountData.value && !errorActive,
+          loading: props.loading
+        }"
       >
         Confirm
         <span class="loader" v-if="props.loading">

@@ -10,7 +10,7 @@ const contractsStore = useContractsStore();
 
 /*Methods*/
 const resetAmount = () => {
-  contractsStore.updateFormField(0, 'external', 'amount');
+  contractsStore.updateFormField(null, 'external', 'amount');
 };
 
 const resetAddress = () => {
@@ -26,7 +26,7 @@ const cancelForm = () => {
   contractsStore.updateError({external: false});
   contractsStore.updateLoading({withdrawExternal: false});
   contractsStore.updateWallet('external', {step: 1});
-  contractsStore.updateFormField(0, 'external', 'amount');
+  contractsStore.updateFormField(null, 'external', 'amount');
   contractsStore.updateFormField('', 'external', 'address');
 };
 
@@ -48,14 +48,20 @@ const setMaxAmount = () => {
       :amountData="contractsStore.form.external.amount"
       :resetAmount="resetAmount"
       :setMax="setMaxAmount"
-      v-if="contractsStore.wallets.external.step === 1"
+      v-if="
+        contractsStore.wallets.external.step === 1 &&
+        !contractsStore.error.external
+      "
     />
     <DefineAddress
       :form="contractsStore.form.external"
       :resetAddress="resetAddress"
       :onAddressChange="onAddressChange"
       :errorActive="contractsStore.error.external"
-      v-if="contractsStore.wallets.external.step === 2"
+      v-if="
+        contractsStore.wallets.external.step === 2 &&
+        !contractsStore.error.external
+      "
       :loading="contractsStore.loading.withdrawExternal"
     />
     <Processing
@@ -66,10 +72,7 @@ const setMaxAmount = () => {
       "
     />
     <Unsuccessful
-      v-if="
-        contractsStore.wallets.external.step === 3 &&
-        contractsStore.error.external
-      "
+      v-if="contractsStore.error.external"
       :cancelForm="cancelForm"
       :loading="contractsStore.loading.withdrawExternal"
     />

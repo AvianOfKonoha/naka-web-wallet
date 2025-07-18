@@ -16,6 +16,7 @@ export interface IContractsLoading {
   withdrawConnected: boolean;
   withdrawExternal: boolean;
   connect: boolean;
+  history: boolean;
 }
 
 export interface IContractsHash {
@@ -57,11 +58,11 @@ export interface IWithdrawal {
 }
 
 export interface IConnectedForm {
-  amount: IFormField<number>;
+  amount: IFormField<number | null>;
 }
 
 export interface IExternalForm {
-  amount: IFormField<number>;
+  amount: IFormField<number | null>;
   address: IFormField<string>;
 }
 

@@ -40,7 +40,7 @@ const closeConnectedModal = () => {
   contractsStore.updateModal({withdrawConnected: false});
   contractsStore.updateError({connected: false});
   contractsStore.updateLoading({withdrawConnected: false});
-  contractsStore.updateFormField(0, 'connected', 'amount');
+  contractsStore.updateFormField(null, 'connected', 'amount');
   contractsStore.updateWallet('connected', {step: 1});
 };
 
@@ -48,7 +48,7 @@ const closeExternalModal = () => {
   contractsStore.updateModal({withdrawExternal: false});
   contractsStore.updateError({external: false});
   contractsStore.updateLoading({withdrawExternal: false});
-  contractsStore.updateFormField(0, 'external', 'amount');
+  contractsStore.updateFormField(null, 'external', 'amount');
   contractsStore.updateFormField('', 'external', 'address');
   contractsStore.updateWallet('external', {step: 1});
 };

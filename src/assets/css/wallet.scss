@@ -23,6 +23,12 @@
   }
 }
 
+@keyframes l4 {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 .home {
   @include framework.flex-layout(flex, center, unset, unset);
   &__box {
@@ -209,6 +215,7 @@
               1fr auto,
               calc(#{framework.$defaultGridGap} / 2)
             );
+            position: relative;
             .amount {
               &__wrap {
                 position: relative;
@@ -220,6 +227,9 @@
                   framework.$defaultGridGap
                 );
                 align-items: center;
+                &.error {
+                  border-color: map.get(framework.$colors, 'red-400');
+                }
                 input {
                   border: unset;
                   padding: unset;
@@ -258,6 +268,14 @@
                 @include framework.font-style('default', 'gray-950');
                 border-radius: 100vh;
                 font-weight: 600;
+              }
+            }
+            .error {
+              &__text {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                @include framework.font-style('12', 'red-400');
               }
             }
           }
@@ -523,6 +541,29 @@
             display: grid;
             justify-items: center;
             align-items: center;
+            &.loading {
+              .loader {
+                width: 50px;
+                aspect-ratio: 1;
+                border-radius: 100vh;
+                padding: 1px;
+                background: conic-gradient(#0000 10%, #f03355) content-box;
+                -webkit-mask:
+                  repeating-conic-gradient(
+                    #0000 0deg,
+                    #000 1deg 20deg,
+                    #0000 21deg 36deg
+                  ),
+                  radial-gradient(
+                    farthest-side,
+                    #0000 calc(100% - calc(#{framework.$defaultRem} / 2) - 1px),
+                    #000 calc(100% - calc(#{framework.$defaultRem} / 2))
+                  );
+                -webkit-mask-composite: destination-in;
+                mask-composite: intersect;
+                animation: l4 1s infinite steps(10);
+              }
+            }
             .empty {
               &__title {
                 @include framework.font-style('18', 'gray-400');

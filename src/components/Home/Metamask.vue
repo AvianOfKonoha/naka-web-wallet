@@ -10,8 +10,7 @@ onMounted(() => {
   contractsStore.updateFirstSign(!!sessionStorage.getItem('firstSign'));
   contractsStore.connectMobile();
   contractsStore.checkConnection();
-  /*TODO: Uncomment when you're ready to deploy to prod*/
-  // contractsStore.connectContract();
+  contractsStore.getEstimatedGas();
 });
 </script>
 
