@@ -96,7 +96,7 @@ const completeWithdrawal = () => {
           Withdraw: {{ props.withdrawal.address }}
         </span>
         <div class="withdrawal__details--date">
-          {{ localizeDateTime(props.withdrawal.date) }}
+          {{ localizeDateTime(props.withdrawal.unlockTime) }}
         </div>
       </div>
       <div class="withdrawal__amount">

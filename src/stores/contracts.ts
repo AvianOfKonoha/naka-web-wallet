@@ -623,124 +623,6 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
-    async submitConnectedForm() {
-      if (
-        this.loading.withdrawConnected ||
-        !this.form.connected.amount.value ||
-        this.contractBalance.usdt < this.form.connected.amount.value ||
-        !this.vaultContract
-      ) {
-        return;
-      }
-
-      /** If the request for withdrawal failed the user has been sent to the retry screen. The retry function takes the user back to the beginning of the form and resets the state */
-      if (this.error.connected) {
-        this.resetConnectedForm();
-        return;
-      }
-
-      /** Init loading */
-      this.updateLoading({withdrawConnected: true});
-
-      try {
-        /** On amount screen call the "withdrawRequest" method from the Vault SC. On success the withdraw request is pending for an hour before the user can complete it */
-        if (this.wallets.connected.step === 1) {
-          /** Make a withdraw request to Vault SC */
-          await this.vaultContract.methods
-            .withdrawRequest(
-              USDT_ADDRESS_STAGING,
-              this.connectedAccount,
-              formatNumberToUint256(this.form.connected.amount.value, 6)
-            )
-            .send({
-              from: this.connectedAccount,
-              gas: this.transactionGas?.gas
-                ? `${this.transactionGas.gas}`
-                : undefined,
-              maxFeePerGas: this.transactionGas?.maxFeePerGas
-                ? `${this.transactionGas.maxFeePerGas}`
-                : undefined,
-              maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
-                ? `${this.transactionGas.maxPriorityFeePerGas}`
-                : undefined
-            });
-
-          /** Update global state for Vault balance */
-          await this.getVaultBalance();
-
-          /** Proceed to the next step */
-          this.updateWallet('connected', {step: 2});
-          return;
-        }
-
-        /** Close the modal and reset the form  */
-        this.updateModal({withdrawConnected: false});
-        this.updateFormField(null, 'connected', 'amount');
-        this.updateWallet('connected', {step: 1});
-      } catch (error) {
-        console.error('Error submitting form: ', (error as Error).message);
-        toast.error(`${(error as Error).message}`);
-        this.updateError({connected: true});
-
-        /** Estimate gas from the last 30 blocks on the chain */
-        await this.getEstimatedGas();
-      } finally {
-        this.updateLoading({withdrawConnected: false});
-      }
-    },
-
-    async submitExternalForm() {
-      if (!this.form.external.amount.value) {
-        return;
-      }
-
-      if (
-        this.loading.withdrawExternal ||
-        this.contractBalance.usdt < this.form.external.amount.value
-      ) {
-        return;
-      }
-
-      /** Init loading */
-      this.updateLoading({withdrawExternal: true});
-
-      try {
-        /*TODO: Update logic when the SC gets connected*/
-        if (this.wallets.external.step === 1) {
-          /*TODO: Logic for amount window*/
-          this.updateWallet('external', {step: 2});
-          return;
-        }
-
-        if (this.wallets.external.step === 2) {
-          /*TODO: Logic for address window*/
-          if (this.form.external.address.value.length > 10) {
-            this.updateWallet('external', {step: 3});
-          } else {
-            this.updateError({external: true});
-          }
-          return;
-        }
-
-        if (this.wallets.external.step === 3 && this.error.external) {
-          /*TODO: Logic for retry window*/
-          return;
-        }
-
-        /*TODO: Logic for "I understand" window*/
-        /** Close the modal and reset the form  */
-        this.updateModal({withdrawExternal: false});
-        this.updateFormField(null, 'external', 'amount');
-        this.updateFormField('', 'external', 'address');
-        this.updateWallet('external', {step: 1});
-      } catch (error) {
-        toast.error(`${(error as Error).message}`);
-        this.updateError({external: true});
-      } finally {
-        this.updateLoading({withdrawExternal: false});
-      }
-    },
-
     async getEstimatedGas() {
       if (!this.web3) {
         return;
@@ -806,6 +688,146 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
+    async submitConnectedForm() {
+      if (
+        this.loading.withdrawConnected ||
+        !this.form.connected.amount.value ||
+        this.contractBalance.usdt < this.form.connected.amount.value ||
+        !this.vaultContract
+      ) {
+        return;
+      }
+
+      /** If the request for withdrawal failed the user has been sent to the retry screen. The retry function takes the user back to the beginning of the form and resets the state */
+      if (this.error.connected) {
+        this.resetConnectedForm();
+        return;
+      }
+
+      /** Init loading */
+      this.updateLoading({withdrawConnected: true});
+
+      try {
+        /** On amount screen call the "withdrawRequest" method from the Vault SC. On success the withdraw request is pending for an hour before the user can complete it */
+        if (this.wallets.connected.step === 1) {
+          /** Make a withdrawal request to Vault SC */
+          await this.vaultContract.methods
+            .withdrawRequest(
+              USDT_ADDRESS_STAGING,
+              this.connectedAccount,
+              formatNumberToUint256(this.form.connected.amount.value, 6)
+            )
+            .send({
+              from: this.connectedAccount,
+              gas: this.transactionGas?.gas
+                ? `${this.transactionGas.gas}`
+                : undefined,
+              maxFeePerGas: this.transactionGas?.maxFeePerGas
+                ? `${this.transactionGas.maxFeePerGas}`
+                : undefined,
+              maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
+                ? `${this.transactionGas.maxPriorityFeePerGas}`
+                : undefined
+            });
+
+          /** Proceed to the next step */
+          this.updateWallet('connected', {step: 2});
+
+          /** Update global state for Vault balance */
+          await this.getVaultBalance();
+          return;
+        }
+
+        /** Close the modal and reset the form  */
+        this.updateModal({withdrawConnected: false});
+        this.updateFormField(null, 'connected', 'amount');
+        this.updateWallet('connected', {step: 1});
+      } catch (error) {
+        console.error('Error submitting form: ', (error as Error).message);
+        toast.error(`${(error as Error).message}`);
+        this.updateError({connected: true});
+
+        /** Estimate gas from the last 30 blocks on the chain */
+        await this.getEstimatedGas();
+      } finally {
+        this.updateLoading({withdrawConnected: false});
+      }
+    },
+
+    async submitExternalForm() {
+      if (
+        this.loading.withdrawExternal ||
+        !this.form.external.amount.value ||
+        !this.vaultContract ||
+        this.contractBalance.usdt < this.form.external.amount.value ||
+        !this.form.external.amount.value
+      ) {
+        return;
+      }
+
+      /** If the request for withdrawal failed the user has been sent to the retry screen. The retry function takes the user back to the beginning of the form and resets the state */
+      if (this.error.external) {
+        this.resetExternalForm();
+        return;
+      }
+
+      /** Init loading */
+      this.updateLoading({withdrawExternal: true});
+
+      try {
+        /** On amount screen call the "withdrawRequest" method from the Vault SC. On success the withdraw request is pending for an hour before the user can complete it */
+        if (this.wallets.external.step === 1) {
+          this.updateWallet('external', {step: 2});
+          return;
+        }
+
+        if (this.wallets.external.step === 2) {
+          /** Make a withdrawal request to Vault SC */
+          await this.vaultContract.methods
+            .withdrawRequest(
+              USDT_ADDRESS_STAGING,
+              this.form.external.address.value,
+              formatNumberToUint256(this.form.external.amount.value, 6)
+            )
+            .send({
+              from: this.connectedAccount,
+              gas: this.transactionGas?.gas
+                ? `${this.transactionGas.gas}`
+                : undefined,
+              maxFeePerGas: this.transactionGas?.maxFeePerGas
+                ? `${this.transactionGas.maxFeePerGas}`
+                : undefined,
+              maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
+                ? `${this.transactionGas.maxPriorityFeePerGas}`
+                : undefined
+            });
+
+          /** Proceed to the next step */
+          this.updateWallet('external', {step: 3});
+
+          /** Update global state for Vault balance */
+          await this.getVaultBalance();
+          return;
+        }
+
+        /** Close the modal and reset the form  */
+        this.updateModal({withdrawExternal: false});
+        this.updateFormField(null, 'external', 'amount');
+        this.updateFormField('', 'external', 'address');
+        this.updateWallet('external', {step: 1});
+      } catch (error) {
+        console.error('Error submitting form: ', (error as Error).message);
+        toast.error(`${(error as Error).message}`);
+        this.updateError({external: true});
+        this.updateLoading({withdrawExternal: false});
+
+        /** Estimate gas from the last 30 blocks on the chain */
+        await this.getEstimatedGas();
+      } finally {
+        this.updateLoading({withdrawExternal: false});
+      }
+    },
+
     async getVaultBalance() {
       if (!this.vaultContract) {
         return;
@@ -826,6 +848,82 @@ export const useContractsStore = defineStore('contracts', {
       } catch (error) {
         console.error(
           'Error fetching vault balance: ',
+          (error as Error).message
+        );
+      }
+    },
+
+    async getWithdrawalHistory() {
+      if (!this.vaultContract || !this.web3) {
+        return;
+      }
+
+      /** Get a signature of the withdrawRequest method to use as a filter in block indexer */
+      const withdrawRequestSig = 'withdrawRequest(address,address,uint256)';
+      const methodId =
+        this.web3.eth.abi.encodeFunctionSignature(withdrawRequestSig);
+
+      try {
+        /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
+        const withdrawals = await (this.vaultContract as any).getPastEvents(
+          'WithdrawRequest',
+          {
+            fromBlock: 23988284,
+            toBlock: 'latest'
+          }
+        );
+
+        const constructedWithdrawals = withdrawals
+          .map(async (withdrawal: any) => {
+            if (!this.web3) {
+              return;
+            }
+
+            /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
+            const tx: any = await this.web3?.eth.getTransaction(
+              withdrawal.transactionHash
+            );
+
+            if (!tx.to) {
+              return;
+            }
+
+            /** Stop propagation if the address of the contract is not the same as the "to" address in transaction */
+            if (
+              tx.to.toLowerCase() !==
+                (this.vaultContract as any)._address.toLowerCase() ||
+              !tx.input.startsWith(methodId)
+            ) {
+              return;
+            }
+
+            /** Decode the parameters in abi in order to access the recipient address. withdrawRequest takes in three arguments - token address, recipient's address and an amount. Because the recipients address is the second argument we index it with 1 */
+            const decodedInput = this.web3.eth.abi.decodeParameters(
+              ['address', 'address', 'uint256'],
+              '0x' + tx.input.slice(10)
+            );
+
+            /** By default, the unlockTime fetched from the SC is of type bigint. Once converted to the number it shows the time in seconds. First we need to multiply it with 1000 to convert it to milliseconds, then we can use Date to mutate it */
+            return {
+              address: decodedInput[1], //Recipients address
+              amount: formatUint256toNumber(withdrawal.returnValues.amount, 6),
+              unlockTime: new Date(
+                Number(withdrawal.returnValues.unlockTime) * 1000
+              ),
+              status:
+                Number(withdrawal.returnValues.unlockTime) / 3600 > 1
+                  ? 'ready'
+                  : 'pending'
+            };
+          })
+          .reverse();
+
+        /** Resolve the promises that have been created due to async mapping */
+        this.withdrawals = await Promise.all(constructedWithdrawals);
+      } catch (error) {
+        toast.error(`${(error as Error).message}`);
+        console.error(
+          'Error fetching withdrawal history: ',
           (error as Error).message
         );
       }
@@ -925,30 +1023,6 @@ export const useContractsStore = defineStore('contracts', {
           )
         );
         console.error('Error connecting to Vault: ', (error as Error).message);
-      }
-    },
-
-    async getWithdrawalHistory() {
-      if (!this.vaultContract) {
-        return;
-      }
-
-      try {
-        const withdrawals = await (this.vaultContract as any).getPastEvents(
-          'WithdrawRequest',
-          {
-            fromBlock: 23988284,
-            toBlock: 'latest'
-          }
-        );
-
-        console.log('events: ', withdrawals);
-      } catch (error) {
-        toast.error(`${(error as Error).message}`);
-        console.error(
-          'Error fetching withdrawal history: ',
-          (error as Error).message
-        );
       }
     }
   }

@@ -58,11 +58,11 @@ const setMaxAmount = () => {
       :resetAddress="resetAddress"
       :onAddressChange="onAddressChange"
       :errorActive="contractsStore.error.external"
+      :loading="contractsStore.loading.withdrawExternal"
       v-if="
         contractsStore.wallets.external.step === 2 &&
         !contractsStore.error.external
       "
-      :loading="contractsStore.loading.withdrawExternal"
     />
     <Processing
       :amountData="contractsStore.form.external.amount"

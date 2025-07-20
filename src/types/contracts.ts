@@ -52,7 +52,7 @@ export interface IActiveNetwork {
 
 export interface IWithdrawal {
   address: string;
-  date: Date;
+  unlockTime: Date;
   amount: number;
   status: string;
 }

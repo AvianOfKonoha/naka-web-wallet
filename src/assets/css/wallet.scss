@@ -349,6 +349,12 @@
                   background-color: map.get(framework.$colors, 'gray-800');
                   color: map.get(framework.$colors, 'gray-50');
                 }
+                &.loading {
+                  .loader {
+                    border-color: map.get(framework.$colors, 'white');
+                    border-bottom-color: transparent;
+                  }
+                }
               }
             }
           }
