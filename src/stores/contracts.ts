@@ -897,7 +897,7 @@ export const useContractsStore = defineStore('contracts', {
               return;
             }
 
-            /** Decode the parameters in abi in order to access the recipient address. withdrawRequest takes in three arguments - token address, recipient's address and an amount. Because the recipients address is the second argument we index it with 1 */
+            /** Decode the parameters in abi in order to access the recipient address. withdrawRequest takes in three arguments - token address, recipient's address and an amount.*/
             const decodedInput = this.web3.eth.abi.decodeParameters(
               ['address', 'address', 'uint256'],
               '0x' + tx.input.slice(10)
