@@ -12,6 +12,7 @@ import ExternalWallet from '@/components/Withdraw/Form/ExternalWallet.vue';
 import WithdrawBox from '@/components/Withdraw/Content/WithdrawBox.vue';
 import Card from '@/components/Withdraw/Content/Card.vue';
 import Loading from '@/components/Withdraw/List/Loading.vue';
+import {bottomToast} from '@/utils/helpers.ts';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -54,6 +55,34 @@ const closeExternalModal = () => {
   contractsStore.updateWallet('external', {step: 1});
 };
 
+const openConnectedModal = () => {
+  /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
+  if (contractsStore.activeRequest) {
+    bottomToast(
+      'You can not create multiple withdrawal requests. Confirm or cancel the existing withdrawal to create a new one.',
+      5000,
+      'toast__wide toast__withdrawal'
+    );
+    return;
+  }
+
+  contractsStore.updateModal({withdrawConnected: true});
+};
+
+const openExternalModal = () => {
+  /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
+  if (contractsStore.activeRequest) {
+    bottomToast(
+      'You can not create multiple withdrawal requests. Confirm or cancel the existing withdrawal to create a new one.',
+      5000,
+      'toast__wide toast__withdrawal'
+    );
+    return;
+  }
+
+  contractsStore.updateModal({withdrawExternal: true});
+};
+
 /*Lifecycle hooks*/
 onMounted(() => {
   // setPolygonChain();
@@ -93,14 +122,14 @@ onMounted(() => {
       </div>
       <div class="withdraw__screen--row withdraw__screen--connect">
         <WithdrawBox
-          @click="contractsStore.updateModal({withdrawConnected: true})"
+          @click="openConnectedModal"
           title="Withdraw to connected wallet"
           description="Simply withdraw your funds to the currently connected wallet in your
       browser."
           buttonText="Withdraw connected"
         />
         <WithdrawBox
-          @click="contractsStore.updateModal({withdrawExternal: true})"
+          @click="openExternalModal"
           title="Withdraw to external wallet"
           description="Insert an external wallet address and transfer your funds."
           buttonText="Withdraw external"
