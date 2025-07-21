@@ -11,6 +11,7 @@ import Withdrawal from '@/components/Withdraw/List/Withdrawal.vue';
 import ExternalWallet from '@/components/Withdraw/Form/ExternalWallet.vue';
 import WithdrawBox from '@/components/Withdraw/Content/WithdrawBox.vue';
 import Card from '@/components/Withdraw/Content/Card.vue';
+import Loading from '@/components/Withdraw/List/Loading.vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -110,16 +111,25 @@ onMounted(() => {
       <div class="withdraw__screen--row withdraw__screen--history">
         <div class="history__title">Withdrawal History</div>
         <div class="history__list">
-          <Empty v-if="!contractsStore.withdrawals.length" />
+          <Empty
+            v-if="
+              !contractsStore.withdrawals.length &&
+              !contractsStore.loading.history
+            "
+          />
           <div
             class="history__list--grid"
-            v-if="contractsStore.withdrawals.length"
+            v-if="
+              contractsStore.withdrawals.length &&
+              !contractsStore.loading.history
+            "
           >
             <Withdrawal
               v-for="withdrawal in contractsStore.withdrawals"
               :withdrawal="withdrawal"
             />
           </div>
+          <Loading v-if="contractsStore.loading.history" />
         </div>
       </div>
     </div>

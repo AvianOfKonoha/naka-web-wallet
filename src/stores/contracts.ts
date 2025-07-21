@@ -25,7 +25,12 @@ import {metamaskSdk} from '@/utils/metamask.ts';
 import VaultABI from '@/assets/abi/Vault.json';
 import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
 import type {IVaultBalance} from '@/types/vault.ts';
-import {formatNumberToUint256, formatUint256toNumber} from '@/utils/helpers.ts';
+import {
+  bottomToast,
+  convertUint256ToHours,
+  formatNumberToUint256,
+  formatUint256toNumber
+} from '@/utils/helpers.ts';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
@@ -58,7 +63,8 @@ export const useContractsStore = defineStore('contracts', {
       withdrawConnected: false,
       withdrawExternal: false,
       connect: false,
-      history: false
+      history: false,
+      withdraw: false
     },
     transactionHash: {
       contractAddress: ''
@@ -104,7 +110,8 @@ export const useContractsStore = defineStore('contracts', {
     },
     error: {
       external: false,
-      connected: false
+      connected: false,
+      externalAddress: false
     },
     factoryContract: null,
     vaultContract: null,
@@ -708,6 +715,22 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({withdrawConnected: true});
 
       try {
+        /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
+        const reservationStatus: {amount: bigint; unlockTime: bigint} =
+          await this.vaultContract.methods
+            .getWithdrawProtocolTokenReservation()
+            .call();
+
+        /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
+        if (Number(reservationStatus.amount) > 0) {
+          bottomToast(
+            'You can not create multiple withdrawal requests.\nConfirm or cancel the existing withdrawal to create a new one.',
+            5000,
+            'toast__wide toast__withdrawal'
+          );
+          return;
+        }
+
         /** On amount screen call the "withdrawRequest" method from the Vault SC. On success the withdraw request is pending for an hour before the user can complete it */
         if (this.wallets.connected.step === 1) {
           /** Make a withdrawal request to Vault SC */
@@ -742,6 +765,7 @@ export const useContractsStore = defineStore('contracts', {
         this.updateModal({withdrawConnected: false});
         this.updateFormField(null, 'connected', 'amount');
         this.updateWallet('connected', {step: 1});
+        await this.getWithdrawalHistory();
       } catch (error) {
         console.error('Error submitting form: ', (error as Error).message);
         toast.error(`${(error as Error).message}`);
@@ -775,6 +799,22 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({withdrawExternal: true});
 
       try {
+        /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
+        const reservationStatus: {amount: bigint; unlockTime: bigint} =
+          await this.vaultContract.methods
+            .getWithdrawProtocolTokenReservation()
+            .call();
+
+        /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
+        if (Number(reservationStatus.amount) > 0) {
+          bottomToast(
+            'You can not create multiple withdrawal requests.\nConfirm or cancel the existing withdrawal to create a new one.',
+            5000,
+            'toast__wide toast__withdrawal'
+          );
+          return;
+        }
+
         /** On amount screen call the "withdrawRequest" method from the Vault SC. On success the withdraw request is pending for an hour before the user can complete it */
         if (this.wallets.external.step === 1) {
           this.updateWallet('external', {step: 2});
@@ -815,6 +855,7 @@ export const useContractsStore = defineStore('contracts', {
         this.updateFormField(null, 'external', 'amount');
         this.updateFormField('', 'external', 'address');
         this.updateWallet('external', {step: 1});
+        await this.getWithdrawalHistory();
       } catch (error) {
         console.error('Error submitting form: ', (error as Error).message);
         toast.error(`${(error as Error).message}`);
@@ -854,78 +895,111 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getWithdrawalHistory() {
-      if (!this.vaultContract || !this.web3) {
+      if (!this.vaultContract || !this.factoryContract || !this.web3) {
         return;
       }
 
-      /** Get a signature of the withdrawRequest method to use as a filter in block indexer */
-      const withdrawRequestSig = 'withdrawRequest(address,address,uint256)';
-      const methodId =
-        this.web3.eth.abi.encodeFunctionSignature(withdrawRequestSig);
+      /** Init loading */
+      this.updateLoading({history: true});
 
       try {
+        /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
+        const reservationStatus: {amount: bigint; unlockTime: bigint} =
+          await this.vaultContract.methods
+            .getWithdrawProtocolTokenReservation()
+            .call();
+
+        /** Fetch a lock duration of the withdrawal request from the factory contract */
+        const lockDuration: bigint = await this.factoryContract.methods
+          .getProtocolTokenWithdrawalReservationLockDuration()
+          .call();
+
         /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
+        const withdrawalRequests = await (
+          this.vaultContract as any
+        ).getPastEvents('WithdrawRequest', {
+          fromBlock: 23988284,
+          toBlock: 'latest'
+        });
+
+        /** Take the latest WithdrawalRequest event as the active request */
+        const activeRequest = withdrawalRequests?.reverse()?.[0];
+
+        /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
+        const activeRequestTransaction: any =
+          await this.web3.eth.getTransaction(activeRequest.transactionHash);
+
+        /** Decode the parameters in abi in order to access the recipient address. withdrawRequest takes in three arguments - token address, recipient's address and an amount. */
+        const decodedInput = this.web3.eth.abi.decodeParameters(
+          ['address', 'address', 'uint256'],
+          '0x' + activeRequestTransaction.input.slice(10)
+        );
+
+        /** By default, the unlockTime fetched from the SC is of type bigint. Once converted to the number it shows the time in seconds. First we need to multiply it with 1000 to convert it to milliseconds, then we can use Date to mutate it */
+        const activeRequestMapped = {
+          address: decodedInput[1], //Recipients address
+          amount: formatUint256toNumber(activeRequest.returnValues.amount, 6),
+          date: new Date(
+            (Number(activeRequest.returnValues.unlockTime) -
+              Number(lockDuration)) *
+              1000
+          ),
+          status:
+            Number(activeRequest.returnValues.unlockTime) * 1000 < Date.now()
+              ? 'ready'
+              : 'pending'
+        };
+
+        /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
         const withdrawals = await (this.vaultContract as any).getPastEvents(
-          'WithdrawRequest',
+          'Withdrawal',
           {
             fromBlock: 23988284,
             toBlock: 'latest'
           }
         );
 
-        const constructedWithdrawals = withdrawals
-          .map(async (withdrawal: any) => {
+        /** Map the withdrawals by adding a timestamp to the object from withdrawal block */
+        const constructedWithdrawals = withdrawals.map(
+          async (withdrawal: any) => {
             if (!this.web3) {
               return;
             }
 
-            /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
-            const tx: any = await this.web3?.eth.getTransaction(
-              withdrawal.transactionHash
-            );
+            const block = await this.web3.eth.getBlock(withdrawal.blockNumber);
+            const timestamp = block.timestamp;
 
-            if (!tx.to) {
-              return;
-            }
-
-            /** Stop propagation if the address of the contract is not the same as the "to" address in transaction */
-            if (
-              tx.to.toLowerCase() !==
-                (this.vaultContract as any)._address.toLowerCase() ||
-              !tx.input.startsWith(methodId)
-            ) {
-              return;
-            }
-
-            /** Decode the parameters in abi in order to access the recipient address. withdrawRequest takes in three arguments - token address, recipient's address and an amount. */
-            const decodedInput = this.web3.eth.abi.decodeParameters(
-              ['address', 'address', 'uint256'],
-              '0x' + tx.input.slice(10)
-            );
-
-            /** By default, the unlockTime fetched from the SC is of type bigint. Once converted to the number it shows the time in seconds. First we need to multiply it with 1000 to convert it to milliseconds, then we can use Date to mutate it */
             return {
-              address: decodedInput[1], //Recipients address
+              address: withdrawal.returnValues.recipient, //Recipients address
               amount: formatUint256toNumber(withdrawal.returnValues.amount, 6),
-              unlockTime: new Date(
-                Number(withdrawal.returnValues.unlockTime) * 1000
-              ),
-              status:
-                Number(withdrawal.returnValues.unlockTime) / 3600 > 1
-                  ? 'ready'
-                  : 'pending'
+              date: new Date(Number(timestamp) * 1000),
+              status: 'complete'
             };
-          })
-          .reverse();
+          }
+        );
 
-        /** Resolve the promises that have been created due to async mapping */
-        this.withdrawals = await Promise.all(constructedWithdrawals);
+        /** Resolve mapping promises */
+        const resolvedConstructedWithdrawals = await Promise.all(
+          constructedWithdrawals
+        );
+
+        /** save the withdrawal requests and withdrawals in global state and sort them by date */
+        this.withdrawals =
+          Number(reservationStatus.amount) > 0
+            ? [
+                activeRequestMapped,
+                ...resolvedConstructedWithdrawals.sort(
+                  (a, b) => b.date - a.date
+                )
+              ]
+            : resolvedConstructedWithdrawals.sort((a, b) => b.date - a.date);
       } catch (error) {
-        toast.error(`${(error as Error).message}`);
         console.error(
           'Error fetching withdrawal history: ',
           (error as Error).message
         );
+      } finally {
+        this.updateLoading({history: false});
       }
     },
 
@@ -1023,6 +1097,59 @@ export const useContractsStore = defineStore('contracts', {
           )
         );
         console.error('Error connecting to Vault: ', (error as Error).message);
+      }
+    },
+
+    async withdrawFunds(
+      recipientAddress: string,
+      amount: number,
+      callback?: () => void
+    ) {
+      if (!this.vaultContract || this.loading.withdraw) {
+        return;
+      }
+
+      /** Init loading */
+      this.updateLoading({withdraw: true});
+
+      try {
+        await this.vaultContract.methods
+          .withdraw(
+            USDT_ADDRESS_STAGING,
+            recipientAddress,
+            formatNumberToUint256(amount, 6)
+          )
+          .send({
+            from: this.connectedAccount,
+            gas: this.transactionGas?.gas
+              ? `${this.transactionGas.gas}`
+              : undefined,
+            maxFeePerGas: this.transactionGas?.maxFeePerGas
+              ? `${this.transactionGas.maxFeePerGas}`
+              : undefined,
+            maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
+              ? `${this.transactionGas.maxPriorityFeePerGas}`
+              : undefined
+          });
+
+        await this.getWithdrawalHistory();
+
+        if (callback) {
+          callback();
+        }
+
+        bottomToast(
+          `Withdraw to: ${recipientAddress.substring(0, 4)}...${recipientAddress.slice(-4)} has been successfully completed.`,
+          3000,
+          'toast__wide toast__withdrawal'
+        );
+      } catch (error) {
+        console.error('Error withdrawing funds: ', (error as Error).message);
+        toast.error(`${(error as Error).message}`);
+        this.updateLoading({withdraw: false});
+        await this.getEstimatedGas();
+      } finally {
+        this.updateLoading({withdraw: false});
       }
     }
   }

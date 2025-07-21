@@ -18,7 +18,16 @@ const resetAddress = () => {
 };
 
 const onAddressChange = () => {
-  contractsStore.updateError({external: false});
+  contractsStore.updateError({externalAddress: false});
+
+  if (
+    contractsStore.form.external.address.value.startsWith('0x') ||
+    contractsStore.form.external.address.value.length < 2
+  ) {
+    return;
+  }
+
+  contractsStore.updateError({externalAddress: true});
 };
 
 const cancelForm = () => {
@@ -57,7 +66,7 @@ const setMaxAmount = () => {
       :form="contractsStore.form.external"
       :resetAddress="resetAddress"
       :onAddressChange="onAddressChange"
-      :errorActive="contractsStore.error.external"
+      :errorActive="contractsStore.error.externalAddress"
       :loading="contractsStore.loading.withdrawExternal"
       v-if="
         contractsStore.wallets.external.step === 2 &&

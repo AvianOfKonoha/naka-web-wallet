@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import type {IWithdrawal} from '@/types/contracts.ts';
-import {bottomToast, localizeDateTime} from '@/utils/helpers.ts';
+import {localizeDateTime} from '@/utils/helpers.ts';
 import Modal from '@/components/UI/Modal.vue';
 import {ref} from 'vue';
+import {useContractsStore} from '@/stores/contracts.ts';
 
 /*Props*/
 const props = defineProps<{
   withdrawal: IWithdrawal;
 }>();
+
+/*Global state*/
+const contractsStore = useContractsStore();
 
 /*Local state*/
 const completeModal = ref(false);
@@ -22,13 +26,12 @@ const closeModal = () => {
 };
 
 /** On complete close the modal, add the withdrawal to the list in chronological order and notify the user of withdrawal completion with a toast */
-const completeWithdrawal = () => {
-  bottomToast(
-    'Withdraw to: b4329..7FAB has been successfully completed.',
-    3000,
-    'toast__wide toast__withdrawal'
+const completeWithdrawal = async () => {
+  await contractsStore.withdrawFunds(
+    props.withdrawal.address,
+    props.withdrawal.amount,
+    closeModal
   );
-  closeModal();
 };
 </script>
 
@@ -53,6 +56,9 @@ const completeWithdrawal = () => {
         @click="completeWithdrawal"
       >
         Complete withdrawal
+        <span class="loader" v-if="contractsStore.loading.withdraw">
+          <span></span><span></span>
+        </span>
       </button>
     </div>
   </Modal>
@@ -96,7 +102,7 @@ const completeWithdrawal = () => {
           Withdraw: {{ props.withdrawal.address }}
         </span>
         <div class="withdrawal__details--date">
-          {{ localizeDateTime(props.withdrawal.unlockTime) }}
+          {{ localizeDateTime(props.withdrawal.date) }}
         </div>
       </div>
       <div class="withdrawal__amount">

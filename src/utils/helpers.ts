@@ -66,3 +66,7 @@ export const formatUint256toNumber = (value: bigint, decimals: number) => {
 export const formatNumberToUint256 = (value: number, decimals: number) => {
   return BigInt(value) * BigInt(10 ** decimals);
 };
+
+export const convertUint256ToHours = (time: bigint) => {
+  return (Number(time) * 1000) / 3600;
+};

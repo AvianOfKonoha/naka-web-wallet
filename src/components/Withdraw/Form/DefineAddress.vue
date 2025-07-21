@@ -82,8 +82,8 @@ const copyAddress = () => {
           :class="{error: props.errorActive}"
         />
         <small class="error" v-if="props.errorActive"
-          >Invalid withdrawal address</small
-        >
+          >Invalid withdrawal address
+        </small>
         <button
           type="reset"
           class="reset"

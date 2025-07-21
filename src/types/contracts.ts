@@ -17,6 +17,7 @@ export interface IContractsLoading {
   withdrawExternal: boolean;
   connect: boolean;
   history: boolean;
+  withdraw: boolean;
 }
 
 export interface IContractsHash {
@@ -52,7 +53,7 @@ export interface IActiveNetwork {
 
 export interface IWithdrawal {
   address: string;
-  unlockTime: Date;
+  date: Date;
   amount: number;
   status: string;
 }
@@ -83,6 +84,7 @@ export interface IContractsWallets {
 export interface IContractsErrors {
   external: boolean;
   connected: boolean;
+  externalAddress: boolean;
 }
 
 export interface ITransactionGas {

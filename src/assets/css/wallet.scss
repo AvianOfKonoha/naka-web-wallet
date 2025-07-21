@@ -382,9 +382,14 @@
             font-weight: 600;
             border-radius: 100vh;
             transition: all 0.1s ease;
+            position: relative;
             &:active {
               background-color: map.get(framework.$colors, 'green-800');
               color: map.get(framework.$colors, 'white');
+            }
+            .loader {
+              border-color: map.get(framework.$colors, 'gray-800');
+              border-bottom-color: transparent;
             }
           }
         }
@@ -583,6 +588,9 @@
                 padding-bottom: framework.$defaultPadding;
               }
             }
+          }
+          &--grid {
+            @include framework.grid-gap(calc(#{framework.$defaultGridGap} / 2));
           }
         }
       }

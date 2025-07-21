@@ -51,7 +51,7 @@ const checkBalance = () => {
 /*Watchers*/
 watch(
   () => props.amountData.value,
-  (newValue) => {
+  () => {
     checkBalance();
   }
 );
