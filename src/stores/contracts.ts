@@ -770,6 +770,7 @@ export const useContractsStore = defineStore('contracts', {
         console.error('Error submitting form: ', (error as Error).message);
         toast.error(`${(error as Error).message}`);
         this.updateError({connected: true});
+        this.updateLoading({withdrawConnected: false});
 
         /** Estimate gas from the last 30 blocks on the chain */
         await this.getEstimatedGas();
@@ -1031,6 +1032,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
         this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
 
+        /** Get the list of all withdrawals */
         await this.getWithdrawalHistory();
 
         /** Fetch Vault balance */
