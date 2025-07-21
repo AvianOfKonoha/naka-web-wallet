@@ -726,7 +726,7 @@ export const useContractsStore = defineStore('contracts', {
           /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
           if (Number(reservationStatus.amount) > 0) {
             bottomToast(
-              'You can not create multiple withdrawal requests.\nConfirm or cancel the existing withdrawal to create a new one.',
+              'You can not create multiple withdrawal requests. Confirm or cancel the existing withdrawal to create a new one.',
               5000,
               'toast__wide toast__withdrawal'
             );
@@ -811,7 +811,7 @@ export const useContractsStore = defineStore('contracts', {
           /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
           if (Number(reservationStatus.amount) > 0) {
             bottomToast(
-              'You can not create multiple withdrawal requests.\nConfirm or cancel the existing withdrawal to create a new one.',
+              'You can not create multiple withdrawal requests. Confirm or cancel the existing withdrawal to create a new one.',
               5000,
               'toast__wide toast__withdrawal'
             );
