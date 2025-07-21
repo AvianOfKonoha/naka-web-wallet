@@ -27,7 +27,6 @@ import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
 import type {IVaultBalance} from '@/types/vault.ts';
 import {
   bottomToast,
-  convertUint256ToHours,
   formatNumberToUint256,
   formatUint256toNumber
 } from '@/utils/helpers.ts';
@@ -115,7 +114,8 @@ export const useContractsStore = defineStore('contracts', {
     },
     factoryContract: null,
     vaultContract: null,
-    transactionGas: null
+    transactionGas: null,
+    activeRequest: null
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -894,21 +894,12 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
-    async getWithdrawalHistory() {
-      if (!this.vaultContract || !this.factoryContract || !this.web3) {
+    async getActiveRequest() {
+      if (!this.factoryContract || !this.web3) {
         return;
       }
 
-      /** Init loading */
-      this.updateLoading({history: true});
-
       try {
-        /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
-        const reservationStatus: {amount: bigint; unlockTime: bigint} =
-          await this.vaultContract.methods
-            .getWithdrawProtocolTokenReservation()
-            .call();
-
         /** Fetch a lock duration of the withdrawal request from the factory contract */
         const lockDuration: bigint = await this.factoryContract.methods
           .getProtocolTokenWithdrawalReservationLockDuration()
@@ -925,6 +916,10 @@ export const useContractsStore = defineStore('contracts', {
         /** Take the latest WithdrawalRequest event as the active request */
         const activeRequest = withdrawalRequests?.reverse()?.[0];
 
+        if (!activeRequest) {
+          return;
+        }
+
         /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
         const activeRequestTransaction: any =
           await this.web3.eth.getTransaction(activeRequest.transactionHash);
@@ -936,8 +931,8 @@ export const useContractsStore = defineStore('contracts', {
         );
 
         /** By default, the unlockTime fetched from the SC is of type bigint. Once converted to the number it shows the time in seconds. First we need to multiply it with 1000 to convert it to milliseconds, then we can use Date to mutate it */
-        const activeRequestMapped = {
-          address: decodedInput[1], //Recipients address
+        this.activeRequest = {
+          address: `${decodedInput[1]}`, //Recipients address
           amount: formatUint256toNumber(activeRequest.returnValues.amount, 6),
           date: new Date(
             (Number(activeRequest.returnValues.unlockTime) -
@@ -949,6 +944,28 @@ export const useContractsStore = defineStore('contracts', {
               ? 'ready'
               : 'pending'
         };
+      } catch (error) {
+        console.error(
+          'Error fetching active request: ',
+          (error as Error).message
+        );
+      }
+    },
+
+    async getWithdrawalHistory() {
+      if (!this.vaultContract || !this.factoryContract || !this.web3) {
+        return;
+      }
+
+      /** Init loading */
+      this.updateLoading({history: true});
+
+      try {
+        /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
+        const reservationStatus: {amount: bigint; unlockTime: bigint} =
+          await this.vaultContract.methods
+            .getWithdrawProtocolTokenReservation()
+            .call();
 
         /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
         const withdrawals = await (this.vaultContract as any).getPastEvents(
@@ -958,6 +975,8 @@ export const useContractsStore = defineStore('contracts', {
             toBlock: 'latest'
           }
         );
+
+        await this.getActiveRequest();
 
         /** Map the withdrawals by adding a timestamp to the object from withdrawal block */
         const constructedWithdrawals = withdrawals.map(
@@ -987,7 +1006,7 @@ export const useContractsStore = defineStore('contracts', {
         this.withdrawals =
           Number(reservationStatus.amount) > 0
             ? [
-                activeRequestMapped,
+                this.activeRequest,
                 ...resolvedConstructedWithdrawals.sort(
                   (a, b) => b.date - a.date
                 )

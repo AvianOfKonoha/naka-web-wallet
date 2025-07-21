@@ -122,4 +122,5 @@ export interface IContractsStore {
   vaultContract: Contract<ContractAbi> | null;
   factoryContract: Contract<ContractAbi> | null;
   transactionGas: ITransactionGas | null;
+  activeRequest: IWithdrawal | null;
 }
