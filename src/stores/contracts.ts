@@ -715,24 +715,24 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({withdrawConnected: true});
 
       try {
-        /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
-        const reservationStatus: {amount: bigint; unlockTime: bigint} =
-          await this.vaultContract.methods
-            .getWithdrawProtocolTokenReservation()
-            .call();
-
-        /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
-        if (Number(reservationStatus.amount) > 0) {
-          bottomToast(
-            'You can not create multiple withdrawal requests.\nConfirm or cancel the existing withdrawal to create a new one.',
-            5000,
-            'toast__wide toast__withdrawal'
-          );
-          return;
-        }
-
         /** On amount screen call the "withdrawRequest" method from the Vault SC. On success the withdraw request is pending for an hour before the user can complete it */
         if (this.wallets.connected.step === 1) {
+          /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
+          const reservationStatus: {amount: bigint; unlockTime: bigint} =
+            await this.vaultContract.methods
+              .getWithdrawProtocolTokenReservation()
+              .call();
+
+          /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
+          if (Number(reservationStatus.amount) > 0) {
+            bottomToast(
+              'You can not create multiple withdrawal requests.\nConfirm or cancel the existing withdrawal to create a new one.',
+              5000,
+              'toast__wide toast__withdrawal'
+            );
+            return;
+          }
+
           /** Make a withdrawal request to Vault SC */
           await this.vaultContract.methods
             .withdrawRequest(
@@ -800,24 +800,24 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({withdrawExternal: true});
 
       try {
-        /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
-        const reservationStatus: {amount: bigint; unlockTime: bigint} =
-          await this.vaultContract.methods
-            .getWithdrawProtocolTokenReservation()
-            .call();
-
-        /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
-        if (Number(reservationStatus.amount) > 0) {
-          bottomToast(
-            'You can not create multiple withdrawal requests.\nConfirm or cancel the existing withdrawal to create a new one.',
-            5000,
-            'toast__wide toast__withdrawal'
-          );
-          return;
-        }
-
         /** On amount screen call the "withdrawRequest" method from the Vault SC. On success the withdraw request is pending for an hour before the user can complete it */
         if (this.wallets.external.step === 1) {
+          /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
+          const reservationStatus: {amount: bigint; unlockTime: bigint} =
+            await this.vaultContract.methods
+              .getWithdrawProtocolTokenReservation()
+              .call();
+
+          /** Stop propagation if the withdrawal has already been requested and hasn't been resolved yet */
+          if (Number(reservationStatus.amount) > 0) {
+            bottomToast(
+              'You can not create multiple withdrawal requests.\nConfirm or cancel the existing withdrawal to create a new one.',
+              5000,
+              'toast__wide toast__withdrawal'
+            );
+            return;
+          }
+
           this.updateWallet('external', {step: 2});
           return;
         }
