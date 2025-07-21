@@ -1136,7 +1136,7 @@ export const useContractsStore = defineStore('contracts', {
         );
       } catch (error) {
         console.error('Error withdrawing funds: ', (error as Error).message);
-        toast.error(`${(error as Error).message}`);
+        toast.error(`Error withdrawing funds: ${(error as Error).message}`);
         this.updateLoading({withdraw: false});
         await this.getEstimatedGas();
       } finally {
