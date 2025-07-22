@@ -11,6 +11,7 @@ onMounted(() => {
   contractsStore.connectMobile();
   contractsStore.checkConnection();
   contractsStore.getEstimatedGas();
+  contractsStore.getLastNetworkBlock();
 });
 </script>
 

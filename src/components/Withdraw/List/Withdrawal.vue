@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type {IWithdrawal} from '@/types/contracts.ts';
 import {localizeDateTime} from '@/utils/helpers.ts';
-import Modal from '@/components/UI/Modal.vue';
 import {ref} from 'vue';
 import {useContractsStore} from '@/stores/contracts.ts';
 
@@ -13,27 +12,7 @@ const props = defineProps<{
 /*Global state*/
 const contractsStore = useContractsStore();
 
-/*Local state*/
-const completeModal = ref(false);
-
 /*Methods*/
-const toggleModal = (active: boolean) => {
-  completeModal.value = active;
-};
-
-const closeModal = () => {
-  toggleModal(false);
-};
-
-/** On complete close the modal, add the withdrawal to the list in chronological order and notify the user of withdrawal completion with a toast */
-const completeWithdrawal = async () => {
-  await contractsStore.withdrawFunds(
-    props.withdrawal.address,
-    props.withdrawal.amount,
-    closeModal
-  );
-};
-
 /** If the withdrawal is a pending request give it an option to open a modal that will cancel its request otherwise stop propagation */
 const openCancelModal = () => {
   if (props.withdrawal.status === 'complete') {
@@ -44,34 +23,6 @@ const openCancelModal = () => {
 </script>
 
 <template>
-  <!-- Modals -->
-  <Modal
-    :closeModal="closeModal"
-    wrapClass="modal__withdraw--wrap-complete"
-    class="modal__withdrawal--complete"
-    :active="completeModal"
-  >
-    <div class="modal__title">Complete Withdrawal</div>
-    <div class="complete__description">
-      Please note that a small gas fee is required to complete your withdrawal.
-      This fee ensures the secure and timely processing of your transaction. You
-      can complete the withdrawal process after confirming the payment of the
-      gas fee. Thank you for your understanding.
-    </div>
-    <div class="complete__button">
-      <button
-        type="button"
-        aria-label="Complete withdrawal"
-        @click="completeWithdrawal"
-      >
-        Complete withdrawal
-        <span class="loader" v-if="contractsStore.loading.withdraw">
-          <span></span><span></span>
-        </span>
-      </button>
-    </div>
-  </Modal>
-
   <!-- Main -->
   <div
     class="withdrawal__row"
@@ -116,7 +67,7 @@ const openCancelModal = () => {
         </div>
       </div>
       <div class="withdrawal__amount">
-        -{{ props.withdrawal.amount.toFixed(2) }} USD₮
+        -{{ props.withdrawal.amount.toFixed(3) }} USD₮
       </div>
     </div>
     <div
@@ -126,7 +77,7 @@ const openCancelModal = () => {
       <button
         type="button"
         aria-label="Complete withdraw"
-        @click="toggleModal(true)"
+        @click="contractsStore.updateModal({completeWithdraw: true})"
       >
         Complete withdraw
       </button>

@@ -88,14 +88,21 @@ const closeCancelWithdrawModal = () => {
   contractsStore.updateLoading({cancelWithdraw: false});
 };
 
+const closeCompleteWithdrawModal = () => {
+  contractsStore.updateModal({completeWithdraw: false});
+  contractsStore.updateLoading({completeWithdraw: false});
+};
+
 /*Lifecycle hooks*/
 onMounted(() => {
-  // setPolygonChain();
+  setPolygonChain();
 });
 </script>
 
 <template>
   <!-- Modal -->
+
+  <!-- Connected wallet -->
   <Modal
     class="modal__withdraw--connected"
     wrapClass="modal__withdraw--wrap"
@@ -105,6 +112,8 @@ onMounted(() => {
   >
     <ConnectedWallet />
   </Modal>
+
+  <!-- External wallet -->
   <Modal
     class="modal__withdraw--connected modal__withdraw--external"
     wrapClass="modal__withdraw--wrap"
@@ -114,6 +123,36 @@ onMounted(() => {
   >
     <ExternalWallet />
   </Modal>
+
+  <!-- Complete withdraw -->
+  <Modal
+    :closeModal="closeCompleteWithdrawModal"
+    wrapClass="modal__withdraw--wrap-complete"
+    class="modal__withdrawal--complete"
+    :active="contractsStore.modal.completeWithdraw"
+  >
+    <div class="modal__title">Complete Withdrawal</div>
+    <div class="complete__description">
+      Please note that a small gas fee is required to complete your withdrawal.
+      This fee ensures the secure and timely processing of your transaction. You
+      can complete the withdrawal process after confirming the payment of the
+      gas fee. Thank you for your understanding.
+    </div>
+    <div class="complete__button">
+      <button
+        type="button"
+        aria-label="Complete withdrawal"
+        @click="contractsStore.completeWithdraw"
+      >
+        Complete withdrawal
+        <span class="loader" v-if="contractsStore.loading.withdraw">
+          <span></span><span></span>
+        </span>
+      </button>
+    </div>
+  </Modal>
+
+  <!-- Cancel withdraw -->
   <Modal
     :closeModal="closeCancelWithdrawModal"
     wrapClass="modal__withdraw--wrap-complete"

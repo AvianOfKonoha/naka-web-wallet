@@ -19,6 +19,7 @@ export interface IContractsLoading {
   history: boolean;
   withdraw: boolean;
   cancelWithdraw: boolean;
+  completeWithdraw: boolean;
 }
 
 export interface IContractsHash {
@@ -44,6 +45,7 @@ export interface IContractsModal {
   withdrawConnected: boolean;
   withdrawExternal: boolean;
   cancelWithdraw: boolean;
+  completeWithdraw: boolean;
 }
 
 export interface IActiveNetwork {
@@ -125,4 +127,5 @@ export interface IContractsStore {
   factoryContract: Contract<ContractAbi> | null;
   transactionGas: ITransactionGas | null;
   activeRequest: IWithdrawal | null;
+  lastBlock: number;
 }

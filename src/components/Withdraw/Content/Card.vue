@@ -30,7 +30,7 @@ const props = defineProps<{amount: number | string}>();
       <div class="card__balance--title">Balance</div>
       <div class="card__balance--value">
         <div class="value__number">
-          {{ parseFloat(`${props.amount}`).toFixed(2) }}
+          {{ parseFloat(`${props.amount}`).toFixed(3) }}
         </div>
         <div class="value__currency">USD₮</div>
       </div>

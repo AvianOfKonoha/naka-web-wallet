@@ -20,7 +20,7 @@ const props = defineProps<{
     <div class="process__statement">
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
-        {{ props.amountData.value?.toFixed(2) }} USD₮
+        {{ props.amountData.value?.toFixed(3) }} USD₮
       </div>
     </div>
     <div class="process__button">

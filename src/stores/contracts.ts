@@ -16,9 +16,11 @@ import {keccak256} from 'js-sha3';
 import {encode} from 'rlp';
 import {toast} from 'vue3-toastify';
 import {
+  CONTRACT_ADDRESS_PRODUCTION,
   CONTRACT_ADDRESS_STAGING,
   NETWORKS,
   polygonMainnet,
+  USDT_ADDRESS_PRODUCTION,
   USDT_ADDRESS_STAGING
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
@@ -28,7 +30,8 @@ import type {IReservation, IVaultBalance} from '@/types/vault.ts';
 import {
   bottomToast,
   formatNumberToUint256,
-  formatUint256toNumber
+  formatUint256toNumber,
+  isMobileChrome
 } from '@/utils/helpers.ts';
 
 export const useContractsStore = defineStore('contracts', {
@@ -64,7 +67,8 @@ export const useContractsStore = defineStore('contracts', {
       connect: false,
       history: false,
       withdraw: false,
-      cancelWithdraw: false
+      cancelWithdraw: false,
+      completeWithdraw: false
     },
     transactionHash: {
       contractAddress: ''
@@ -80,7 +84,8 @@ export const useContractsStore = defineStore('contracts', {
       connect: false,
       withdrawConnected: false,
       withdrawExternal: false,
-      cancelWithdraw: false
+      cancelWithdraw: false,
+      completeWithdraw: false
     },
     withdrawals: [],
     form: {
@@ -117,7 +122,8 @@ export const useContractsStore = defineStore('contracts', {
     factoryContract: null,
     vaultContract: null,
     transactionGas: null,
-    activeRequest: null
+    activeRequest: null,
+    lastBlock: 0
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -242,7 +248,7 @@ export const useContractsStore = defineStore('contracts', {
         const data = await res.json();
         const ethPrice = data.ethereum.usd;
 
-        return (parseFloat(balanceEth) * parseFloat(ethPrice)).toFixed(2);
+        return (parseFloat(balanceEth) * parseFloat(ethPrice)).toFixed(5);
       } catch (error) {
         console.error('Error converting to USDT: ', (error as Error).message);
       }
@@ -260,7 +266,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Step 1: Connect to metamask and extract balance in ETH or its derivation */
         const balance = await this.web3.eth.getBalance(this.connectedAccount);
         const balanceEth = this.web3.utils.fromWei(balance, 'ether');
-        this.balance = parseFloat(balanceEth).toFixed(2);
+        this.balance = parseFloat(balanceEth).toFixed(5);
 
         /*TODO: Add USD conversion if necessary*/
         /** Step 2: Fetch ETH price in USD */
@@ -320,13 +326,12 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Switch the chain to Polygon mainnet - it is the chain of the Vault SC. The call to the chain change is conditioned on two things -> #1 If the user has never connected the dApp to the MetaMask and they're not on mobile device outside Metamask or the user is on desktop device the polygon chain will be switched in metamask app/extension. #2 If the user has already connected the app to the metamask the chain switcher will commence. In any other case this step will be skipped. */
-        /*TODO: uncomment when you're ready to deploy to prod*/
-        /*if ((!this.firstSign && !isMobileChrome()) || this.firstSign) {
+        if ((!this.firstSign && !isMobileChrome()) || this.firstSign) {
           await this.provider.request({
             method: 'wallet_switchEthereumChain',
             params: [{chainId: polygonMainnet.chainId}]
           });
-        }*/
+        }
 
         /** Extract the metamask account's address and display it */
         await this.provider.request({method: 'eth_requestAccounts'});
@@ -423,7 +428,7 @@ export const useContractsStore = defineStore('contracts', {
         parseInt(this.inputs.nonce)
       ); // last 40 hex chars
 
-      /** TODO: Get the contract */
+      /** Get the contract */
       // contract = new web3.eth.Contract(contractABI, contractAddress);
     },
 
@@ -722,7 +727,7 @@ export const useContractsStore = defineStore('contracts', {
           /** Make a withdrawal request to Vault SC */
           await this.vaultContract.methods
             .withdrawRequest(
-              USDT_ADDRESS_STAGING,
+              USDT_ADDRESS_PRODUCTION,
               this.connectedAccount,
               formatNumberToUint256(this.form.connected.amount.value)
             )
@@ -797,7 +802,7 @@ export const useContractsStore = defineStore('contracts', {
           /** Make a withdrawal request to Vault SC */
           await this.vaultContract.methods
             .withdrawRequest(
-              USDT_ADDRESS_STAGING,
+              USDT_ADDRESS_PRODUCTION,
               this.form.external.address.value,
               formatNumberToUint256(this.form.external.amount.value)
             )
@@ -889,20 +894,39 @@ export const useContractsStore = defineStore('contracts', {
           .getProtocolTokenWithdrawalReservationLockDuration()
           .call();
 
+        console.log('lock: ', lockDuration);
+
         /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
         const withdrawalRequests = await (
           this.vaultContract as any
         ).getPastEvents('WithdrawRequest', {
-          fromBlock: 23988284,
+          fromBlock: this.lastBlock - 50000,
           toBlock: 'latest'
         });
 
+        console.log('requests: ', withdrawalRequests);
+
+        if (!withdrawalRequests.length) {
+          return;
+        }
+
         /** Take the latest WithdrawalRequest event as the active request */
-        const latestRequest = withdrawalRequests?.reverse()?.[0];
+        const latestRequest = withdrawalRequests.reverse()[0];
 
         /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
-        const activeRequestTransaction: any =
-          await this.web3.eth.getTransaction(latestRequest.transactionHash);
+        const blockRequest = await this.web3.eth.getBlock(
+          latestRequest.blockNumber,
+          true
+        );
+        const activeRequestTransaction: any = blockRequest.transactions.find(
+          (item: any) => item.hash === latestRequest.transactionHash
+        );
+        console.log('active transaction: ', activeRequestTransaction);
+
+        /*const requestActive: any = await this.web3.eth.getTransaction(
+          latestRequest.transactionHash
+        );
+        console.log('active transaction 2:', requestActive);*/
 
         /** Decode the parameters in abi in order to access the recipient address. withdrawRequest takes in three arguments - token address, recipient's address and an amount. */
         const decodedInput = this.web3.eth.abi.decodeParameters(
@@ -941,17 +965,19 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({history: true});
 
       try {
+        /** Fetch active withdrawal request */
+        await this.getActiveRequest();
+
         /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
         const withdrawals = await (this.vaultContract as any).getPastEvents(
           'Withdrawal',
           {
-            fromBlock: 23988284,
+            fromBlock: this.lastBlock - 50000,
             toBlock: 'latest'
           }
         );
 
-        /** Fetch active withdrawal request */
-        await this.getActiveRequest();
+        console.log('withdrawals: ', withdrawals);
 
         /** Map the withdrawals by adding a timestamp to the object from withdrawal block */
         const constructedWithdrawals = withdrawals.map(
@@ -1024,7 +1050,7 @@ export const useContractsStore = defineStore('contracts', {
       /** Initialize factory contract by providing the registry ABI and the factory contract's address to the contract class then save it to the global state */
       this.factoryContract = new this.web3.eth.Contract(
         VaultRegistryABI,
-        CONTRACT_ADDRESS_STAGING //TODO: replace contract with production on deploy
+        CONTRACT_ADDRESS_PRODUCTION
       );
 
       const loadingToast = toast.loading('Connecting to the contract...');
@@ -1091,12 +1117,8 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
-    async withdrawFunds(
-      recipientAddress: string,
-      amount: number,
-      callback?: () => void
-    ) {
-      if (!this.vaultContract || this.loading.withdraw) {
+    async completeWithdraw() {
+      if (!this.vaultContract || this.loading.withdraw || !this.activeRequest) {
         return;
       }
 
@@ -1106,9 +1128,9 @@ export const useContractsStore = defineStore('contracts', {
       try {
         await this.vaultContract.methods
           .withdraw(
-            USDT_ADDRESS_STAGING,
-            recipientAddress,
-            formatNumberToUint256(amount)
+            USDT_ADDRESS_PRODUCTION,
+            this.activeRequest.address,
+            formatNumberToUint256(this.activeRequest.amount)
           )
           .send({
             from: this.connectedAccount,
@@ -1123,17 +1145,14 @@ export const useContractsStore = defineStore('contracts', {
               : undefined
           });
 
-        await this.getWithdrawalHistory();
-
-        if (callback) {
-          callback();
-        }
-
+        /** Close the modal and re-fetch withdrawal list */
+        this.updateModal({completeWithdraw: false});
         bottomToast(
-          `Withdraw to: ${recipientAddress.substring(0, 4)}...${recipientAddress.slice(-4)} has been successfully completed.`,
+          `Withdraw to: ${this.activeRequest.address.substring(0, 4)}...${this.activeRequest.address.slice(-4)} has been successfully completed.`,
           3000,
           'toast__wide toast__withdrawal'
         );
+        await this.getWithdrawalHistory();
       } catch (error) {
         console.error('Error withdrawing funds: ', (error as Error).message);
         toast.error(`Error withdrawing funds: ${(error as Error).message}`);
@@ -1155,7 +1174,7 @@ export const useContractsStore = defineStore('contracts', {
       try {
         /** Make a request to the Vault smart contract to cancel the active withdraw request. It takes in one argument - currency token address */
         await this.vaultContract.methods
-          .cancelWithdrawRequest(USDT_ADDRESS_STAGING)
+          .cancelWithdrawRequest(USDT_ADDRESS_PRODUCTION)
           .send({
             from: this.connectedAccount,
             gas: this.transactionGas?.gas
@@ -1180,6 +1199,22 @@ export const useContractsStore = defineStore('contracts', {
         await this.getEstimatedGas();
       } finally {
         this.updateLoading({cancelWithdraw: false});
+      }
+    },
+
+    async getLastNetworkBlock() {
+      if (!this.web3) {
+        return;
+      }
+
+      try {
+        const latestBlock = await this.web3.eth.getBlockNumber();
+        this.lastBlock = Number(latestBlock);
+      } catch (error) {
+        console.error(
+          'Error fetching the last block: ',
+          (error as Error).message
+        );
       }
     }
   }
