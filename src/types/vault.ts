@@ -4,3 +4,8 @@ export interface IVaultBalance {
   processPaymentReservation: bigint;
   withdrawalReservation: bigint;
 }
+
+export interface IReservation {
+  amount: bigint;
+  unlockTime: bigint;
+}

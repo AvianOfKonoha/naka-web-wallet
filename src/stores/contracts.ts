@@ -24,7 +24,7 @@ import {
 import {metamaskSdk} from '@/utils/metamask.ts';
 import VaultABI from '@/assets/abi/Vault.json';
 import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
-import type {IVaultBalance} from '@/types/vault.ts';
+import type {IReservation, IVaultBalance} from '@/types/vault.ts';
 import {
   bottomToast,
   formatNumberToUint256,
@@ -865,11 +865,23 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getActiveRequest() {
-      if (!this.factoryContract || !this.web3) {
+      if (!this.factoryContract || !this.vaultContract || !this.web3) {
         return;
       }
 
       try {
+        /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
+        const reservationStatus: IReservation = await this.vaultContract.methods
+          .getWithdrawProtocolTokenReservation()
+          .call();
+        const reservationAmount = Number(reservationStatus.amount);
+
+        /** When there are no reserved funds reset the active request and stop propagation */
+        if (reservationAmount <= 0) {
+          this.activeRequest = null;
+          return;
+        }
+
         /** Fetch a lock duration of the withdrawal request from the factory contract */
         const lockDuration: bigint = await this.factoryContract.methods
           .getProtocolTokenWithdrawalReservationLockDuration()
@@ -884,16 +896,11 @@ export const useContractsStore = defineStore('contracts', {
         });
 
         /** Take the latest WithdrawalRequest event as the active request */
-        const activeRequest = withdrawalRequests?.reverse()?.[0];
-
-        if (!activeRequest) {
-          this.activeRequest = null;
-          return;
-        }
+        const latestRequest = withdrawalRequests?.reverse()?.[0];
 
         /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
         const activeRequestTransaction: any =
-          await this.web3.eth.getTransaction(activeRequest.transactionHash);
+          await this.web3.eth.getTransaction(latestRequest.transactionHash);
 
         /** Decode the parameters in abi in order to access the recipient address. withdrawRequest takes in three arguments - token address, recipient's address and an amount. */
         const decodedInput = this.web3.eth.abi.decodeParameters(
@@ -904,14 +911,14 @@ export const useContractsStore = defineStore('contracts', {
         /** By default, the unlockTime fetched from the SC is of type bigint. Once converted to the number it shows the time in seconds. First we need to multiply it with 1000 to convert it to milliseconds, then we can use Date to mutate it */
         this.activeRequest = {
           address: `${decodedInput[1]}`, //Recipients address
-          amount: formatUint256toNumber(activeRequest.returnValues.amount, 6),
+          amount: formatUint256toNumber(latestRequest.returnValues.amount, 6),
           date: new Date(
-            (Number(activeRequest.returnValues.unlockTime) -
+            (Number(latestRequest.returnValues.unlockTime) -
               Number(lockDuration)) *
               1000
           ),
           status:
-            Number(activeRequest.returnValues.unlockTime) * 1000 < Date.now()
+            Number(latestRequest.returnValues.unlockTime) * 1000 < Date.now()
               ? 'ready'
               : 'pending'
         };
@@ -933,10 +940,9 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
-        const reservationStatus: {amount: bigint; unlockTime: bigint} =
-          await this.vaultContract.methods
-            .getWithdrawProtocolTokenReservation()
-            .call();
+        const reservationStatus: IReservation = await this.vaultContract.methods
+          .getWithdrawProtocolTokenReservation()
+          .call();
 
         /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
         const withdrawals = await (this.vaultContract as any).getPastEvents(
