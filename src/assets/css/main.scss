@@ -306,9 +306,9 @@ main {
       &__toast-body {
         @include framework.grid-column-layout(
           1fr auto,
-          calc(#{framework.$defaultGridGap} / 2)
+          framework.$defaultGridGap
         );
-        padding-left: 30px;
+        padding-left: framework.$defaultPadding;
       }
       &__toast-icon {
         grid-column: 2/3;
