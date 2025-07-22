@@ -71,6 +71,19 @@ export const formatNumberToUint256 = (value: number, decimals = 6) => {
   return BigInt(Math.round(value * 10 ** decimals));
 };
 
-export const convertUint256ToHours = (time: bigint) => {
-  return (Number(time) * 1000) / 3600;
+export const formatWithAtLeastTwoDecimals = (value: number) => {
+  const [integer, decimals] = value.toString().split('.');
+
+  if (!decimals) {
+    /** No decimal part, force two decimals */
+    return parseFloat(integer).toFixed(2);
+  }
+
+  if (decimals.length === 1) {
+    /** Only 1 decimal digit, add one more zero */
+    return `${integer}.${decimals}0`;
+  }
+
+  /** Already has 2 or more decimals, return as is */
+  return value;
 };

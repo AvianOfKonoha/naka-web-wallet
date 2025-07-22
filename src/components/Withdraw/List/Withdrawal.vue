@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type {IWithdrawal} from '@/types/contracts.ts';
-import {localizeDateTime} from '@/utils/helpers.ts';
+import {
+  formatWithAtLeastTwoDecimals,
+  localizeDateTime
+} from '@/utils/helpers.ts';
 import {ref} from 'vue';
 import {useContractsStore} from '@/stores/contracts.ts';
 
@@ -67,7 +70,7 @@ const openCancelModal = () => {
         </div>
       </div>
       <div class="withdrawal__amount">
-        -{{ props.withdrawal.amount.toFixed(2) }} USD₮
+        -{{ formatWithAtLeastTwoDecimals(props.withdrawal.amount) }} USD₮
       </div>
     </div>
     <div

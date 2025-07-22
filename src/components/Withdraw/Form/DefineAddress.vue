@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type {IExternalForm} from '@/types/contracts.ts';
-import {copyToClipboard} from '@/utils/helpers.ts';
+import {
+  copyToClipboard,
+  formatWithAtLeastTwoDecimals
+} from '@/utils/helpers.ts';
 
 /*Props*/
 const props = defineProps<{
@@ -141,7 +144,10 @@ const copyAddress = () => {
     <div class="process__statement">
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
-        {{ props.form.amount.value?.toFixed(3) }} USD₮
+        {{
+          formatWithAtLeastTwoDecimals(props.form.amount.value as number)
+        }}
+        USD₮
       </div>
     </div>
     <div class="connected__form--submit">

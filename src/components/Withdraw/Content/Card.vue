@@ -1,6 +1,8 @@
 <script setup lang="ts">
 /*Props*/
-const props = defineProps<{amount: number | string}>();
+import {formatWithAtLeastTwoDecimals} from '@/utils/helpers.ts';
+
+const props = defineProps<{amount: number}>();
 </script>
 
 <template>
@@ -30,7 +32,7 @@ const props = defineProps<{amount: number | string}>();
       <div class="card__balance--title">Balance</div>
       <div class="card__balance--value">
         <div class="value__number">
-          {{ parseFloat(`${props.amount}`).toFixed(3) }}
+          {{ formatWithAtLeastTwoDecimals(props.amount) }}
         </div>
         <div class="value__currency">USD₮</div>
       </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type {IFormField} from '@/types/general.ts';
+import {formatWithAtLeastTwoDecimals} from '@/utils/helpers.ts';
 
 /*Props*/
 const props = defineProps<{
@@ -20,7 +21,10 @@ const props = defineProps<{
     <div class="process__statement">
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
-        {{ props.amountData.value?.toFixed(3) }} USD₮
+        {{
+          formatWithAtLeastTwoDecimals(props.amountData.value as number)
+        }}
+        USD₮
       </div>
     </div>
     <div class="process__button">
