@@ -59,12 +59,16 @@ export const openNewTab = (url: string) => {
   window.open(url, '_blank');
 };
 
-export const formatUint256toNumber = (value: bigint, decimals: number) => {
-  return Number(BigInt(value)) / 10 ** decimals;
+export const formatUint256toNumber = (value: bigint, decimals = 6) => {
+  const divisor = 10n ** BigInt(decimals);
+  const integerPart = value / divisor;
+  const fractionalPart = value % divisor;
+
+  return Number(integerPart) + Number(fractionalPart) / Number(divisor);
 };
 
-export const formatNumberToUint256 = (value: number, decimals: number) => {
-  return BigInt(value) * BigInt(10 ** decimals);
+export const formatNumberToUint256 = (value: number, decimals = 6) => {
+  return BigInt(Math.round(value * 10 ** decimals));
 };
 
 export const convertUint256ToHours = (time: bigint) => {

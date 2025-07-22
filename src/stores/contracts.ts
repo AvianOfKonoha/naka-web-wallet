@@ -557,7 +557,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
         this.disconnectMetamask();
 
-        /*TODO: Uncomment if multiple networks are  allowed*/
+        /*TODO: Uncomment if multiple networks are allowed*/
 
         /** If the user has not made the first connection to the metamask wallet end propagation */
         /*if (!this.connectedAccount) {
@@ -722,7 +722,7 @@ export const useContractsStore = defineStore('contracts', {
             .withdrawRequest(
               USDT_ADDRESS_STAGING,
               this.connectedAccount,
-              formatNumberToUint256(this.form.connected.amount.value, 6)
+              formatNumberToUint256(this.form.connected.amount.value)
             )
             .send({
               from: this.connectedAccount,
@@ -797,7 +797,7 @@ export const useContractsStore = defineStore('contracts', {
             .withdrawRequest(
               USDT_ADDRESS_STAGING,
               this.form.external.address.value,
-              formatNumberToUint256(this.form.external.amount.value, 6)
+              formatNumberToUint256(this.form.external.amount.value)
             )
             .send({
               from: this.connectedAccount,
@@ -850,7 +850,7 @@ export const useContractsStore = defineStore('contracts', {
           .getProtocolTokenBalances()
           .call();
 
-        const converted = formatUint256toNumber(balance.avaliableBalance, 6);
+        const converted = formatUint256toNumber(balance.avaliableBalance);
 
         this.contractBalance = {
           ...this.contractBalance,
@@ -911,7 +911,7 @@ export const useContractsStore = defineStore('contracts', {
         /** By default, the unlockTime fetched from the SC is of type bigint. Once converted to the number it shows the time in seconds. First we need to multiply it with 1000 to convert it to milliseconds, then we can use Date to mutate it */
         this.activeRequest = {
           address: `${decodedInput[1]}`, //Recipients address
-          amount: formatUint256toNumber(latestRequest.returnValues.amount, 6),
+          amount: formatUint256toNumber(latestRequest.returnValues.amount),
           date: new Date(
             (Number(latestRequest.returnValues.unlockTime) -
               Number(lockDuration)) *
@@ -967,7 +967,7 @@ export const useContractsStore = defineStore('contracts', {
 
             return {
               address: withdrawal.returnValues.recipient, //Recipients address
-              amount: formatUint256toNumber(withdrawal.returnValues.amount, 6),
+              amount: formatUint256toNumber(withdrawal.returnValues.amount),
               date: new Date(Number(timestamp) * 1000),
               status: 'complete'
             };
@@ -1114,7 +1114,7 @@ export const useContractsStore = defineStore('contracts', {
           .withdraw(
             USDT_ADDRESS_STAGING,
             recipientAddress,
-            formatNumberToUint256(amount, 6)
+            formatNumberToUint256(amount)
           )
           .send({
             from: this.connectedAccount,
