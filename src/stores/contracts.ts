@@ -63,7 +63,8 @@ export const useContractsStore = defineStore('contracts', {
       withdrawExternal: false,
       connect: false,
       history: false,
-      withdraw: false
+      withdraw: false,
+      cancelWithdraw: false
     },
     transactionHash: {
       contractAddress: ''
@@ -78,7 +79,8 @@ export const useContractsStore = defineStore('contracts', {
     modal: {
       connect: false,
       withdrawConnected: false,
-      withdrawExternal: false
+      withdrawExternal: false,
+      cancelWithdraw: false
     },
     withdrawals: [],
     form: {
@@ -939,11 +941,6 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({history: true});
 
       try {
-        /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
-        const reservationStatus: IReservation = await this.vaultContract.methods
-          .getWithdrawProtocolTokenReservation()
-          .call();
-
         /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
         const withdrawals = await (this.vaultContract as any).getPastEvents(
           'Withdrawal',
@@ -953,6 +950,7 @@ export const useContractsStore = defineStore('contracts', {
           }
         );
 
+        /** Fetch active withdrawal request */
         await this.getActiveRequest();
 
         /** Map the withdrawals by adding a timestamp to the object from withdrawal block */
@@ -980,15 +978,12 @@ export const useContractsStore = defineStore('contracts', {
         );
 
         /** save the withdrawal requests and withdrawals in global state and sort them by date */
-        this.withdrawals =
-          Number(reservationStatus.amount) > 0
-            ? [
-                this.activeRequest,
-                ...resolvedConstructedWithdrawals.sort(
-                  (a, b) => b.date - a.date
-                )
-              ]
-            : resolvedConstructedWithdrawals.sort((a, b) => b.date - a.date);
+        const successfulWithdrawals = resolvedConstructedWithdrawals.sort(
+          (a, b) => b.date - a.date
+        );
+        this.withdrawals = this.activeRequest
+          ? [this.activeRequest, ...successfulWithdrawals]
+          : successfulWithdrawals;
       } catch (error) {
         console.error(
           'Error fetching withdrawal history: ',
@@ -1043,7 +1038,6 @@ export const useContractsStore = defineStore('contracts', {
 
         /** If the Vault contract has already been created stop propagation otherwise proceed to Vault creation */
         if (vaultExists) {
-          /** Remove loader */
           await this.setVaultContract(vaultAddress);
           toast.remove(loadingToast);
           return;
@@ -1147,6 +1141,45 @@ export const useContractsStore = defineStore('contracts', {
         await this.getEstimatedGas();
       } finally {
         this.updateLoading({withdraw: false});
+      }
+    },
+
+    async cancelWithdrawRequest() {
+      if (this.loading.cancelWithdraw || !this.vaultContract) {
+        return;
+      }
+
+      /** Init loading */
+      this.updateLoading({cancelWithdraw: true});
+
+      try {
+        /** Make a request to the Vault smart contract to cancel the active withdraw request. It takes in one argument - currency token address */
+        await this.vaultContract.methods
+          .cancelWithdrawRequest(USDT_ADDRESS_STAGING)
+          .send({
+            from: this.connectedAccount,
+            gas: this.transactionGas?.gas
+              ? `${this.transactionGas.gas}`
+              : undefined,
+            maxFeePerGas: this.transactionGas?.maxFeePerGas
+              ? `${this.transactionGas.maxFeePerGas}`
+              : undefined,
+            maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
+              ? `${this.transactionGas.maxPriorityFeePerGas}`
+              : undefined
+          });
+
+        /** On successful cancel of withdraw request close the modal and re-fetch the list of withdrawals */
+        this.updateModal({cancelWithdraw: false});
+        toast.success('Withdrawal request canceled');
+        await this.getVaultBalance();
+        await this.getWithdrawalHistory();
+      } catch (error) {
+        toast.error(`${(error as Error).message}`);
+        this.updateLoading({cancelWithdraw: false});
+        await this.getEstimatedGas();
+      } finally {
+        this.updateLoading({cancelWithdraw: false});
       }
     }
   }

@@ -83,6 +83,11 @@ const openExternalModal = () => {
   contractsStore.updateModal({withdrawExternal: true});
 };
 
+const closeCancelWithdrawModal = () => {
+  contractsStore.updateModal({cancelWithdraw: false});
+  contractsStore.updateLoading({cancelWithdraw: false});
+};
+
 /*Lifecycle hooks*/
 onMounted(() => {
   // setPolygonChain();
@@ -108,6 +113,32 @@ onMounted(() => {
     :active="contractsStore.modal.withdrawExternal"
   >
     <ExternalWallet />
+  </Modal>
+  <Modal
+    :closeModal="closeCancelWithdrawModal"
+    wrapClass="modal__withdraw--wrap-complete"
+    class="modal__withdrawal--complete modal__withdrawal--cancel"
+    :active="contractsStore.modal.cancelWithdraw"
+  >
+    <div class="modal__title">Cancel Withdrawal Request</div>
+    <div class="complete__description">
+      Please note that a small gas fee is required to complete your
+      cancellation. This fee ensures the secure and timely processing of your
+      transaction. You can complete the withdrawal process after confirming the
+      payment of the gas fee. Thank you for your understanding.
+    </div>
+    <div class="cancel__button">
+      <button
+        type="button"
+        aria-label="Cancel withdrawal request"
+        @click="contractsStore.cancelWithdrawRequest"
+      >
+        Cancel withdrawal request
+        <span class="loader" v-if="contractsStore.loading.cancelWithdraw">
+          <span></span><span></span>
+        </span>
+      </button>
+    </div>
   </Modal>
 
   <!-- Main -->

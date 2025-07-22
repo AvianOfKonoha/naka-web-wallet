@@ -18,6 +18,7 @@ export interface IContractsLoading {
   connect: boolean;
   history: boolean;
   withdraw: boolean;
+  cancelWithdraw: boolean;
 }
 
 export interface IContractsHash {
@@ -42,6 +43,7 @@ export interface IContractsModal {
   connect: boolean;
   withdrawConnected: boolean;
   withdrawExternal: boolean;
+  cancelWithdraw: boolean;
 }
 
 export interface IActiveNetwork {

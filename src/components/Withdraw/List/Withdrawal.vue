@@ -33,9 +33,18 @@ const completeWithdrawal = async () => {
     closeModal
   );
 };
+
+/** If the withdrawal is a pending request give it an option to open a modal that will cancel its request otherwise stop propagation */
+const openCancelModal = () => {
+  if (props.withdrawal.status === 'complete') {
+    return;
+  }
+  contractsStore.updateModal({cancelWithdraw: true});
+};
 </script>
 
 <template>
+  <!-- Modals -->
   <Modal
     :closeModal="closeModal"
     wrapClass="modal__withdraw--wrap-complete"
@@ -63,11 +72,12 @@ const completeWithdrawal = async () => {
     </div>
   </Modal>
 
+  <!-- Main -->
   <div
     class="withdrawal__row"
     :class="`withdrawal__row--${props.withdrawal.status}`"
   >
-    <div class="withdrawal__row--statement">
+    <div class="withdrawal__row--statement" @click="openCancelModal">
       <div class="withdrawal__icon">
         <div class="withdrawal__icon--status"></div>
         <svg

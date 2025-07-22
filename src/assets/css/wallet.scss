@@ -378,7 +378,7 @@
             @include framework.flex-layout(flex, center, center, unset);
             background-color: map.get(framework.$colors, 'green-500');
             padding: 0 calc(#{framework.$defaultPadding} * 1.5);
-            @include framework.font-style('default ', 'gray-800');
+            @include framework.font-style('default', 'gray-800');
             font-weight: 600;
             border-radius: 100vh;
             transition: all 0.1s ease;
@@ -389,6 +389,32 @@
             }
             .loader {
               border-color: map.get(framework.$colors, 'gray-800');
+              border-bottom-color: transparent;
+            }
+          }
+        }
+      }
+    }
+    &--cancel {
+      .cancel {
+        &__button {
+          button {
+            width: 100%;
+            height: 48px;
+            @include framework.flex-layout(flex, center, center, unset);
+            padding: 0 calc(#{framework.$defaultPadding} * 1.5);
+            @include framework.font-style('default', 'white');
+            font-weight: 600;
+            border-radius: 100vh;
+            transition: all 0.1s ease;
+            position: relative;
+            background-color: map.get(framework.$colors, 'red-500');
+            &:active {
+              background-color: map.get(framework.$colors, 'red-800');
+              color: map.get(framework.$colors, 'white');
+            }
+            .loader {
+              border-color: map.get(framework.$colors, 'white');
               border-bottom-color: transparent;
             }
           }
@@ -558,7 +584,11 @@
                 aspect-ratio: 1;
                 border-radius: 100vh;
                 padding: 1px;
-                background: conic-gradient(#0000 10%, #f03355) content-box;
+                background: conic-gradient(
+                    #0000 10%,
+                    #{map.get(framework.$colors, 'gray-950')}
+                  )
+                  content-box;
                 -webkit-mask:
                   repeating-conic-gradient(
                     #0000 0deg,
@@ -642,6 +672,9 @@
         calc(#{framework.$defaultGridGap} / 2)
       );
       align-items: center;
+      &:active {
+        background-color: map.get(framework.$colors, 'gray-100');
+      }
     }
     &--ready {
       @include framework.grid-column-layout(
