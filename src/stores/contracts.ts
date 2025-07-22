@@ -894,17 +894,13 @@ export const useContractsStore = defineStore('contracts', {
           .getProtocolTokenWithdrawalReservationLockDuration()
           .call();
 
-        console.log('lock: ', lockDuration);
-
         /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
         const withdrawalRequests = await (
           this.vaultContract as any
         ).getPastEvents('WithdrawRequest', {
-          fromBlock: this.lastBlock - 50000,
+          fromBlock: this.lastBlock - 5000,
           toBlock: 'latest'
         });
-
-        console.log('requests: ', withdrawalRequests);
 
         if (!withdrawalRequests.length) {
           return;
@@ -921,7 +917,6 @@ export const useContractsStore = defineStore('contracts', {
         const activeRequestTransaction: any = blockRequest.transactions.find(
           (item: any) => item.hash === latestRequest.transactionHash
         );
-        console.log('active transaction: ', activeRequestTransaction);
 
         /*const requestActive: any = await this.web3.eth.getTransaction(
           latestRequest.transactionHash
@@ -972,12 +967,10 @@ export const useContractsStore = defineStore('contracts', {
         const withdrawals = await (this.vaultContract as any).getPastEvents(
           'Withdrawal',
           {
-            fromBlock: this.lastBlock - 50000,
+            fromBlock: this.lastBlock - 5000,
             toBlock: 'latest'
           }
         );
-
-        console.log('withdrawals: ', withdrawals);
 
         /** Map the withdrawals by adding a timestamp to the object from withdrawal block */
         const constructedWithdrawals = withdrawals.map(
