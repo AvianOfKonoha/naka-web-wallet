@@ -163,8 +163,8 @@ onMounted(() => {
     <div class="complete__description">
       Please note that a small gas fee is required to complete your
       cancellation. This fee ensures the secure and timely processing of your
-      transaction. You can complete the withdrawal process after confirming the
-      payment of the gas fee. Thank you for your understanding.
+      transaction. You can cancel the withdrawal after confirming the payment of
+      the gas fee. Thank you for your understanding.
     </div>
     <div class="cancel__button">
       <button
