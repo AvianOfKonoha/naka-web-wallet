@@ -15,9 +15,11 @@ import {Web3} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_PRODUCTION,
+  CONTRACT_ADDRESS_STAGING,
   NETWORKS,
   polygonMainnet,
-  USDT_ADDRESS_PRODUCTION
+  USDT_ADDRESS_PRODUCTION,
+  USDT_ADDRESS_STAGING
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
 import VaultABI from '@/assets/abi/Vault.json';
@@ -698,6 +700,20 @@ export const useContractsStore = defineStore('contracts', {
           .call();
         const reservationAmount = Number(reservationStatus.amount);
 
+        /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
+        const withdrawalRequests = await (
+          this.vaultContract as any
+        ).getPastEvents('WithdrawRequest', {
+          fromBlock: this.lastBlock - 200000,
+          toBlock: 'latest'
+        });
+
+        if (!withdrawalRequests.length) {
+          return;
+        }
+
+        this.withdrawalRequests = withdrawalRequests;
+
         /** When there are no reserved funds reset the active request and stop propagation */
         if (reservationAmount <= 0) {
           this.activeRequest = null;
@@ -708,20 +724,6 @@ export const useContractsStore = defineStore('contracts', {
         const lockDuration: bigint = await this.factoryContract.methods
           .getProtocolTokenWithdrawalReservationLockDuration()
           .call();
-
-        /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
-        const withdrawalRequests = await (
-          this.vaultContract as any
-        ).getPastEvents('WithdrawRequest', {
-          fromBlock: this.lastBlock - 50000,
-          toBlock: 'latest'
-        });
-
-        if (!withdrawalRequests.length) {
-          return;
-        }
-
-        this.withdrawalRequests = withdrawalRequests.reverse();
 
         /** Take the latest WithdrawalRequest event as the active request */
         const latestRequest = withdrawalRequests.reverse()[0];
@@ -778,7 +780,7 @@ export const useContractsStore = defineStore('contracts', {
         }
 
         /** Get token address from the CanceledWithdrawReservation event */
-        const event = receipt.logs.find(
+        const event: any = receipt.logs.find(
           (log) =>
             log.address?.toLowerCase() ===
             (this.vaultContract as any)._address.toLowerCase()
@@ -795,8 +797,8 @@ export const useContractsStore = defineStore('contracts', {
             {indexed: true, name: 'token', type: 'address'},
             {indexed: false, name: 'amount', type: 'uint256'}
           ],
-          event.data as any,
-          (event.topics as any).slice(1)
+          event.data,
+          event.topics
         );
 
         /** Set currency token and amount requested */
@@ -804,55 +806,33 @@ export const useContractsStore = defineStore('contracts', {
         const amount = decodedEvent.amount;
 
         /** Search backwards for the withdrawRequest with the same token + amount (requires scanning past logs for WithdrawRequest events) */
-
-        const encoding = this.web3.utils.sha3(
-          'WithdrawRequest(address,uint256,uint256)'
+        const cancelledRequest: any = this.withdrawalRequests.find(
+          (item: any) =>
+            amount === item.returnValues.amount &&
+            token === item.returnValues.token
         );
-        const withdrawLogs = await this.web3.eth.getPastLogs({
-          address: (this.vaultContract as any)._address,
-          fromBlock: this.lastBlock - 50000,
-          toBlock: receipt.blockNumber,
-          topics: [`${encoding}`]
-        });
 
-        /** Find matching log by token + amount */
-        for (const log of withdrawLogs.reverse()) {
-          const decoded = this.web3.eth.abi.decodeLog(
-            [
-              {indexed: true, name: 'token', type: 'address'},
-              {indexed: false, name: 'amount', type: 'uint256'},
-              {indexed: false, name: 'unlockTime', type: 'uint256'}
-            ],
-            (log as any).data,
-            (log as any).topics.slice(1)
-          );
-
-          /** Throw an error if the token and the amount of the withdrawal request doesn't coincide with the cancellation log */
-          if (
-            (decoded.token as any).toLowerCase() !==
-              (token as any).toLowerCase() ||
-            decoded.amount !== amount
-          ) {
-            throw new Error('No cancelled request found');
-          }
-
-          /** Find the transaction of the log */
-          const tx = await this.web3.eth.getTransaction(
-            (log as any).transactionHash
-          );
-
-          /** Get the decoded input of the transaction */
-          const decodedInput = this.web3.eth.abi.decodeParameters(
-            ['address', 'address', 'uint256'],
-            '0x' + tx.input.slice(10)
-          );
-
-          /** Return recipient's address and transaction hash */
-          return {
-            recipient: decodedInput[1], // recipient from calldata
-            withdrawTxHash: (log as any).transactionHash
-          };
+        /** Throw an error if no compatible request is found */
+        if (!cancelledRequest) {
+          throw new Error('No cancelled request found');
         }
+
+        /** Find the transaction of the log */
+        const cancelledTransaction = await this.web3.eth.getTransaction(
+          cancelledRequest.transactionHash
+        );
+
+        /** Get the decoded input of the transaction */
+        const decodedTransaction = this.web3.eth.abi.decodeParameters(
+          ['address', 'address', 'uint256'],
+          '0x' + cancelledTransaction.input.slice(10)
+        );
+
+        /** Return recipient's address and transaction hash */
+        return {
+          recipient: decodedTransaction[1], // recipient from decoded WR transaction data
+          withdrawTxHash: cancelledRequest.transactionHash
+        };
       } catch (error) {
         throw new Error('Matching withdrawRequest not found');
       }
@@ -874,7 +854,7 @@ export const useContractsStore = defineStore('contracts', {
         const cancelledWithdrawals = await (
           this.vaultContract as any
         ).getPastEvents('CanceledWithdrawReservation', {
-          fromBlock: this.lastBlock - 50000,
+          fromBlock: this.lastBlock - 200000,
           toBlock: 'latest'
         });
 
@@ -915,7 +895,7 @@ export const useContractsStore = defineStore('contracts', {
         const withdrawals = await (this.vaultContract as any).getPastEvents(
           'Withdrawal',
           {
-            fromBlock: this.lastBlock - 50000,
+            fromBlock: this.lastBlock - 200000,
             toBlock: 'latest'
           }
         );
