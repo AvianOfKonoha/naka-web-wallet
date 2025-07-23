@@ -827,6 +827,7 @@ export const useContractsStore = defineStore('contracts', {
             (log as any).topics.slice(1)
           );
 
+          /** Throw an error if the token and the amount of the withdrawal request doesn't coincide with the cancellation log */
           if (
             (decoded.token as any).toLowerCase() !==
               (token as any).toLowerCase() ||
@@ -835,18 +836,19 @@ export const useContractsStore = defineStore('contracts', {
             throw new Error('No cancelled request found');
           }
 
-          /** Get the transaction that made the withdrawRequest */
+          /** Find the transaction of the log */
           const tx = await this.web3.eth.getTransaction(
             (log as any).transactionHash
           );
+
+          /** Get the decoded input of the transaction */
           const decodedInput = this.web3.eth.abi.decodeParameters(
             ['address', 'address', 'uint256'],
             '0x' + tx.input.slice(10)
           );
 
+          /** Return recipient's address and transaction hash */
           return {
-            token,
-            amount,
             recipient: decodedInput[1], // recipient from calldata
             withdrawTxHash: (log as any).transactionHash
           };
@@ -893,7 +895,7 @@ export const useContractsStore = defineStore('contracts', {
             );
 
             return {
-              address: cancelledTx?.recipient,
+              address: cancelledTx?.recipient || '',
               amount: formatUint256toNumber(cancellation.returnValues.amount),
               date: new Date(Number(timestamp) * 1000),
               status: 'cancelled'
