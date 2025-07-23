@@ -764,6 +764,98 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
+    async findRecipientForCancellation(cancelTxHash: string) {
+      if (!this.web3 || !this.vaultContract) {
+        return;
+      }
+
+      try {
+        /** Get the cancel transaction receipt */
+        const receipt = await this.web3.eth.getTransactionReceipt(cancelTxHash);
+
+        /** Stop propagation if there is no transaction with provided hash */
+        if (!receipt) {
+          return;
+        }
+
+        /** Get token address from the CanceledWithdrawReservation event */
+        const event = receipt.logs.find(
+          (log) =>
+            log.address?.toLowerCase() ===
+            (this.vaultContract as any)._address.toLowerCase()
+        );
+
+        /** Stop propagation if no cancelled requests are found */
+        if (!event) {
+          throw new Error('No CanceledWithdrawReservation found in tx');
+        }
+
+        /** Decode the log by providing data from the cancelled receipt */
+        const decodedEvent = this.web3.eth.abi.decodeLog(
+          [
+            {indexed: true, name: 'token', type: 'address'},
+            {indexed: false, name: 'amount', type: 'uint256'}
+          ],
+          event.data as any,
+          (event.topics as any).slice(1)
+        );
+
+        /** Set currency token and amount requested */
+        const token = decodedEvent.token;
+        const amount = decodedEvent.amount;
+
+        /** Search backwards for the withdrawRequest with the same token + amount (requires scanning past logs for WithdrawRequest events) */
+        const encoding = this.web3.utils.sha3(
+          'WithdrawRequest(address,uint256,uint256)'
+        );
+        const withdrawLogs = await this.web3.eth.getPastLogs({
+          address: (this.vaultContract as any)._address,
+          fromBlock: this.lastBlock - 50000,
+          toBlock: receipt.blockNumber,
+          topics: [`${encoding}`]
+        });
+
+        /** Find matching log by token + amount */
+        for (const log of withdrawLogs.reverse()) {
+          const decoded = this.web3.eth.abi.decodeLog(
+            [
+              {indexed: true, name: 'token', type: 'address'},
+              {indexed: false, name: 'amount', type: 'uint256'},
+              {indexed: false, name: 'unlockTime', type: 'uint256'}
+            ],
+            (log as any).data,
+            (log as any).topics.slice(1)
+          );
+
+          if (
+            (decoded.token as any).toLowerCase() !==
+              (token as any).toLowerCase() ||
+            decoded.amount !== amount
+          ) {
+            throw new Error('No cancelled request found');
+          }
+
+          /** Get the transaction that made the withdrawRequest */
+          const tx = await this.web3.eth.getTransaction(
+            (log as any).transactionHash
+          );
+          const decodedInput = this.web3.eth.abi.decodeParameters(
+            ['address', 'address', 'uint256'],
+            '0x' + tx.input.slice(10)
+          );
+
+          return {
+            token,
+            amount,
+            recipient: decodedInput[1], // recipient from calldata
+            withdrawTxHash: (log as any).transactionHash
+          };
+        }
+      } catch (error) {
+        throw new Error('Matching withdrawRequest not found');
+      }
+    },
+
     async getWithdrawalHistory() {
       if (!this.vaultContract || !this.factoryContract || !this.web3) {
         return;
@@ -775,6 +867,47 @@ export const useContractsStore = defineStore('contracts', {
       try {
         /** Fetch active withdrawal request */
         await this.getActiveRequest();
+
+        /** Fetch all cancelled withdrawals events that manifest after successful "withdraw" method requests from the Vault contract */
+        const cancelledWithdrawals = await (
+          this.vaultContract as any
+        ).getPastEvents('CanceledWithdrawReservation', {
+          fromBlock: this.lastBlock - 50000,
+          toBlock: 'latest'
+        });
+
+        /** Map the cancellations by adding a timestamp to the object from cancellation block */
+        const constructedCancellations = cancelledWithdrawals.map(
+          async (cancellation: any) => {
+            if (!this.web3) {
+              return;
+            }
+
+            const block = await this.web3.eth.getBlock(
+              cancellation.blockNumber,
+              true
+            );
+            const timestamp = block.timestamp;
+            const cancelledTx = await this.findRecipientForCancellation(
+              cancellation.transactionHash
+            );
+
+            return {
+              address: cancelledTx?.recipient,
+              amount: formatUint256toNumber(cancellation.returnValues.amount),
+              date: new Date(Number(timestamp) * 1000),
+              status: 'cancelled'
+            };
+          }
+        );
+
+        /** Resolve mapping promises */
+        const resolvedCancellations = await Promise.all(
+          constructedCancellations
+        );
+        const sortedCancellations = resolvedCancellations.sort(
+          (a, b) => b.date - a.date
+        );
 
         /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
         const withdrawals = await (this.vaultContract as any).getPastEvents(
@@ -809,13 +942,16 @@ export const useContractsStore = defineStore('contracts', {
           constructedWithdrawals
         );
 
-        /** save the withdrawal requests and withdrawals in global state and sort them by date */
-        const successfulWithdrawals = resolvedConstructedWithdrawals.sort(
-          (a, b) => b.date - a.date
-        );
+        /** Save the cancelled and completed withdrawals to one list and sort them by date */
+        const withdrawalList = [
+          ...sortedCancellations,
+          ...resolvedConstructedWithdrawals
+        ].sort((a, b) => b.date - a.date);
+
+        /** Save the withdrawal requests, completed withdrawals and cancelled withdrawals in global state and sort them by date */
         this.withdrawals = this.activeRequest
-          ? [this.activeRequest, ...successfulWithdrawals]
-          : successfulWithdrawals;
+          ? [this.activeRequest, ...withdrawalList]
+          : withdrawalList;
       } catch (error) {
         console.error(
           'Error fetching withdrawal history: ',

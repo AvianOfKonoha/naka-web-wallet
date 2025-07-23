@@ -31,7 +31,7 @@ const openCancelModal = () => {
     class="withdrawal__row"
     :class="`withdrawal__row--${props.withdrawal.status}`"
   >
-    <div class="withdrawal__row--statement" @click="openCancelModal">
+    <div class="withdrawal__row--statement">
       <div class="withdrawal__icon">
         <div class="withdrawal__icon--status"></div>
         <svg
@@ -73,14 +73,21 @@ const openCancelModal = () => {
         -{{ formatWithAtLeastTwoDecimals(props.withdrawal.amount) }} USD₮
       </div>
     </div>
-    <div
-      class="withdrawal__row--button"
-      v-if="props.withdrawal.status === 'ready'"
-    >
+    <div class="withdrawal__row--button">
+      <button
+        class="cancel"
+        type="button"
+        aria-label="Cancel withdraw request"
+        @click="openCancelModal"
+        v-if="['ready', 'pending'].includes(props.withdrawal.status)"
+      >
+        Cancel withdraw
+      </button>
       <button
         type="button"
         aria-label="Complete withdraw"
         @click="contractsStore.updateModal({completeWithdraw: true})"
+        v-if="props.withdrawal.status === 'ready'"
       >
         Complete withdraw
       </button>

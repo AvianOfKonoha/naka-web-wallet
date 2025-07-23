@@ -403,18 +403,22 @@
             height: 48px;
             @include framework.flex-layout(flex, center, center, unset);
             padding: 0 calc(#{framework.$defaultPadding} * 1.5);
-            @include framework.font-style('default', 'white');
+            @include framework.font-style('default', 'gray-800');
             font-weight: 600;
             border-radius: 100vh;
             transition: all 0.1s ease;
             position: relative;
-            background-color: map.get(framework.$colors, 'red-500');
+            background-color: map.get(framework.$colors, 'red-300');
             &:active {
               background-color: map.get(framework.$colors, 'red-800');
               color: map.get(framework.$colors, 'white');
+              .loader {
+                border-color: map.get(framework.$colors, 'white');
+                border-bottom-color: transparent;
+              }
             }
             .loader {
-              border-color: map.get(framework.$colors, 'white');
+              border-color: map.get(framework.$colors, 'gray-800');
               border-bottom-color: transparent;
             }
           }
@@ -672,9 +676,6 @@
         calc(#{framework.$defaultGridGap} / 2)
       );
       align-items: center;
-      &:active {
-        background-color: map.get(framework.$colors, 'gray-100');
-      }
     }
     &--ready {
       @include framework.grid-column-layout(
@@ -686,6 +687,32 @@
         &__icon {
           &--status {
             background-color: map.get(framework.$colors, 'green-500');
+          }
+        }
+        &__row {
+          &--button {
+            @include framework.flex-layout(
+              inline-flex,
+              unset,
+              center,
+              calc(#{framework.$defaultGridGap} / 2)
+            );
+          }
+        }
+      }
+    }
+    &--pending {
+      @include framework.grid-column-layout(
+        1fr auto,
+        calc(#{framework.$defaultGridGap} / 2)
+      );
+      align-items: center;
+    }
+    &--cancelled {
+      .withdrawal {
+        &__icon {
+          &--status {
+            background-color: map.get(framework.$colors, 'red-300');
           }
         }
       }
@@ -712,6 +739,12 @@
         &:active {
           background-color: map.get(framework.$colors, 'green-800');
           color: map.get(framework.$colors, 'white');
+        }
+        &.cancel {
+          background-color: map.get(framework.$colors, 'red-300');
+          &:active {
+            background-color: map.get(framework.$colors, 'red-900');
+          }
         }
       }
     }
@@ -1126,10 +1159,23 @@
         grid-gap: unset;
         .withdrawal {
           &__row {
-            &--statement {
-              border-bottom-right-radius: unset;
-              border-bottom-left-radius: unset;
+            &--button {
+              @include framework.grid-column-layout(1fr 1fr, 10px);
+              button {
+                width: 100%;
+                border-radius: framework.$defaultRem;
+                border-top-right-radius: unset;
+                border-top-left-radius: unset;
+              }
             }
+          }
+        }
+      }
+      &--pending {
+        grid-template-columns: unset;
+        grid-gap: unset;
+        .withdrawal {
+          &__row {
             &--button {
               button {
                 width: 100%;
@@ -1140,6 +1186,9 @@
             }
           }
         }
+      }
+      &--button {
+        padding: 0 calc(#{framework.$defaultPadding} * 1.5);
       }
     }
   }

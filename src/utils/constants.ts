@@ -43,7 +43,7 @@ export const NETWORKS = {
   },
   137: {
     id: 'polygon',
-    symbol: 'MATIC',
+    symbol: 'POL',
     name: 'Polygon',
     icon: './img/icons/polygon-matic-logo.png'
   },
@@ -85,7 +85,7 @@ export const NETWORKS = {
   },
   80001: {
     id: 'polygon',
-    symbol: 'MATIC',
+    symbol: 'POL',
     name: 'Polygon Mumbai',
     icon: './img/icons/polygon-matic-logo.png'
   },
@@ -113,8 +113,8 @@ export const polygonMainnet = {
   chainId: '0x89', // 137 in hex
   chainName: 'Polygon Mainnet',
   nativeCurrency: {
-    name: 'MATIC',
-    symbol: 'MATIC',
+    name: 'POL',
+    symbol: 'POL',
     decimals: 18
   },
   rpcUrls: ['https://polygon-rpc.com/'],
