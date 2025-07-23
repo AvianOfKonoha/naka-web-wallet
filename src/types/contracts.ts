@@ -128,4 +128,5 @@ export interface IContractsStore {
   transactionGas: ITransactionGas | null;
   activeRequest: IWithdrawal | null;
   lastBlock: number;
+  withdrawalRequests: unknown[];
 }

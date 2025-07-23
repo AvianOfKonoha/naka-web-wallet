@@ -119,7 +119,8 @@ export const useContractsStore = defineStore('contracts', {
     vaultContract: null,
     transactionGas: null,
     activeRequest: null,
-    lastBlock: 0
+    lastBlock: 0,
+    withdrawalRequests: []
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -720,6 +721,8 @@ export const useContractsStore = defineStore('contracts', {
           return;
         }
 
+        this.withdrawalRequests = withdrawalRequests.reverse();
+
         /** Take the latest WithdrawalRequest event as the active request */
         const latestRequest = withdrawalRequests.reverse()[0];
 
@@ -731,10 +734,6 @@ export const useContractsStore = defineStore('contracts', {
         const activeRequestTransaction: any = blockRequest.transactions.find(
           (item: any) => item.hash === latestRequest.transactionHash
         );
-
-        /*const requestActive: any = await this.web3.eth.getTransaction(
-          latestRequest.transactionHash
-        );*/
 
         /** Decode the parameters in abi in order to access the recipient address. withdrawRequest takes in three arguments - token address, recipient's address and an amount. */
         const decodedInput = this.web3.eth.abi.decodeParameters(
@@ -805,6 +804,7 @@ export const useContractsStore = defineStore('contracts', {
         const amount = decodedEvent.amount;
 
         /** Search backwards for the withdrawRequest with the same token + amount (requires scanning past logs for WithdrawRequest events) */
+
         const encoding = this.web3.utils.sha3(
           'WithdrawRequest(address,uint256,uint256)'
         );
