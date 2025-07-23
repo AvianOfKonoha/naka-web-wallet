@@ -40,19 +40,12 @@ const setPolygonChain = async () => {
 
 const closeConnectedModal = () => {
   contractsStore.updateModal({withdrawConnected: false});
-  contractsStore.updateError({connected: false});
-  contractsStore.updateLoading({withdrawConnected: false});
-  contractsStore.updateFormField(null, 'connected', 'amount');
-  contractsStore.updateWallet('connected', {step: 1});
+  contractsStore.resetConnectedForm();
 };
 
 const closeExternalModal = () => {
   contractsStore.updateModal({withdrawExternal: false});
-  contractsStore.updateError({external: false});
-  contractsStore.updateLoading({withdrawExternal: false});
-  contractsStore.updateFormField(null, 'external', 'amount');
-  contractsStore.updateFormField('', 'external', 'address');
-  contractsStore.updateWallet('external', {step: 1});
+  contractsStore.resetExternalForm();
 };
 
 const openConnectedModal = () => {

@@ -193,6 +193,7 @@ export const useContractsStore = defineStore('contracts', {
       this.updateError({connected: false});
       this.updateWallet('connected', {step: 1});
       this.updateFormField(null, 'connected', 'amount');
+      this.updateLoading({withdrawConnected: false});
     },
 
     resetExternalForm() {
@@ -200,6 +201,7 @@ export const useContractsStore = defineStore('contracts', {
       this.updateWallet('external', {step: 1});
       this.updateFormField(null, 'external', 'amount');
       this.updateFormField('', 'external', 'address');
+      this.updateLoading({withdrawExternal: false});
     },
 
     updateFormField(
