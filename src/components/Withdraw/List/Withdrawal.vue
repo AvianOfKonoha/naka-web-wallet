@@ -4,7 +4,6 @@ import {
   formatWithAtLeastTwoDecimals,
   localizeDateTime
 } from '@/utils/helpers.ts';
-import {ref} from 'vue';
 import {useContractsStore} from '@/stores/contracts.ts';
 
 /*Props*/
