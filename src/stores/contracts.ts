@@ -705,22 +705,29 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      /** Get the latest block number */
-      const latestBlock = await this.web3.eth.getBlockNumber();
+      try {
+        /** Get the latest block number */
+        const latestBlock = await this.web3.eth.getBlockNumber();
 
-      /** Fetch the latest block and a block sampleSize blocks behind */
-      const blockLatest = await this.web3.eth.getBlock(latestBlock);
-      const blockPast = await this.web3.eth.getBlock(
-        Number(latestBlock) - sampleSize
-      );
+        /** Fetch the latest block and a block sampleSize blocks behind */
+        const blockLatest = await this.web3.eth.getBlock(latestBlock);
+        const blockPast = await this.web3.eth.getBlock(
+          Number(latestBlock) - sampleSize
+        );
 
-      /** Compute average block time */
-      const timeDiff =
-        Number(blockLatest.timestamp) - Number(blockPast.timestamp);
-      const avgBlockTime = timeDiff / sampleSize; // in seconds
+        /** Compute average block time */
+        const timeDiff =
+          Number(blockLatest.timestamp) - Number(blockPast.timestamp);
+        const avgBlockTime = timeDiff / sampleSize; // in seconds
 
-      /** Estimate blocks per specified time (2 days) */
-      this.blocksOffset = Math.ceil((3600 * 48) / avgBlockTime);
+        /** Estimate blocks per specified time (2 days) */
+        this.blocksOffset = Math.ceil((3600 * 48) / avgBlockTime);
+      } catch (error) {
+        console.error(
+          'Error estimating block offset: ',
+          (error as Error).message
+        );
+      }
     },
 
     async getWithdrawRequests() {
@@ -838,7 +845,8 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Get token address from the CanceledWithdrawReservation event */
         const event = transactionReceipt.logs.find(
-          (log) => log.address === this.vaultAddress
+          (log) =>
+            log.address?.toLowerCase() === this.vaultAddress.toLowerCase()
         );
 
         /** Stop propagation if no cancelled requests are found */
@@ -1076,7 +1084,7 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Make a request to "createVault" method on the factory contract to create a new Vault contract that will connect to the wallet address and the user will be able to withdraw funds from */
 
-        const tx = await this.factoryContract.methods
+        const factoryTransaction = await this.factoryContract.methods
           .createVault(this.connectedAccount)
           .send({
             from: this.connectedAccount,
@@ -1091,13 +1099,15 @@ export const useContractsStore = defineStore('contracts', {
               : undefined
           });
 
-        if (!tx.events) {
+        if (!factoryTransaction.events) {
           throw new Error(
             'Something went wrong while creating the Vault contract. Try again.'
           );
         }
 
-        await this.setVaultContract(tx.events.ContractInitialized.address);
+        await this.setVaultContract(
+          factoryTransaction.events.ContractInitialized.address
+        );
 
         toast.remove(loadingToast);
         toast.success(`Vault contract successfully created:`);
