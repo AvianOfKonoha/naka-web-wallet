@@ -876,7 +876,7 @@ export const useContractsStore = defineStore('contracts', {
         const cancelledRequest = this.withdrawalRequests.find(
           (item) =>
             amount === item.returnValues.amount &&
-            token === item.returnValues.token
+            `${token}`.toLowerCase() === item.returnValues.token.toLowerCase()
         );
 
         /** Throw an error if no compatible request is found */
