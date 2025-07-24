@@ -12,6 +12,7 @@ onMounted(() => {
   contractsStore.checkConnection();
   contractsStore.getEstimatedGas();
   contractsStore.getLastNetworkBlock();
+  contractsStore.estimateBlocksPerHour();
 });
 </script>
 

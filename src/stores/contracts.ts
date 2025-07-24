@@ -9,22 +9,28 @@ import type {
   IContractsStore,
   IContractsWallets,
   IExternalForm,
-  IWallet
+  IWallet,
+  IWithdrawal
 } from '@/types/contracts.ts';
 import {Web3} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_PRODUCTION,
-  CONTRACT_ADDRESS_STAGING,
   NETWORKS,
   polygonMainnet,
-  USDT_ADDRESS_PRODUCTION,
-  USDT_ADDRESS_STAGING
+  USDT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
 import VaultABI from '@/assets/abi/Vault.json';
 import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
-import type {IReservation, IVaultBalance} from '@/types/vault.ts';
+import type {
+  IBlock,
+  ICancelledWithdrawReservationData,
+  IReservation,
+  IVaultBalance,
+  IVaultEvent,
+  IWithdrawRequestData
+} from '@/types/vault.ts';
 import {
   bottomToast,
   formatNumberToUint256,
@@ -122,7 +128,11 @@ export const useContractsStore = defineStore('contracts', {
     transactionGas: null,
     activeRequest: null,
     lastBlock: 0,
-    withdrawalRequests: []
+    withdrawalRequests: [],
+    vaultAddress: '',
+    blocksOffset: 5000,
+    completedWithdrawals: [],
+    cancelledWithdrawals: []
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -690,6 +700,50 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
+    async estimateBlocksPerHour(sampleSize = 20) {
+      if (!this.web3) {
+        return;
+      }
+
+      /** Get the latest block number */
+      const latestBlock = await this.web3.eth.getBlockNumber();
+
+      /** Fetch the latest block and a block sampleSize blocks behind */
+      const blockLatest = await this.web3.eth.getBlock(latestBlock);
+      const blockPast = await this.web3.eth.getBlock(
+        Number(latestBlock) - sampleSize
+      );
+
+      /** Compute average block time */
+      const timeDiff =
+        Number(blockLatest.timestamp) - Number(blockPast.timestamp);
+      const avgBlockTime = timeDiff / sampleSize; // in seconds
+
+      /** Estimate blocks per specified time (2 days) */
+      this.blocksOffset = Math.ceil((3600 * 48) / avgBlockTime);
+    },
+
+    async getWithdrawRequests() {
+      if (!this.vaultContract) {
+        return;
+      }
+
+      try {
+        /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
+        this.withdrawalRequests = (await (
+          this.vaultContract as any
+        ).getPastEvents('WithdrawRequest', {
+          fromBlock: this.lastBlock - this.blocksOffset,
+          toBlock: 'latest'
+        })) as IVaultEvent<IWithdrawRequestData>[];
+      } catch (error) {
+        console.error(
+          'Error fetching withdraw requests; ',
+          (error as Error).message
+        );
+      }
+    },
+
     async getActiveRequest() {
       if (!this.factoryContract || !this.vaultContract || !this.web3) {
         return;
@@ -702,20 +756,6 @@ export const useContractsStore = defineStore('contracts', {
           .call();
         const reservationAmount = Number(reservationStatus.amount);
 
-        /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
-        const withdrawalRequests = await (
-          this.vaultContract as any
-        ).getPastEvents('WithdrawRequest', {
-          fromBlock: this.lastBlock - 200000,
-          toBlock: 'latest'
-        });
-
-        if (!withdrawalRequests.length) {
-          return;
-        }
-
-        this.withdrawalRequests = withdrawalRequests;
-
         /** When there are no reserved funds reset the active request and stop propagation */
         if (reservationAmount <= 0) {
           this.activeRequest = null;
@@ -727,17 +767,31 @@ export const useContractsStore = defineStore('contracts', {
           .getProtocolTokenWithdrawalReservationLockDuration()
           .call();
 
+        /** Fetch withdraw requests from WithdrawRequest event */
+        await this.getWithdrawRequests();
+
+        if (!this.withdrawalRequests.length) {
+          return;
+        }
+
         /** Take the latest WithdrawalRequest event as the active request */
-        const latestRequest = withdrawalRequests.reverse()[0];
+        const latestRequest = this.withdrawalRequests.reverse()[0];
 
         /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
-        const blockRequest = await this.web3.eth.getBlock(
+        const blockRequest = (await this.web3.eth.getBlock(
           latestRequest.blockNumber,
           true
+        )) as IBlock;
+
+        /** Extract the active request by comparing block transaction's hash to the latest withdrawal request event's hash */
+        const activeRequestTransaction = blockRequest.transactions.find(
+          (item) => item.hash === latestRequest.transactionHash
         );
-        const activeRequestTransaction: any = blockRequest.transactions.find(
-          (item: any) => item.hash === latestRequest.transactionHash
-        );
+
+        /** Stop propagation if no transaction is found */
+        if (!activeRequestTransaction) {
+          return;
+        }
 
         /** Decode the parameters in abi in order to access the recipient address. withdrawRequest takes in three arguments - token address, recipient's address and an amount. */
         const decodedInput = this.web3.eth.abi.decodeParameters(
@@ -774,23 +828,22 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Get the cancel transaction receipt */
-        const receipt = await this.web3.eth.getTransactionReceipt(cancelTxHash);
+        const transactionReceipt =
+          await this.web3.eth.getTransactionReceipt(cancelTxHash);
 
         /** Stop propagation if there is no transaction with provided hash */
-        if (!receipt) {
+        if (!transactionReceipt) {
           return;
         }
 
         /** Get token address from the CanceledWithdrawReservation event */
-        const event: any = receipt.logs.find(
-          (log) =>
-            log.address?.toLowerCase() ===
-            (this.vaultContract as any)._address.toLowerCase()
+        const event = transactionReceipt.logs.find(
+          (log) => log.address === this.vaultAddress
         );
 
         /** Stop propagation if no cancelled requests are found */
-        if (!event) {
-          throw new Error('No CanceledWithdrawReservation found in tx');
+        if (!event || !event.data || !event.topics) {
+          return;
         }
 
         /** Decode the log by providing data from the cancelled receipt */
@@ -808,8 +861,12 @@ export const useContractsStore = defineStore('contracts', {
         const amount = decodedEvent.amount;
 
         /** Search backwards for the withdrawRequest with the same token + amount (requires scanning past logs for WithdrawRequest events) */
-        const cancelledRequest: any = this.withdrawalRequests.find(
-          (item: any) =>
+        if (!this.withdrawalRequests.length) {
+          await this.getWithdrawRequests();
+        }
+
+        const cancelledRequest = this.withdrawalRequests.find(
+          (item) =>
             amount === item.returnValues.amount &&
             token === item.returnValues.token
         );
@@ -840,29 +897,19 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
-    async getWithdrawalHistory() {
-      if (!this.vaultContract || !this.factoryContract || !this.web3) {
-        return;
-      }
-
-      /** Init loading */
-      this.updateLoading({history: true});
-
+    async getCancelledWithdrawals() {
       try {
-        /** Fetch active withdrawal request */
-        await this.getActiveRequest();
-
         /** Fetch all cancelled withdrawals events that manifest after successful "withdraw" method requests from the Vault contract */
-        const cancelledWithdrawals = await (
+        const cancelledWithdrawals = (await (
           this.vaultContract as any
         ).getPastEvents('CanceledWithdrawReservation', {
-          fromBlock: this.lastBlock - 200000,
+          fromBlock: this.lastBlock - this.blocksOffset,
           toBlock: 'latest'
-        });
+        })) as IVaultEvent<ICancelledWithdrawReservationData>[];
 
         /** Map the cancellations by adding a timestamp to the object from cancellation block */
         const constructedCancellations = cancelledWithdrawals.map(
-          async (cancellation: any) => {
+          async (cancellation) => {
             if (!this.web3) {
               return;
             }
@@ -877,7 +924,7 @@ export const useContractsStore = defineStore('contracts', {
             );
 
             return {
-              address: cancelledTx?.recipient || '',
+              address: cancelledTx ? cancelledTx.recipient : '',
               amount: formatUint256toNumber(cancellation.returnValues.amount),
               date: new Date(Number(timestamp) * 1000),
               status: 'cancelled'
@@ -886,18 +933,24 @@ export const useContractsStore = defineStore('contracts', {
         );
 
         /** Resolve mapping promises */
-        const resolvedCancellations = await Promise.all(
+        this.cancelledWithdrawals = (await Promise.all(
           constructedCancellations
+        )) as IWithdrawal[];
+      } catch (error) {
+        console.error(
+          'Error fetching cancelled withdrawals: ',
+          (error as Error).message
         );
-        const sortedCancellations = resolvedCancellations.sort(
-          (a, b) => b.date - a.date
-        );
+      }
+    },
 
+    async getCompletedWithdrawals() {
+      try {
         /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
         const withdrawals = await (this.vaultContract as any).getPastEvents(
           'Withdrawal',
           {
-            fromBlock: this.lastBlock - 200000,
+            fromBlock: this.lastBlock - this.blocksOffset,
             toBlock: 'latest'
           }
         );
@@ -922,15 +975,38 @@ export const useContractsStore = defineStore('contracts', {
         );
 
         /** Resolve mapping promises */
-        const resolvedConstructedWithdrawals = await Promise.all(
-          constructedWithdrawals
+        this.completedWithdrawals = await Promise.all(constructedWithdrawals);
+      } catch (error) {
+        console.error(
+          'Error fetching completed withdrawals',
+          (error as Error).message
         );
+      }
+    },
+
+    async getWithdrawalHistory() {
+      if (!this.vaultContract || !this.factoryContract || !this.web3) {
+        return;
+      }
+
+      /** Init loading */
+      this.updateLoading({history: true});
+
+      try {
+        /** Fetch active withdrawal request */
+        await this.getActiveRequest();
+
+        /** Fetch cancelled withdrawals */
+        await this.getCancelledWithdrawals();
+
+        /** Fetch completed withdrawals */
+        await this.getCompletedWithdrawals();
 
         /** Save the cancelled and completed withdrawals to one list and sort them by date */
         const withdrawalList = [
-          ...sortedCancellations,
-          ...resolvedConstructedWithdrawals
-        ].sort((a, b) => b.date - a.date);
+          ...this.cancelledWithdrawals,
+          ...this.completedWithdrawals
+        ].sort((a, b) => +b.date - +a.date);
 
         /** Save the withdrawal requests, completed withdrawals and cancelled withdrawals in global state and sort them by date */
         this.withdrawals = this.activeRequest
@@ -983,14 +1059,14 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Check if the currently connected wallet address already created a Vault smart contract. Stop propagation if so, otherwise create a new Vault smart contract. */
-        const vaultAddress: string = await this.factoryContract.methods
+        this.vaultAddress = await this.factoryContract.methods
           .getVaultAddressByOwner(this.connectedAccount)
           .call();
-        const vaultExists = parseInt(vaultAddress, 16);
+        const vaultExists = parseInt(this.vaultAddress, 16);
 
         /** If the Vault contract has already been created stop propagation otherwise proceed to Vault creation */
         if (vaultExists) {
-          await this.setVaultContract(vaultAddress);
+          await this.setVaultContract(this.vaultAddress);
           toast.remove(loadingToast);
           return;
         }

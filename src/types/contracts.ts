@@ -1,5 +1,6 @@
 import type {Contract, ContractAbi, Web3} from 'web3';
 import type {IFormField} from '@/types/general.ts';
+import type {IVaultEvent, IWithdrawRequestData} from '@/types/vault.ts';
 
 export interface IContractsInputs {
   privateKey: string;
@@ -128,5 +129,9 @@ export interface IContractsStore {
   transactionGas: ITransactionGas | null;
   activeRequest: IWithdrawal | null;
   lastBlock: number;
-  withdrawalRequests: unknown[];
+  withdrawalRequests: IVaultEvent<IWithdrawRequestData>[];
+  completedWithdrawals: IWithdrawal[];
+  cancelledWithdrawals: IWithdrawal[];
+  vaultAddress: string;
+  blocksOffset: number;
 }
