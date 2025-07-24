@@ -720,8 +720,8 @@ export const useContractsStore = defineStore('contracts', {
           Number(blockLatest.timestamp) - Number(blockPast.timestamp);
         const avgBlockTime = timeDiff / sampleSize; // in seconds
 
-        /** Estimate blocks per specified time (2 days) */
-        this.blocksOffset = Math.ceil((3600 * 48) / avgBlockTime);
+        /** Estimate blocks per specified time (3 days) */
+        this.blocksOffset = Math.ceil((3600 * 72) / avgBlockTime);
       } catch (error) {
         console.error(
           'Error estimating block offset: ',
