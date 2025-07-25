@@ -1019,7 +1019,6 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({history: true});
 
       try {
-        console.log('days: ', this.daysOffset);
         /** Fetch active withdrawal request */
         await this.getActiveRequest();
 

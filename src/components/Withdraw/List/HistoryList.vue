@@ -8,6 +8,10 @@ import {ref, watch} from 'vue';
 /*Constants*/
 const timeList = [
   {
+    text: 'Today',
+    value: (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24
+  },
+  {
     text: '2 days',
     value: 2
   },

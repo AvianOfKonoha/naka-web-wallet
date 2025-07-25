@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import Empty from '@/components/Withdraw/List/Empty.vue';
 import {useContractsStore} from '@/stores/contracts.ts';
 import {onMounted} from 'vue';
 import {NetworkEnum, polygonMainnet} from '@/utils/constants.ts';
 import {toast} from 'vue3-toastify';
 import Modal from '@/components/UI/Modal.vue';
 import ConnectedWallet from '@/components/Withdraw/Form/ConnectedWallet.vue';
-import Withdrawal from '@/components/Withdraw/List/Withdrawal.vue';
 import ExternalWallet from '@/components/Withdraw/Form/ExternalWallet.vue';
 import WithdrawBox from '@/components/Withdraw/Content/WithdrawBox.vue';
 import Card from '@/components/Withdraw/Content/Card.vue';
-import Loading from '@/components/Withdraw/List/Loading.vue';
 import {bottomToast} from '@/utils/helpers.ts';
 import HistoryList from '@/components/Withdraw/List/HistoryList.vue';
 
