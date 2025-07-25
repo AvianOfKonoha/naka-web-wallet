@@ -1,5 +1,3 @@
-<script setup lang="ts"></script>
-
 <template>
   <div class="history__list--empty">
     <div class="empty__image">

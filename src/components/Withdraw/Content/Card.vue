@@ -1,7 +1,7 @@
 <script setup lang="ts">
-/*Props*/
 import {formatWithAtLeastTwoDecimals} from '@/utils/helpers.ts';
 
+/*Props*/
 const props = defineProps<{amount: number}>();
 </script>
 
