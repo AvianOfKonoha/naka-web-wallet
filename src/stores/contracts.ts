@@ -132,7 +132,8 @@ export const useContractsStore = defineStore('contracts', {
     vaultAddress: '',
     blocksOffset: 5000,
     completedWithdrawals: [],
-    cancelledWithdrawals: []
+    cancelledWithdrawals: [],
+    daysOffset: 2
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -184,6 +185,10 @@ export const useContractsStore = defineStore('contracts', {
         ...this.error,
         ...error
       };
+    },
+
+    updateOffsetDays(days: number) {
+      this.daysOffset = days;
     },
 
     updateWallet(
@@ -720,8 +725,8 @@ export const useContractsStore = defineStore('contracts', {
           Number(blockLatest.timestamp) - Number(blockPast.timestamp);
         const avgBlockTime = timeDiff / sampleSize; // in seconds
 
-        /** Estimate blocks per specified time (2 days) */
-        this.blocksOffset = Math.ceil((3600 * 48) / avgBlockTime);
+        /** Estimate blocks per specified time (1 day) */
+        this.blocksOffset = Math.ceil((3600 * 24) / avgBlockTime);
       } catch (error) {
         console.error(
           'Error estimating block offset: ',
@@ -740,7 +745,9 @@ export const useContractsStore = defineStore('contracts', {
         this.withdrawalRequests = (await (
           this.vaultContract as any
         ).getPastEvents('WithdrawRequest', {
-          fromBlock: this.lastBlock - this.blocksOffset,
+          fromBlock: Math.ceil(
+            this.lastBlock - this.blocksOffset * this.daysOffset
+          ),
           toBlock: 'latest'
         })) as IVaultEvent<IWithdrawRequestData>[];
       } catch (error) {
@@ -820,6 +827,13 @@ export const useContractsStore = defineStore('contracts', {
               ? 'ready'
               : 'pending'
         };
+
+        /** If more than two days have passed, cancel active withdraw request */
+        const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+        if (twoDaysAgo.getTime() < this.activeRequest.date.getTime()) {
+          return;
+        }
+        await this.cancelWithdrawRequest();
       } catch (error) {
         console.error(
           'Error fetching active request: ',
@@ -876,12 +890,12 @@ export const useContractsStore = defineStore('contracts', {
         const cancelledRequest = this.withdrawalRequests.find(
           (item) =>
             amount === item.returnValues.amount &&
-            `${token}`.toLowerCase() === item.returnValues.token.toLowerCase()
+            token === item.returnValues.token
         );
 
         /** Throw an error if no compatible request is found */
         if (!cancelledRequest) {
-          throw new Error('No cancelled request found');
+          return;
         }
 
         /** Find the transaction of the log */
@@ -911,7 +925,9 @@ export const useContractsStore = defineStore('contracts', {
         const cancelledWithdrawals = (await (
           this.vaultContract as any
         ).getPastEvents('CanceledWithdrawReservation', {
-          fromBlock: this.lastBlock - this.blocksOffset,
+          fromBlock: Math.ceil(
+            this.lastBlock - this.blocksOffset * this.daysOffset
+          ),
           toBlock: 'latest'
         })) as IVaultEvent<ICancelledWithdrawReservationData>[];
 
@@ -941,9 +957,9 @@ export const useContractsStore = defineStore('contracts', {
         );
 
         /** Resolve mapping promises */
-        this.cancelledWithdrawals = (await Promise.all(
-          constructedCancellations
-        )) as IWithdrawal[];
+        this.cancelledWithdrawals = (
+          await Promise.all(constructedCancellations)
+        ).filter((item) => item?.address) as IWithdrawal[];
       } catch (error) {
         console.error(
           'Error fetching cancelled withdrawals: ',
@@ -958,7 +974,9 @@ export const useContractsStore = defineStore('contracts', {
         const withdrawals = await (this.vaultContract as any).getPastEvents(
           'Withdrawal',
           {
-            fromBlock: this.lastBlock - this.blocksOffset,
+            fromBlock: Math.ceil(
+              this.lastBlock - this.blocksOffset * this.daysOffset
+            ),
             toBlock: 'latest'
           }
         );
@@ -1001,6 +1019,7 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({history: true});
 
       try {
+        console.log('days: ', this.daysOffset);
         /** Fetch active withdrawal request */
         await this.getActiveRequest();
 
@@ -1175,7 +1194,7 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
-    async cancelWithdrawRequest() {
+    async cancelWithdrawRequest(overThreshold = false) {
       if (this.loading.cancelWithdraw || !this.vaultContract) {
         return;
       }
@@ -1202,9 +1221,14 @@ export const useContractsStore = defineStore('contracts', {
 
         /** On successful cancel of withdraw request close the modal and re-fetch the list of withdrawals */
         this.updateModal({cancelWithdraw: false});
-        toast.success('Withdrawal request canceled');
         await this.getVaultBalance();
         await this.getWithdrawalHistory();
+
+        /** In case the elapsed time since the withdrawal request was made passes 2 days, and it hasn't been confirmed prevent toast success from showing - the request will get cancelled by dApp */
+        if (overThreshold) {
+          return;
+        }
+        toast.success('Withdrawal request canceled');
       } catch (error) {
         toast.error(`${(error as Error).message}`);
         this.updateLoading({cancelWithdraw: false});

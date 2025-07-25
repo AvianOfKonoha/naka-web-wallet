@@ -627,6 +627,25 @@
             @include framework.grid-gap(calc(#{framework.$defaultGridGap} / 2));
           }
         }
+        &__selector {
+          @include framework.flex-layout(
+            inline-flex,
+            flex-end,
+            center,
+            calc(#{framework.$defaultGridGap} / 2)
+          );
+          &--select {
+            border: 1px solid map.get(framework.$colors, 'gray-100');
+            border-radius: framework.$defaultRem;
+            background-color: map.get(framework.$colors, 'gray-50');
+            @include framework.font-style('default', 'gray-800');
+            padding: calc(#{framework.$defaultPadding} / 2)
+              framework.$defaultPadding;
+          }
+          label {
+            @include framework.font-style('14', 'gray-400');
+          }
+        }
       }
     }
   }

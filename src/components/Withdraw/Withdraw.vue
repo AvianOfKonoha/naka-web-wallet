@@ -13,6 +13,7 @@ import WithdrawBox from '@/components/Withdraw/Content/WithdrawBox.vue';
 import Card from '@/components/Withdraw/Content/Card.vue';
 import Loading from '@/components/Withdraw/List/Loading.vue';
 import {bottomToast} from '@/utils/helpers.ts';
+import HistoryList from '@/components/Withdraw/List/HistoryList.vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -163,7 +164,7 @@ onMounted(() => {
       <button
         type="button"
         aria-label="Cancel withdrawal request"
-        @click="contractsStore.cancelWithdrawRequest"
+        @click="() => contractsStore.cancelWithdrawRequest"
       >
         Cancel withdrawal request
         <span class="loader" v-if="contractsStore.loading.cancelWithdraw">
@@ -207,30 +208,7 @@ onMounted(() => {
           "
         />
       </div>
-      <div class="withdraw__screen--row withdraw__screen--history">
-        <div class="history__title">Withdrawal History</div>
-        <div class="history__list">
-          <Empty
-            v-if="
-              !contractsStore.withdrawals.length &&
-              !contractsStore.loading.history
-            "
-          />
-          <div
-            class="history__list--grid"
-            v-if="
-              contractsStore.withdrawals.length &&
-              !contractsStore.loading.history
-            "
-          >
-            <Withdrawal
-              v-for="withdrawal in contractsStore.withdrawals"
-              :withdrawal="withdrawal"
-            />
-          </div>
-          <Loading v-if="contractsStore.loading.history" />
-        </div>
-      </div>
+      <HistoryList />
     </div>
   </div>
 </template>

@@ -134,4 +134,5 @@ export interface IContractsStore {
   cancelledWithdrawals: IWithdrawal[];
   vaultAddress: string;
   blocksOffset: number;
+  daysOffset: number;
 }
