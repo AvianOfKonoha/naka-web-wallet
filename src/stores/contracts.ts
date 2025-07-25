@@ -1102,7 +1102,6 @@ export const useContractsStore = defineStore('contracts', {
         await this.getEstimatedGas();
 
         /** Make a request to "createVault" method on the factory contract to create a new Vault contract that will connect to the wallet address and the user will be able to withdraw funds from */
-
         const factoryTransaction = await this.factoryContract.methods
           .createVault(this.connectedAccount)
           .send({
@@ -1195,7 +1194,11 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async cancelWithdrawRequest(overThreshold = false) {
-      if (this.loading.cancelWithdraw || !this.vaultContract) {
+      if (
+        this.loading.cancelWithdraw ||
+        !this.vaultContract ||
+        !this.transactionGas
+      ) {
         return;
       }
 
@@ -1208,15 +1211,9 @@ export const useContractsStore = defineStore('contracts', {
           .cancelWithdrawRequest(USDT_ADDRESS_PRODUCTION)
           .send({
             from: this.connectedAccount,
-            gas: this.transactionGas?.gas
-              ? `${this.transactionGas.gas}`
-              : undefined,
-            maxFeePerGas: this.transactionGas?.maxFeePerGas
-              ? `${this.transactionGas.maxFeePerGas}`
-              : undefined,
-            maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
-              ? `${this.transactionGas.maxPriorityFeePerGas}`
-              : undefined
+            gas: `${this.transactionGas.gas}`,
+            maxFeePerGas: `${this.transactionGas.maxFeePerGas}`,
+            maxPriorityFeePerGas: `${this.transactionGas.maxPriorityFeePerGas}`
           });
 
         /** On successful cancel of withdraw request close the modal and re-fetch the list of withdrawals */
