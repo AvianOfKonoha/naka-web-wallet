@@ -234,6 +234,7 @@ async function withdrawFromVault(vaultAddress: string, tokenAddress: string, rec
    }
 }
 ```
+---
 
 ## 🏗️ Rebuilding the project locally
 
