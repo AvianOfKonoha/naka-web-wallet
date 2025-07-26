@@ -1,10 +1,9 @@
 # 🧾 Vault Smart Contract Frontend
 **Built with Vue + Vite + TypeScript + Web3.js**
 
-This frontend application was rewritten from a minimal Vite setup into a Vue-based client that interacts with Ethereum smart contracts using **Web3.js** and **MetaMask**. It includes functionality to deterministically compute contract addresses using **RLP encoding** and **Keccak-256 hashing**—entirely within the browser, with no backend.
+**Vault dApp** is a lightweight, browser‑based minimal Vite setup and a Vue-based client that interacts with Polygon smart contracts using **Web3.js**. Users can create personal **Vault contracts** via a **VaultRegistry factory**, manage assets, and handle deposits, withdrawals, and KYC settings securely through **MetaMask**.
 
 ---
-
 
 ## 🌍 Live Demo
 
@@ -21,7 +20,7 @@ You can access the deployed version of this app here:
 - 🔗 Connect to Ethereum via MetaMask using Web3.js
 - 💼 Withdraw crypto to connected wallet
 - 💼 Withdraw crypto to external wallet
-- 📜️ View withdraw history  
+- 📜️ View withdraw history
 - ⚡ Instant development with Vite
 - 🧩 Written in **TypeScript** for type safety and scalability
 - 🌐 Clean, static frontend suitable for GitHub Pages
@@ -29,103 +28,80 @@ You can access the deployed version of this app here:
 
 ---
 
-## 🧠 Web3 Methods
+## 🏭 Vault Registry (Factory Contract)
 
-The following methods are available on the **Vault smart contract**, allowing the frontend application to:
-
-- 🔍 Monitor vault status and token balances
-- 🧾 Manage card keys
-- 💸 Handle deposits and withdrawals
-- ⚙️ Configure payment limits
-
----
-
-## 🏦 Core Vault Methods
+The **VaultRegistry** contract manages all Vault deployments and registry-level settings:
 
 | Method | Description |
 |--------|-------------|
-| `deposit(token, amount)` | Deposit native or ERC-20 tokens into the vault (payable). |
+| `createVault(owner)` | **Creates a new Vault** for the specified owner. Returns the Vault address. |
+| `getVaultByOwner(owner)` | Retrieve vault details by owner address. |
+| `getVaultAddressByOwner(owner)` | Get the vault contract address linked to an owner. |
+| `getVaults(page, pageSize)` | Paginated list of all registered vaults. |
+| `getVaultsCount()` | Total number of vaults created. |
+| `getVaultData(vaultAddress)` | Get full details of a specific vault. |
+| `getProtocolTokenAddress()` | Address of the protocol’s ERC‑20 token. |
+| `getProtocolTokenBridgeAddress()` | Address used for cross‑chain bridge withdrawals. |
+| `getProtocolTokenIsWrapped()` | Returns true if the token is wrapped. |
+| `getKYCLevels(...)` | List of KYC levels and associated spending limits. |
+| `getDefaultKYCLevel()` | Default KYC level assigned to new vaults. |
+
+---
+
+## 🏦 Vault Contract Methods
+
+Once created, each Vault provides a full suite of fund, key, and payment management methods:
+
+### Funds Management
+| Method | Description |
+|--------|-------------|
+| `deposit(token, amount)` | Deposit native or ERC‑20 tokens into the vault (payable). |
 | `withdraw(token, recipient, amount)` | Withdraw tokens directly to a recipient. |
 | `withdrawRequest(token, recipient, amount)` | Request a delayed withdrawal. |
-| `cancelWithdrawRequest(token)` | Cancel a previously requested withdrawal. |
+| `cancelWithdrawRequest(token)` | Cancel a pending withdrawal. |
 | `getWithdrawProtocolTokenReservation()` | View pending withdrawal amount and unlock time. |
-| `getProtocolTokenBalances()` | Get all protocol token balances and reservations. |
+| `getProtocolTokenBalances()` | Retrieve protocol token balances and reservations. |
 
----
-
-## 💳 Card Key Management
-
+### Card Key Management
 | Method | Description |
 |--------|-------------|
-| `addCardKey(cardKey, active)` | Add a new card key address and set its active status. |
+| `addCardKey(cardKey, active)` | Add a new card key and set active status. |
 | `setCardKeyActive(cardKey, active)` | Enable or disable an existing card key. |
-| `getCardKey(cardKey)` | Fetch a card key's status. |
-| `getCardKeyByIndex(index)` | Get a card key address by index. |
-| `getCardKeys(page, pageSize, activeOnly)` | Paginated list of card keys (optionally filter active only). |
-| `getAvaliableCardKeysCount()` | Count of active/available card keys. |
-| `isCardKeyActive(cardKey)` | Check if a card key is active. |
+| `getCardKeys(page, pageSize, activeOnly)` | Paginated list of card keys, optionally filtering active only. |
+| `isCardKeyActive(cardKey)` | Check if a card key is currently active. |
 
----
-
-## 💸 Merchant & Payment Flow
-
+### Merchant Payments
 | Method | Description |
 |--------|-------------|
-| `addProcessPaymentReservation(...)` | Create a payment reservation for a merchant. |
-| `cancelProcessPaymentReservation(gatewayPaymentId)` | Cancel a pending payment reservation. |
+| `addProcessPaymentReservation(...)` | Create a reservation for a merchant payment. |
 | `executeProcessPayment(gatewayPaymentId)` | Finalize a reserved payment. |
-| `getProcessPaymentProtocolTokenAmount(merchantId, amount)` | Compute the token cost for a payment. |
+| `cancelProcessPaymentReservation(gatewayPaymentId)` | Cancel a pending payment reservation. |
+| `getProcessPaymentProtocolTokenAmount(merchantId, amount)` | Calculate token cost for a payment. |
 | `getProcessPaymentProtocolTokenReservation()` | Total reserved tokens for pending payments. |
-| `checkLimitsAndSignitures(...)` | Validate limits and signature of a payment. |
-| `verifySignitures(...)` | Verify and recover signed payment amount. |
 
----
-
-## 🔐 Ownership & Admin
-
+### Ownership & Administration
 | Method | Description |
 |--------|-------------|
-| `owner()` | Get the current owner address. |
-| `pendingOwner()` | View address of the pending ownership candidate. |
+| `owner()` | Get the current vault owner. |
+| `transferOwnership(newOwner)` | Initiate transfer of ownership. |
 | `acceptOwnership()` | Accept pending ownership transfer. |
-| `transferOwnership(newOwner)` | Start ownership transfer process. |
-| `renounceOwnership()` | Permanently give up contract ownership. |
+| `renounceOwnership()` | Permanently renounce ownership. |
 
----
-
-## ⚙️ KYC & Vault Initialization
-
+### KYC & Initialization
 | Method | Description |
 |--------|-------------|
-| `init(owner, registry, level)` | One-time contract initializer. |
-| `isInitialized()` | Check if the vault is initialized. |
-| `getVaultKYCLevel()` | Get the current KYC level of the vault. |
-| `setVaultKYCLevel(level, sig, signer)` | Update KYC level via signed payload. |
-| `isKYCLevelValid()` | Verify if the KYC level is still valid. |
+| `init(owner, registry, level)` | One‑time initializer for vaults. |
+| `getVaultKYCLevel()` | Get current KYC level. |
+| `setVaultKYCLevel(level, sig, signer)` | Update vault’s KYC level using a signed payload. |
+| `isKYCLevelValid()` | Check if KYC level is valid. |
 
----
-
-## 🌉 Bridge Support
-
+### Bridge Support
 | Method | Description |
 |--------|-------------|
-| `bridgeWithdraw(...)` | Perform a cross-chain bridge withdrawal. |
-| `bridgeWithdrawRequest(...)` | Request a bridge-based withdrawal. |
-| `getProtocolTokenBridgeAddress()` | Address of the bridge target. |
-| `getProtocolTokenIsWrapped()` | Check if the token is a wrapped asset. |
-
----
-
-## 🧾 View & Utility Methods
-
-| Method | Description |
-|--------|-------------|
-| `getVaultVersion()` | Returns vault version (pure). |
-| `getProtocolTokenAddress()` | ERC-20 address used as protocol token. |
-| `getVaultRegistryAddress()` | Address of the connected registry. |
-| `getProtocolTokenBalancesWithLimitsCheck(amount)` | Check balances with a simulated reservation. |
-| `getPaymentProcessorHash(...)` | Generate a hash for payment verification. |
-| `supportsInterface(interfaceId)` | ERC165 support checker. |
+| `bridgeWithdraw(...)` | Execute cross-chain withdrawal. |
+| `bridgeWithdrawRequest(...)` | Request a bridge withdrawal. |
+| `getProtocolTokenBridgeAddress()` | Address of the bridge. |
+| `getProtocolTokenIsWrapped()` | Whether the vault’s token is wrapped. |
 
 ---
 
@@ -133,7 +109,7 @@ The following methods are available on the **Vault smart contract**, allowing th
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start for Users
 
 ### ✅ Prerequisites
 
@@ -158,7 +134,7 @@ For **Windows users**, simply double-click the included `start_WIN.bat` file in 
 
    ```bash
    chmod +x start_macOS.command
-
+   ```
 ---
 
 If you prefer to start the server manually, or are on a different OS, you can use Python’s built-in HTTP server:
@@ -167,6 +143,97 @@ If you prefer to start the server manually, or are on a different OS, you can us
 python serve_dist.py
 ```
 ---
+
+
+## 👨‍💻 Quick Start for Developers
+
+Here’s how to interact with the dApp programmatically using **Web3.js**.
+
+### 1. Connect MetaMask
+
+```ts
+import Web3 from "web3";
+
+let web3: Web3;
+let accounts: string[] = [];
+
+async function connectMetaMask() {
+   if (!window.ethereum) {
+      alert("MetaMask not detected!");
+      return;
+   }
+   try {
+      web3 = new Web3(window.ethereum);
+      accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      console.log("Connected account:", accounts[0]);
+   } catch (error) {
+      console.error(error)
+   }
+}
+```
+
+### 2. Create a Vault via the VaultRegistry
+
+```ts
+import VaultRegistryABI from "./abi/VaultRegistry.json";
+
+const registryAddress = "0x..."; // Deployed VaultRegistry address
+const registry = new web3.eth.Contract(VaultRegistryABI, registryAddress);
+
+async function createVault() {
+   try {
+      const owner = accounts[0];
+      const tx = await registry.methods.createVault(owner).send({ from: owner });
+      console.log("Vault created, receipt:", tx);
+      // Vault address is in tx.events.VaultCreated.returnValues.vaultAddress
+   } catch (error) {
+      console.error(error)
+   }
+}
+```
+
+
+### 3. Interact with your Vault
+
+```ts
+import VaultABI from "./abi/Vault.json";
+
+async function depositToVault(vaultAddress: string, tokenAddress: string, amountUsdt: bigint) {
+   const vault = new web3.eth.Contract(VaultABI, vaultAddress);
+
+   try {
+      await vault.methods.deposit(tokenAddress, amountUsdt).send({
+         from: accounts[0],
+         value: tokenAddress === "0x0..." ? amountWei : "0"
+      });
+      console.log("Deposit successful");
+   } catch (error) {
+      console.error(error)
+   }
+}
+
+async function requestWithdrawFromVault(vaultAddress: string, tokenAddress: string, recipient: string, amountUsdt: bigint) {
+   const vault = new web3.eth.Contract(VaultABI, vaultAddress);
+
+   try {
+      await vault.methods.withdraw(tokenAddress, recipient, amountUsdt).send({ from: accounts[0] });
+      console.log("Withdrawal successful");
+   } catch (error) {
+      console.error(error)
+   }
+}
+
+async function withdrawFromVault(vaultAddress: string, tokenAddress: string, recipient: string, amountUsdt: bigint) {
+   const vault = new web3.eth.Contract(VaultABI, vaultAddress);
+
+   try {
+      await vault.methods.withdraw(tokenAddress, recipient, amountUsdt).send({ from: accounts[0] });
+      console.log("Withdrawal successful");
+   } catch (error) {
+      console.error(error)
+   }
+}
+```
 
 ## 🏗️ Rebuilding the project locally
 
