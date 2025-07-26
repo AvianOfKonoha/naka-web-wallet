@@ -1,4 +1,4 @@
-# 🧾 Vault Smart Contract Frontend
+# 🧾 NAKA Web Wallet
 **Built with Vue + Vite + TypeScript + Web3.js**
 
 **Vault dApp** is a lightweight, browser‑based minimal Vite setup and a Vue-based client that interacts with Polygon smart contracts using **Web3.js**. Users can create personal **Vault contracts** via a **VaultRegistry factory**, manage assets, and handle deposits, withdrawals, and KYC settings securely through **MetaMask**.
