@@ -3,7 +3,7 @@
 
 **Vault dApp** is a lightweight, browser‑based minimal Vite setup and a Vue-based client that interacts with Polygon smart contracts using **Web3.js**. Users can create personal **Vault contracts** via a **VaultRegistry factory**, manage assets, and handle deposits, withdrawals, and KYC settings securely through **MetaMask**.
 
----
+
 
 ## 🌍 Live Demo
 
@@ -13,7 +13,7 @@ You can access the deployed version of this app here:
 
 > Make sure your MetaMask wallet is installed and unlocked in your browser to interact with the app.
 
----
+
 
 ## ⚙️ Features
 
@@ -26,7 +26,7 @@ You can access the deployed version of this app here:
 - 🌐 Clean, static frontend suitable for GitHub Pages
 - 🗄️ Hosted at `/dapp-withdraw` path to enable scoped deployments
 
----
+
 
 ## 🏭 Vault Registry (Factory Contract)
 
@@ -46,7 +46,7 @@ The **VaultRegistry** contract manages all Vault deployments and registry-level 
 | `getKYCLevels(...)` | List of KYC levels and associated spending limits. |
 | `getDefaultKYCLevel()` | Default KYC level assigned to new vaults. |
 
----
+
 
 ## 🏦 Vault Contract Methods
 
@@ -142,7 +142,6 @@ If you prefer to start the server manually, or are on a different OS, you can us
 ```bash
 python serve_dist.py
 ```
----
 
 
 ## 👨‍💻 Quick Start for Developers
@@ -234,7 +233,7 @@ async function withdrawFromVault(vaultAddress: string, tokenAddress: string, rec
    }
 }
 ```
----
+
 
 ## 🏗️ Rebuilding the project locally
 
