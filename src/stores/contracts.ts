@@ -153,6 +153,9 @@ export const useContractsStore = defineStore('contracts', {
     initializeWeb3(provider?: any) {
       this.provider = window.ethereum || provider;
       this.web3 = new Web3(this.provider);
+
+      this.updateNetwork();
+      this.onAccountsChanged();
     },
 
     updateLoading(loader: Partial<IContractsLoading>) {
@@ -314,20 +317,20 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({connect: true});
 
       try {
-        /** Switch the chain to Polygon mainnet - it is the chain of the Vault SC. The call to the chain change is conditioned on two things -> #1 If the user has never connected the dApp to the MetaMask and they're not on mobile device outside Metamask or the user is on desktop device the polygon chain will be switched in metamask app/extension. #2 If the user has already connected the app to the metamask the chain switcher will commence. In any other case this step will be skipped. */
-        if ((!this.firstSign && !isMobileChrome()) || this.firstSign) {
-          await this.provider.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{chainId: polygonMainnet.chainId}]
-          });
-        }
-
         /** Extract the metamask account's address and display it */
         await this.provider.request({method: 'eth_requestAccounts'});
         const accounts = await this.web3.eth.getAccounts();
 
         if (!accounts.length) {
           throw new Error('No accounts found.');
+        }
+
+        /** Switch the chain to Polygon mainnet - it is the chain of the Vault SC. The call to the chain change is conditioned on two things -> #1 If the user has never connected the dApp to the MetaMask and they're not on mobile device outside Metamask or the user is on desktop device the polygon chain will be switched in metamask app/extension. #2 If the user has already connected the app to the metamask the chain switcher will commence. In any other case this step will be skipped. */
+        if ((!this.firstSign && !isMobileChrome()) || this.firstSign) {
+          await this.provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{chainId: polygonMainnet.chainId}]
+          });
         }
 
         /** Set the state of the metamask account connected to the network */
@@ -398,7 +401,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
         this.disconnectMetamask();
 
-        /*TODO: Uncomment if multiple networks are allowed*/
+        /*TODO: Uncomment and remove upper part if multiple networks are allowed*/
 
         /** If the user has not made the first connection to the metamask wallet end propagation */
         /*if (!this.connectedAccount) {
@@ -434,11 +437,14 @@ export const useContractsStore = defineStore('contracts', {
 
     async connectMobile() {
       const ethereum = metamaskSdk.getProvider();
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(
-        navigator.userAgent
-      );
+      const isMobileOrTablet =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+      const isTouchDevice =
+        'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-      if (!ethereum || !isMobile) {
+      if (!ethereum || (!isMobileOrTablet && !isTouchDevice)) {
         return;
       }
 

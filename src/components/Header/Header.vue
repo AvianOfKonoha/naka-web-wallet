@@ -16,10 +16,6 @@ const disconnectMetamask = () => {
 const copyAddress = () => {
   copyToClipboard(contractsStore.connectedAccount);
 };
-
-/*Callbacks*/
-contractsStore.updateNetwork();
-contractsStore.onAccountsChanged();
 </script>
 
 <template>
