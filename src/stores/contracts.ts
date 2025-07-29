@@ -835,7 +835,7 @@ export const useContractsStore = defineStore('contracts', {
               : 'pending'
         };
 
-        /** If more than two days have passed, cancel active withdraw request */
+        /** If more than two days have passed, prompt the user to either cancel or complete withdraw request */
         const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
         if (twoDaysAgo.getTime() < this.activeRequest.date.getTime()) {
           return;
