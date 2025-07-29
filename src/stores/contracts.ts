@@ -89,7 +89,8 @@ export const useContractsStore = defineStore('contracts', {
       withdrawConnected: false,
       withdrawExternal: false,
       cancelWithdraw: false,
-      completeWithdraw: false
+      completeWithdraw: false,
+      overtime: false
     },
     withdrawals: [],
     form: {
@@ -839,7 +840,7 @@ export const useContractsStore = defineStore('contracts', {
         if (twoDaysAgo.getTime() < this.activeRequest.date.getTime()) {
           return;
         }
-        await this.cancelWithdrawRequest();
+        this.updateModal({overtime: true});
       } catch (error) {
         console.error(
           'Error fetching active request: ',
@@ -1182,6 +1183,7 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Close the modal and re-fetch withdrawal list */
         this.updateModal({completeWithdraw: false});
+        this.updateModal({overtime: false});
         bottomToast(
           `Withdraw to: ${this.activeRequest.address.substring(0, 4)}...${this.activeRequest.address.slice(-4)} has been successfully completed.`,
           3000,
@@ -1198,7 +1200,7 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
-    async cancelWithdrawRequest(overThreshold = false) {
+    async cancelWithdrawRequest() {
       if (
         this.loading.cancelWithdraw ||
         !this.vaultContract ||
@@ -1223,13 +1225,10 @@ export const useContractsStore = defineStore('contracts', {
 
         /** On successful cancel of withdraw request close the modal and re-fetch the list of withdrawals */
         this.updateModal({cancelWithdraw: false});
+        this.updateModal({overtime: false});
         await this.getVaultBalance();
         await this.getWithdrawalHistory();
 
-        /** In case the elapsed time since the withdrawal request was made passes 2 days, and it hasn't been confirmed prevent toast success from showing - the request will get cancelled by dApp */
-        if (overThreshold) {
-          return;
-        }
         toast.success('Withdrawal request canceled');
       } catch (error) {
         toast.error(`${(error as Error).message}`);

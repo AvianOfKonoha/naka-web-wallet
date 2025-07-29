@@ -425,6 +425,22 @@
         }
       }
     }
+    &--overtime {
+      .overtime {
+        &__buttons {
+          @include framework.grid-column-layout(
+            1fr 1fr,
+            framework.$defaultGridGap
+          );
+          align-items: center;
+          .complete {
+            &__button {
+              padding: unset;
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -1016,6 +1032,17 @@
                 }
               }
             }
+          }
+        }
+      }
+    }
+  }
+  .modal {
+    &__withdrawal {
+      &--overtime {
+        .overtime {
+          &__buttons {
+            grid-template-columns: unset;
           }
         }
       }

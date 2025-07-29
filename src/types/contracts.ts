@@ -47,6 +47,7 @@ export interface IContractsModal {
   withdrawExternal: boolean;
   cancelWithdraw: boolean;
   completeWithdraw: boolean;
+  overtime: boolean;
 }
 
 export interface IActiveNetwork {
