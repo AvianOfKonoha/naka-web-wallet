@@ -835,11 +835,9 @@ export const useContractsStore = defineStore('contracts', {
               : 'pending'
         };
 
-        /** If more than <default offset time> have passed, prompt the user to either cancel or complete withdraw request */
-        const offsetTime = new Date(
-          Date.now() - this.daysOffset * 24 * 60 * 60 * 1000
-        );
-        if (offsetTime.getTime() < this.activeRequest.date.getTime()) {
+        /** If more than two days have passed, prompt the user to either cancel or complete withdraw request */
+        const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+        if (twoDaysAgo.getTime() < this.activeRequest.date.getTime()) {
           return;
         }
         this.updateModal({overtime: true});
