@@ -819,6 +819,23 @@
   }
 }
 
+.process {
+  &__statement {
+    @include framework.flex-layout(
+      flex,
+      space-between,
+      center,
+      framework.$defaultGridGap
+    );
+    padding: calc(#{framework.$defaultPadding} * 1.5);
+    background-color: map.get(framework.$colors, 'gray-100');
+    border-radius: calc(#{framework.$defaultRem} / 2);
+    @include framework.font-style('default', 'gray-800');
+    font-weight: 600;
+    line-height: 1;
+  }
+}
+
 .Toastify {
   .Toastify {
     &__toast-container {

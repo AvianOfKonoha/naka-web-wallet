@@ -8,7 +8,7 @@ import ConnectedWallet from '@/components/Withdraw/Form/ConnectedWallet.vue';
 import ExternalWallet from '@/components/Withdraw/Form/ExternalWallet.vue';
 import WithdrawBox from '@/components/Withdraw/Content/WithdrawBox.vue';
 import Card from '@/components/Withdraw/Content/Card.vue';
-import {bottomToast} from '@/utils/helpers.ts';
+import {bottomToast, formatWithAtLeastTwoDecimals} from '@/utils/helpers.ts';
 import HistoryList from '@/components/Withdraw/List/HistoryList.vue';
 
 /*Global state*/
@@ -190,6 +190,13 @@ onMounted(() => {
       gas fee is required to complete your request. This fee ensures the secure
       and timely processing of your transaction. Thank you for your
       understanding.
+    </div>
+    <div class="process__statement" v-if="contractsStore.activeRequest">
+      <div class="statement__label">Amount:</div>
+      <div class="statement__value">
+        {{ formatWithAtLeastTwoDecimals(contractsStore.activeRequest.amount) }}
+        USD₮
+      </div>
     </div>
     <div class="overtime__buttons">
       <div class="cancel__button">
