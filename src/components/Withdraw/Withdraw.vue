@@ -185,9 +185,7 @@ onMounted(() => {
   >
     <div class="modal__title">Withdrawal Request</div>
     <div class="complete__description">
-      It has been more than 2 days since your requested your withdrawal. Please
-      cancel or complete your withdrawal request. Please note that a small gas
-      fee is required to complete your withdrawal.
+      {{ contractsStore.thresholdPrompt }}
     </div>
     <div class="process__statement" v-if="contractsStore.activeRequest">
       <div class="statement__label">Amount:</div>

@@ -134,7 +134,8 @@ export const useContractsStore = defineStore('contracts', {
     blocksOffset: 5000,
     completedWithdrawals: [],
     cancelledWithdrawals: [],
-    daysOffset: 2
+    daysOffset: 2,
+    thresholdPrompt: ''
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -792,6 +793,11 @@ export const useContractsStore = defineStore('contracts', {
         await this.getWithdrawRequests();
 
         if (!this.withdrawalRequests.length) {
+          if (reservationAmount) {
+            this.thresholdPrompt =
+              'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
+            this.updateModal({overtime: true});
+          }
           return;
         }
 
@@ -840,6 +846,8 @@ export const useContractsStore = defineStore('contracts', {
         if (twoDaysAgo.getTime() < this.activeRequest.date.getTime()) {
           return;
         }
+        this.thresholdPrompt =
+          'It has been more than 2 days since your requested your withdrawal. Please cancel or complete your withdrawal request. Please note that a small gas fee is required to complete your withdrawal.';
         this.updateModal({overtime: true});
       } catch (error) {
         console.error(

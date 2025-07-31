@@ -136,4 +136,5 @@ export interface IContractsStore {
   vaultAddress: string;
   blocksOffset: number;
   daysOffset: number;
+  thresholdPrompt: string;
 }
