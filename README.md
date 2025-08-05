@@ -9,7 +9,7 @@
 
 You can access the deployed version of this app here:
 
-🔗 **[https://avianofkonoha.github.io/naka-web-wallet](https://avianofkonoha.github.io/naka-web-wallet)**
+🔗 **[https://nakaopensource.github.io/naka-web-wallet](https://nakaopensource.github.io/naka-web-wallet)**
 
 > Make sure your MetaMask wallet is installed and unlocked in your browser to interact with the app.
 
