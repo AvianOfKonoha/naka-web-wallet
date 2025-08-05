@@ -9,7 +9,7 @@
 
 You can access the deployed version of this app here:
 
-🔗 **[https://avianofkonoha.github.io/dapp-withdraw](https://avianofkonoha.github.io/dapp-withdraw)**
+🔗 **[https://avianofkonoha.github.io/naka-web-wallet](https://avianofkonoha.github.io/naka-web-wallet)**
 
 > Make sure your MetaMask wallet is installed and unlocked in your browser to interact with the app.
 
@@ -24,7 +24,7 @@ You can access the deployed version of this app here:
 - ⚡ Instant development with Vite
 - 🧩 Written in **TypeScript** for type safety and scalability
 - 🌐 Clean, static frontend suitable for GitHub Pages
-- 🗄️ Hosted at `/dapp-withdraw` path to enable scoped deployments
+- 🗄️ Hosted at `/naka-web-wallet` path to enable scoped deployments
 
 ---
 

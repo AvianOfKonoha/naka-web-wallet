@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "deploy": "gh-pages -d dist"
+    "deploy:origin": "gh-pages -d dist",
+    "deploy:naka": "gh-pages -d dist --remote naka",
+    "deploy:both": "pnpm run deploy:origin && pnpm run deploy:naka"
   },
   "dependencies": {
     "@metamask/sdk": "^0.33.0",

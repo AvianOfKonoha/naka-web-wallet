@@ -5,7 +5,7 @@ import mimetypes
 from urllib.parse import unquote
 
 PORT = 8000
-MOUNT_PATH = "/dapp-withdraw"
+MOUNT_PATH = "/naka-web-wallet"
 DIST_DIR = "dist"
 
 # Fix MIME type for JS modules
