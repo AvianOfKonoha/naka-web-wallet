@@ -789,15 +789,17 @@ export const useContractsStore = defineStore('contracts', {
           .getProtocolTokenWithdrawalReservationLockDuration()
           .call();
 
+        /** Check if more than time has passed than the amount of lock duration, which means the request is ready to be completed by the user */
+        const thresholdPassed =
+          Date.now() > Number(reservationStatus.unlockTime) * 1000;
+
         /** Fetch withdraw requests from WithdrawRequest event */
         await this.getWithdrawRequests();
 
-        if (!this.withdrawalRequests.length) {
-          if (reservationAmount) {
-            this.thresholdPrompt =
-              'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
-            this.updateModal({overtime: true});
-          }
+        if (!this.withdrawalRequests.length && thresholdPassed) {
+          this.thresholdPrompt =
+            'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
+          this.updateModal({overtime: true});
           return;
         }
 
