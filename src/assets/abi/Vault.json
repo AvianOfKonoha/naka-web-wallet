@@ -5,14 +5,229 @@
     "type": "constructor"
   },
   {
+    "inputs": [],
+    "name": "AlreadySet",
+    "type": "error"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
-        "name": "owner",
+        "name": "cardKey",
         "type": "address"
       }
     ],
-    "name": "OwnableInvalidOwner",
+    "name": "CardKeyAlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "cardKey",
+        "type": "address"
+      }
+    ],
+    "name": "CardKeyNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "frozenPaymentAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "FrozenPaymentAlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "balance",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "required",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientBalance",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidCardSignature",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidDeposit",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "gatewayAddress",
+        "type": "address"
+      }
+    ],
+    "name": "InvalidGatewayAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidGatewaySignature",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "maxIncrementPercentage",
+        "type": "uint256"
+      }
+    ],
+    "name": "InvalidMaxIncrementPercentage",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "oldVaultAddress",
+        "type": "address"
+      }
+    ],
+    "name": "InvalidOldVaultAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidOwnerSignature",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "paymentId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "InvalidPaymentId",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidSchemaSignature",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "InvalidTokenAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "KYCLevelNotValid",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "KycAmountHigherThenAllowed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "kycLevel",
+        "type": "uint16"
+      }
+    ],
+    "name": "KycLevelNotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoFrozenPaymentExists",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "NoWithdrawalReservationForToken",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "NonceAlreadyUsed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "frozenPaymentAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "OpenFrozenPaymentExists",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "OpenReservationsExist",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "OpenWithdrawalExist",
     "type": "error"
   },
   {
@@ -27,8 +242,83 @@
     "type": "error"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "paymentAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxPaymentAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentAmountHigherThenMax",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "daySpandingAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxDailyAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentDailyAmountLimitExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "paymentAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxSingleAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentSingleAmountLimitExceeded",
+    "type": "error"
+  },
+  {
     "inputs": [],
     "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "protocolTokenAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "frozenPaymentAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ReservationMustUseFrozenAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "gatewayPaymentId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ReservationNotFound",
     "type": "error"
   },
   {
@@ -40,6 +330,81 @@
       }
     ],
     "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "upgradeTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpgradeAlreadyInProgress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "UpgradeNotInProgress",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "upgradeTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpgradeNotReady",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "currentVersion",
+        "type": "uint16"
+      }
+    ],
+    "name": "VaultAlreadyUpgraded",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "WithdrawalAmountTooHigh",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "unlockTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "WithdrawalLockedUntil",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroValue",
     "type": "error"
   },
   {
@@ -96,6 +461,11 @@
           },
           {
             "internalType": "uint256",
+            "name": "maxPaymentAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "forProtocolTokenAmount",
             "type": "uint256"
           },
@@ -143,43 +513,25 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "bridgeAddress",
-        "type": "address"
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "merchantId",
+        "type": "bytes32"
       },
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "chainId",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "recipient",
-        "type": "string"
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "merchantPaymentId",
+        "type": "bytes32"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
+        "name": "protocolTokenAmount",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "fullMessage",
-        "type": "bytes"
       }
     ],
-    "name": "BridgeWithdrawal",
+    "name": "CancelFrozenPaymentAmount",
     "type": "event"
   },
   {
@@ -213,6 +565,11 @@
           {
             "internalType": "uint256",
             "name": "paymentAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxPaymentAmount",
             "type": "uint256"
           },
           {
@@ -347,6 +704,31 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "bytes32",
+        "name": "merchantId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "merchantPaymentId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "protocolTokenAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "FrozenPaymentAmount",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "uint256",
         "name": "oldValue",
         "type": "uint256"
@@ -385,44 +767,6 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferStarted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
         "internalType": "bytes32",
         "name": "merchantId",
         "type": "bytes32"
@@ -449,6 +793,11 @@
           {
             "internalType": "uint256",
             "name": "paymentAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxPaymentAmount",
             "type": "uint256"
           },
           {
@@ -531,6 +880,11 @@
           },
           {
             "internalType": "uint256",
+            "name": "maxPaymentAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
             "name": "forProtocolTokenAmount",
             "type": "uint256"
           },
@@ -572,6 +926,158 @@
       }
     ],
     "name": "ProcessPaymentSuccess",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "merchantId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "merchantPaymentId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "protocolTokenAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "UnfreezePaymentAmount",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "merchantId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "merchantPaymentId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint16",
+        "name": "merchantTerminalId",
+        "type": "uint16"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "paymentData",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "paymentAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "maxPaymentAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "forProtocolTokenAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "executeAfter",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalReservationAmountNow",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dailySpendingNow",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "protocolGatewayFeeAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "gatewayPaymentId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes",
+            "name": "paymentProcessorTranData",
+            "type": "bytes"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IVault.ReservationEventData",
+        "name": "reservationData",
+        "type": "tuple"
+      }
+    ],
+    "name": "UpdateProcessPaymentReservation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "UpgradeCanceled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldVaultAddress",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newVaultAddress",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "ownerAddress",
+        "type": "address"
+      }
+    ],
+    "name": "UpgradeCompleted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "upgradeTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpgradeInProgress",
     "type": "event"
   },
   {
@@ -661,8 +1167,19 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "acceptOwnership",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "cardKey_",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "active_",
+        "type": "bool"
+      }
+    ],
+    "name": "addCardKey",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -678,9 +1195,14 @@
         "internalType": "bool",
         "name": "active_",
         "type": "bool"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature_",
+        "type": "bytes"
       }
     ],
-    "name": "addCardKey",
+    "name": "addCardKeyWithSignature",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -736,75 +1258,59 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "bridgeAddress_",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "token_",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "chainId_",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "recipient_",
-        "type": "string"
+        "internalType": "bytes32",
+        "name": "gatewayPaymentId_",
+        "type": "bytes32"
       },
       {
         "internalType": "uint256",
-        "name": "amount_",
+        "name": "paymentAmount_",
         "type": "uint256"
       },
       {
-        "internalType": "bytes",
-        "name": "fullMessage_",
-        "type": "bytes"
+        "internalType": "uint256",
+        "name": "protocolTokenAmount_",
+        "type": "uint256"
       }
     ],
-    "name": "bridgeWithdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "name": "canUpdateProcessPaymentReservation",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "canUpgrade",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "bridgeAddress_",
-        "type": "address"
+        "internalType": "bytes32",
+        "name": "merchantId_",
+        "type": "bytes32"
       },
       {
-        "internalType": "address",
-        "name": "token_",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "chainId_",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "recipient_",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "fullMessage_",
-        "type": "bytes"
+        "internalType": "bytes32",
+        "name": "merchantPaymentId_",
+        "type": "bytes32"
       }
     ],
-    "name": "bridgeWithdrawRequest",
+    "name": "cancelFrozenPaymentAmount",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -823,6 +1329,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "cancelUpgrade",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -833,6 +1346,58 @@
     "name": "cancelWithdrawRequest",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token_",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature_",
+        "type": "bytes"
+      }
+    ],
+    "name": "cancelWithdrawRequestWithSignature",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "merchantId_",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "merchantPaymentId_",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "protocolTokenAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "paymentProcessorSigniture_",
+        "type": "bytes"
+      }
+    ],
+    "name": "checkFreezeLimitsAndSigniture",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "success_",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -884,7 +1449,7 @@
     ],
     "name": "deposit",
     "outputs": [],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -893,16 +1458,59 @@
         "internalType": "bytes32",
         "name": "gatewayPaymentId_",
         "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "paymentAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "protocolTokenAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "protocolGatewayFeeAmount_",
+        "type": "uint256"
       }
     ],
     "name": "executeProcessPayment",
     "outputs": [
       {
         "internalType": "bool",
-        "name": "success",
+        "name": "success_",
         "type": "bool"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "merchantId_",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "merchantPaymentId_",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "protocolTokenAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "paymentProcessorSigniture_",
+        "type": "bytes"
+      }
+    ],
+    "name": "freezePaymentAmount",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1024,6 +1632,19 @@
   },
   {
     "inputs": [],
+    "name": "getFrozenPaymentAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getMaxPaymentProcessorAllowedDailyAmount",
     "outputs": [
       {
@@ -1046,6 +1667,35 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "merchantPaymentId_",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "protocolTokenAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "merchantId_",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getPaymentProcessorFreezeHash",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -1210,25 +1860,12 @@
   },
   {
     "inputs": [],
-    "name": "getProtocolTokenBridgeAddress",
+    "name": "getUpgradeTime",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getProtocolTokenIsWrapped",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1325,6 +1962,19 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "oldVaultAddress_",
+        "type": "address"
+      }
+    ],
+    "name": "initFromVault",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "cardKey_",
         "type": "address"
       }
@@ -1368,6 +2018,19 @@
   },
   {
     "inputs": [],
+    "name": "isUpgrade",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -1377,26 +2040,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "pendingOwner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1420,8 +2063,31 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "cardKey_",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "active_",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature_",
+        "type": "bytes"
+      }
+    ],
+    "name": "setCardKeyActiveWithSignature",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
-        "name": "maxPaymentProcessorAllowedDailyAmount_",
+        "name": "amount_",
         "type": "uint256"
       }
     ],
@@ -1434,11 +2100,47 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "maxPaymentProcessorAllowedSingleAmount_",
+        "name": "amount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature_",
+        "type": "bytes"
+      }
+    ],
+    "name": "setMaxPaymentProcessorAllowedDailyAmountWithSignature",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount_",
         "type": "uint256"
       }
     ],
     "name": "setMaxPaymentProcessorAllowedSingleAmount",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature_",
+        "type": "bytes"
+      }
+    ],
+    "name": "setMaxPaymentProcessorAllowedSingleAmountWithSignature",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1469,6 +2171,19 @@
   {
     "inputs": [
       {
+        "internalType": "uint16",
+        "name": "vaultKYCLevel_",
+        "type": "uint16"
+      }
+    ],
+    "name": "setVaultKYCLevelWithGateway",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes4",
         "name": "interfaceId_",
         "type": "bytes4"
@@ -1488,13 +2203,72 @@
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "gatewayPaymentId_",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "paymentAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "protocolTokenAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "protocolGatewayFeeAmount_",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateProcessPaymentReservation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "upgrade",
+    "outputs": [
+      {
         "internalType": "address",
-        "name": "newOwner_",
+        "name": "newVaultAddress_",
         "type": "address"
       }
     ],
-    "name": "transferOwnership",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "upgradeRequest",
     "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "upgradeCallTime_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature_",
+        "type": "bytes"
+      }
+    ],
+    "name": "upgradeWithSignature",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "newVaultAddress_",
+        "type": "address"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1526,6 +2300,11 @@
       {
         "internalType": "uint256",
         "name": "paymentAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxPaymentAmount_",
         "type": "uint256"
       }
     ],
@@ -1574,6 +2353,62 @@
       }
     ],
     "name": "withdrawRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "recipient_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature_",
+        "type": "bytes"
+      }
+    ],
+    "name": "withdrawRequestWithSignature",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "recipient_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature_",
+        "type": "bytes"
+      }
+    ],
+    "name": "withdrawWithSignature",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
