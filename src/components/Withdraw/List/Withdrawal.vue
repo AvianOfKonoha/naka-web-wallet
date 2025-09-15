@@ -69,7 +69,7 @@ const openCancelModal = () => {
         </div>
       </div>
       <div class="withdrawal__amount">
-        -{{ formatWithAtLeastTwoDecimals(props.withdrawal.amount) }} USD₮
+        -{{ formatWithAtLeastTwoDecimals(props.withdrawal.amount) }} USD₮0
       </div>
     </div>
     <div class="withdrawal__row--button">

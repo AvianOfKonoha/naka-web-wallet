@@ -34,7 +34,7 @@ const props = defineProps<{amount: number}>();
         <div class="value__number">
           {{ formatWithAtLeastTwoDecimals(props.amount) }}
         </div>
-        <div class="value__currency">USD₮</div>
+        <div class="value__currency">USD₮0</div>
       </div>
     </div>
   </div>
