@@ -537,6 +537,12 @@
                     center,
                     6px
                   );
+                  .currency {
+                    &__icon {
+                      width: 13px;
+                      height: 13px;
+                    }
+                  }
                 }
               }
               &__button {
