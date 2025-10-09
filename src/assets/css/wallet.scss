@@ -1215,6 +1215,9 @@
                 &__max {
                   width: 90px;
                 }
+                &__currency{
+                  padding: 0 calc(#{framework.$defaultPadding} * 2) 0 calc(#{framework.$defaultPadding} / 2);
+                }
               }
             }
           }

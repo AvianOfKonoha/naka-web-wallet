@@ -28,9 +28,7 @@ const copyAddress = () => {
     <div class="modal__title">Define address</div>
     <div class="process__description external__form--description">
       <div class="process__description--text">
-        You are about to withdraw USD₮0 funds from your balance to an external
-        wallet. Make sure the selected wallet supports the selected currency and
-        blockchain network.
+        You are about to withdraw USDT funds from your balance to an external wallet. Make sure the selected wallet supports the selected currency and blockchain network.
       </div>
       <div class="external__form--info">
         <div class="info__icon">
@@ -69,7 +67,7 @@ const copyAddress = () => {
         <div class="info__detail">
           <div class="info__details--title">Only USD₮0 from Polygon</div>
           <div class="info__details--text">
-            Deposit USD₮0 from the Polygon network only.
+            You will withdraw USDT0 on the Polygon network. When sending USDT on the Polygon network, you’re actually using USDT0, the omnichain version of USDT.
           </div>
         </div>
       </div>
