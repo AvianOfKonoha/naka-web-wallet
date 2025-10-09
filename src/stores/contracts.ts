@@ -992,7 +992,7 @@ export const useContractsStore = defineStore('contracts', {
           'Withdrawal',
           {
             fromBlock: Math.ceil(
-              this.lastBlock - this.blocksOffset * this.daysOffset
+              this.lastBlock - (this.blocksOffset * this.daysOffset)
             ),
             toBlock: 'latest'
           }

@@ -8,6 +8,10 @@ import {ref, watch} from 'vue';
 /*Constants*/
 const timeList = [
   {
+    text: 'Last hour',
+    value: 1 / 24
+  },
+  {
     text: 'Today',
     value: (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24
   },
@@ -29,7 +33,7 @@ const timeList = [
 const contractsStore = useContractsStore();
 
 /*Local state*/
-const days = ref(2);
+const days = ref((Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24);
 
 /*Methods*/
 const updateHistoryList = () => {
