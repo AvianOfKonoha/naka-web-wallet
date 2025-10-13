@@ -33,7 +33,7 @@ const timeList = [
 const contractsStore = useContractsStore();
 
 /*Local state*/
-const days = ref((Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24);
+const days = ref(timeList[1].value);
 
 /*Methods*/
 const updateHistoryList = () => {
