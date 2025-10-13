@@ -1020,6 +1020,10 @@ export const useContractsStore = defineStore('contracts', {
         /** Resolve mapping promises */
         this.completedWithdrawals = await Promise.all(constructedWithdrawals);
       } catch (error) {
+        const errorMessage = (error as any).data?.message
+        if(errorMessage){
+          toast.error(errorMessage)
+        }
         console.error(
           'Error fetching completed withdrawals',
           (error as Error).message
