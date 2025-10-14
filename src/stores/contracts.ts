@@ -748,10 +748,14 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
+      const web3Instance = new Web3(POLYGON_RPC_URL)
+      const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
+
       try {
         /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
         this.withdrawalRequests = (await (
-          this.vaultContract as any
+            vaultContract as any
         ).getPastEvents('WithdrawRequest', {
           fromBlock: Math.ceil(
             this.lastBlock - this.blocksOffset * this.daysOffset
@@ -937,10 +941,14 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getCancelledWithdrawals() {
+      /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
+      const web3Instance = new Web3(POLYGON_RPC_URL)
+      const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
+
       try {
         /** Fetch all cancelled withdrawals events that manifest after successful "withdraw" method requests from the Vault contract */
         const cancelledWithdrawals = (await (
-          this.vaultContract as any
+            vaultContract as any
         ).getPastEvents('CanceledWithdrawReservation', {
           fromBlock: Math.ceil(
             this.lastBlock - this.blocksOffset * this.daysOffset
@@ -986,9 +994,13 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getCompletedWithdrawals() {
+      /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
+      const web3Instance = new Web3(POLYGON_RPC_URL)
+      const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
+
       try {
         /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
-        const withdrawals = await (this.vaultContract as any).getPastEvents(
+        const withdrawals = await (vaultContract as any).getPastEvents(
           'Withdrawal',
           {
             fromBlock: Math.ceil(
@@ -1074,12 +1086,9 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
-      const web3Instance = new Web3(POLYGON_RPC_URL)
-
       try {
         /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
-        this.vaultContract = new web3Instance.eth.Contract(VaultABI, address);
+        this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
 
         /** Get the list of all withdrawals */
         await this.getWithdrawalHistory();
