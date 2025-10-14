@@ -16,7 +16,7 @@ import {Web3} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_PRODUCTION,
-  NETWORKS,
+  NETWORKS, POLYGON_RPC_URL,
   polygonMainnet,
   USDT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
@@ -1022,7 +1022,7 @@ export const useContractsStore = defineStore('contracts', {
       } catch (error) {
         const errorMessage = (error as any).data?.message
         if(errorMessage){
-          toast.error(errorMessage)
+          toast.error(errorMessage + ' for withdrawals list')
         }
         console.error(
           'Error fetching completed withdrawals',
@@ -1074,9 +1074,12 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
+      const web3Instance = new Web3(POLYGON_RPC_URL)
+
       try {
         /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
-        this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
+        this.vaultContract = new web3Instance.eth.Contract(VaultABI, address);
 
         /** Get the list of all withdrawals */
         await this.getWithdrawalHistory();
