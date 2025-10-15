@@ -134,6 +134,7 @@ header {
   display: flex;
   justify-content: center;
   position: relative;
+  height: 55px;
   .header {
     &__wrapper {
       padding: calc(#{framework.$defaultPadding} / 2)
@@ -188,6 +189,7 @@ main {
     justify-content: center;
     padding: calc(#{framework.$defaultPadding} * 6)
       calc(#{framework.$defaultPadding} * 1.5);
+    min-height: calc(100dvh - 110px);
     .naka {
       &__wrap {
         width: min(1300px, 100%);
@@ -322,12 +324,37 @@ main {
   }
 }
 
+footer{
+  width: 100%;
+  height: 55px;
+  display: grid;
+  align-items: center;
+  justify-content: end;
+  padding: 5px framework.$defaultPadding;
+  background-color: rgba(map.get(framework.$colors, 'white'), 0.9);
+  .naka{
+    &__rpc{
+      @include framework.flex-layout(inline-flex, unset, center, 5px);
+      .rpc{
+        &__label{
+          @include framework.font-style('12', 'gray-300');
+          position: relative;
+        }
+      }
+    }
+  }
+}
+
+
 @media screen and (max-width: 1200px) {
   main {
     &.naka {
       padding-top: calc(#{framework.$defaultPadding} * 2);
-      padding-bottom: calc(#{framework.$defaultPadding} * 2);
+      padding-bottom: calc(#{framework.$defaultPadding} * 4);
     }
+  }
+  footer{
+    position: relative;
   }
 }
 
