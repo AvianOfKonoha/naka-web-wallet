@@ -53,6 +53,31 @@
       @include framework.flex-layout(flex, center, unset, unset);
       padding-top: calc(#{framework.$defaultPadding} * 3.5);
     }
+    &--info {
+      background-color: map.get(framework.$colors, 'gray-800');
+      border-radius: framework.$defaultRem;
+      @include framework.grid-column-layout(
+        auto 1fr,
+        calc(#{framework.$defaultGridGap} * 1.5)
+      );
+      align-items: center;
+      padding: calc(#{framework.$defaultPadding} * 1.5);
+      .info {
+        &__details {
+          @include framework.grid-gap(calc(#{framework.$defaultGridGap} / 2));
+          &--title {
+            @include framework.font-style('default', 'white');
+            font-weight: 500;
+          }
+          &--text {
+            @include framework.font-style('14', 'white');
+          }
+          &--addition {
+            @include framework.font-style('12', 'orange-600');
+          }
+        }
+      }
+    }
   }
   &__button {
     &--connect {
@@ -512,6 +537,12 @@
                     center,
                     6px
                   );
+                  .currency {
+                    &__icon {
+                      width: 13px;
+                      height: 13px;
+                    }
+                  }
                 }
               }
               &__button {
@@ -1091,6 +1122,9 @@
       &--button {
         padding-top: calc(#{framework.$defaultPadding} * 2.5);
       }
+      &--info {
+        grid-template-columns: unset;
+      }
     }
   }
   .withdraw {
@@ -1180,6 +1214,9 @@
               .amount {
                 &__max {
                   width: 90px;
+                }
+                &__currency{
+                  padding: 0 calc(#{framework.$defaultPadding} * 2) 0 calc(#{framework.$defaultPadding} / 2);
                 }
               }
             }

@@ -19,7 +19,7 @@ const props = defineProps<{
       <div class="box__chain--text">Supported:</div>
       <div class="box__chain--network">
         <NetworkIcon network="polygon" />
-        <span>USDt on Polygon</span>
+        <span>USD₮0 on Polygon</span>
       </div>
     </div>
     <div class="box__button">

@@ -129,3 +129,5 @@ export const USDT_ADDRESS_STAGING =
   '0x5DC14a664d551F24e9f7A4C9c6215a84E44f0f1E';
 export const USDT_ADDRESS_PRODUCTION =
   '0xc2132d05d31c914a87c6611c10748aeb04b58e8f';
+
+export const POLYGON_RPC_URL = 'https://polygon.gateway.tenderly.co'

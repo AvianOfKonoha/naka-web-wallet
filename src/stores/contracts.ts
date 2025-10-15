@@ -16,7 +16,7 @@ import {Web3} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_PRODUCTION,
-  NETWORKS,
+  NETWORKS, POLYGON_RPC_URL,
   polygonMainnet,
   USDT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
@@ -748,10 +748,14 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
+      const web3Instance = new Web3(POLYGON_RPC_URL)
+      const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
+
       try {
         /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
         this.withdrawalRequests = (await (
-          this.vaultContract as any
+            vaultContract as any
         ).getPastEvents('WithdrawRequest', {
           fromBlock: Math.ceil(
             this.lastBlock - this.blocksOffset * this.daysOffset
@@ -789,15 +793,17 @@ export const useContractsStore = defineStore('contracts', {
           .getProtocolTokenWithdrawalReservationLockDuration()
           .call();
 
+        /** Check if more than time has passed than the amount of lock duration, which means the request is ready to be completed by the user */
+        const thresholdPassed =
+          Date.now() > Number(reservationStatus.unlockTime) * 1000;
+
         /** Fetch withdraw requests from WithdrawRequest event */
         await this.getWithdrawRequests();
 
-        if (!this.withdrawalRequests.length) {
-          if (reservationAmount) {
-            this.thresholdPrompt =
-              'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
-            this.updateModal({overtime: true});
-          }
+        if (!this.withdrawalRequests.length && thresholdPassed) {
+          this.thresholdPrompt =
+            'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
+          this.updateModal({overtime: true});
           return;
         }
 
@@ -935,10 +941,14 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getCancelledWithdrawals() {
+      /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
+      const web3Instance = new Web3(POLYGON_RPC_URL)
+      const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
+
       try {
         /** Fetch all cancelled withdrawals events that manifest after successful "withdraw" method requests from the Vault contract */
         const cancelledWithdrawals = (await (
-          this.vaultContract as any
+            vaultContract as any
         ).getPastEvents('CanceledWithdrawReservation', {
           fromBlock: Math.ceil(
             this.lastBlock - this.blocksOffset * this.daysOffset
@@ -984,13 +994,17 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getCompletedWithdrawals() {
+      /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
+      const web3Instance = new Web3(POLYGON_RPC_URL)
+      const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
+
       try {
         /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
-        const withdrawals = await (this.vaultContract as any).getPastEvents(
+        const withdrawals = await (vaultContract as any).getPastEvents(
           'Withdrawal',
           {
             fromBlock: Math.ceil(
-              this.lastBlock - this.blocksOffset * this.daysOffset
+              this.lastBlock - (this.blocksOffset * this.daysOffset)
             ),
             toBlock: 'latest'
           }
@@ -1018,6 +1032,10 @@ export const useContractsStore = defineStore('contracts', {
         /** Resolve mapping promises */
         this.completedWithdrawals = await Promise.all(constructedWithdrawals);
       } catch (error) {
+        const errorMessage = (error as any).data?.message
+        if(errorMessage){
+          toast.error(errorMessage + ' for withdrawals list')
+        }
         console.error(
           'Error fetching completed withdrawals',
           (error as Error).message
