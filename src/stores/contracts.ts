@@ -17,7 +17,7 @@ import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_PRODUCTION,
   NETWORKS, POLYGON_RPC_URL,
-  polygonMainnet,
+  polygonMainnet, RPC_LIST,
   USDT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
@@ -135,7 +135,8 @@ export const useContractsStore = defineStore('contracts', {
     completedWithdrawals: [],
     cancelledWithdrawals: [],
     daysOffset: 2,
-    thresholdPrompt: ''
+    thresholdPrompt: '',
+    rpc: RPC_LIST[0]
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -207,6 +208,11 @@ export const useContractsStore = defineStore('contracts', {
           ...walletData
         }
       };
+    },
+
+    resetWithdrawalsList() {
+      this.activeRequest = null;
+      this.withdrawals = [];
     },
 
     resetConnectedForm() {
@@ -749,7 +755,7 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
-      const web3Instance = new Web3(POLYGON_RPC_URL)
+      const web3Instance = new Web3(this.rpc.url)
       const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
 
       try {
@@ -800,15 +806,9 @@ export const useContractsStore = defineStore('contracts', {
         /** Fetch withdraw requests from WithdrawRequest event */
         await this.getWithdrawRequests();
 
-        if (!this.withdrawalRequests.length && thresholdPassed) {
-          this.thresholdPrompt =
-            'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
-          this.updateModal({overtime: true});
-          return;
-        }
-
         /** Take the latest WithdrawalRequest event as the active request */
         const latestRequest = this.withdrawalRequests.reverse()[0];
+        console.log('latest: ', latestRequest)
 
         /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
         const blockRequest = (await this.web3.eth.getBlock(
@@ -833,7 +833,7 @@ export const useContractsStore = defineStore('contracts', {
         );
 
         /** By default, the unlockTime fetched from the SC is of type bigint. Once converted to the number it shows the time in seconds. First we need to multiply it with 1000 to convert it to milliseconds, then we can use Date to mutate it */
-        this.activeRequest = {
+        this.activeRequest = !latestRequest ? null : {
           address: `${decodedInput[1]}`, //Recipients address
           amount: formatUint256toNumber(latestRequest.returnValues.amount),
           date: new Date(
@@ -847,13 +847,25 @@ export const useContractsStore = defineStore('contracts', {
               : 'pending'
         };
 
-        /** If more than two days have passed, prompt the user to either cancel or complete withdraw request */
-        const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
-        if (twoDaysAgo.getTime() < this.activeRequest.date.getTime()) {
+        /** If for whatever reason the public indexer doesn't work open a prompt notifying the user he has an outstanding withdrawal request */
+        if (!this.activeRequest && thresholdPassed) {
+          this.thresholdPrompt =
+              'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
+          this.updateModal({overtime: true});
+          return;
+        }
+
+        if(!this.activeRequest){
+          return;
+        }
+
+        /** If more than ten days have passed since making withdrawal request, prompt the user to either cancel or complete withdrawal request */
+        const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
+        if (tenDaysAgo.getTime() < this.activeRequest.date.getTime()) {
           return;
         }
         this.thresholdPrompt =
-          'It has been more than 2 days since your requested your withdrawal. Please cancel or complete your withdrawal request. Please note that a small gas fee is required to complete your withdrawal.';
+          'It has been more than 10 days since your requested your withdrawal. Please cancel or complete your withdrawal request. Please note that a small gas fee is required to complete your withdrawal.';
         this.updateModal({overtime: true});
       } catch (error) {
         console.error(
@@ -942,7 +954,7 @@ export const useContractsStore = defineStore('contracts', {
 
     async getCancelledWithdrawals() {
       /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
-      const web3Instance = new Web3(POLYGON_RPC_URL)
+      const web3Instance = new Web3(this.rpc.url)
       const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
 
       try {
@@ -995,7 +1007,7 @@ export const useContractsStore = defineStore('contracts', {
 
     async getCompletedWithdrawals() {
       /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
-      const web3Instance = new Web3(POLYGON_RPC_URL)
+      const web3Instance = new Web3(this.rpc.url)
       const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
 
       try {
@@ -1032,14 +1044,18 @@ export const useContractsStore = defineStore('contracts', {
         /** Resolve mapping promises */
         this.completedWithdrawals = await Promise.all(constructedWithdrawals);
       } catch (error) {
-        const errorMessage = (error as any).data?.message
-        if(errorMessage){
-          toast.error(errorMessage + ' for withdrawals list')
-        }
         console.error(
           'Error fetching completed withdrawals',
           (error as Error).message
         );
+
+        const errorMessage = (error as any).data?.message
+        if(errorMessage){
+          toast.error(errorMessage)
+          return;
+        }
+
+        toast.error((error as Error).message)
       }
     },
 

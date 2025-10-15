@@ -105,6 +105,11 @@ export interface IVaultBalance {
   usdt: number;
 }
 
+export interface IRpc {
+  name: string;
+  url: string;
+}
+
 export interface IContractsStore {
   web3: Web3 | null;
   connectedAccount: string;
@@ -137,4 +142,5 @@ export interface IContractsStore {
   blocksOffset: number;
   daysOffset: number;
   thresholdPrompt: string;
+  rpc: IRpc
 }

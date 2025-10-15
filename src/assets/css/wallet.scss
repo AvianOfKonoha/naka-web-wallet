@@ -1098,6 +1098,27 @@
   }
 }
 
+footer{
+  position: fixed;
+  width: 100%;
+  display: grid;
+  justify-content: end;
+  padding: 5px framework.$defaultPadding;
+  bottom: 0;
+  left: 0;
+  .naka{
+    &__rpc{
+      @include framework.flex-layout(inline-flex, unset, center, 5px);
+      .rpc{
+        &__label{
+          @include framework.font-style('12', 'gray-300');
+          position: relative;
+        }
+      }
+    }
+  }
+}
+
 @media screen and (max-width: 575px) {
   .home {
     &__button {
