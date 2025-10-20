@@ -1,6 +1,6 @@
 import type {Contract, ContractAbi, Web3} from 'web3';
 import type {IFormField} from '@/types/general.ts';
-import type {IVaultEvent, IWithdrawRequestData} from '@/types/vault.ts';
+import type {IVaultBalance, IVaultEvent, IWithdrawRequestData} from '@/types/vault.ts';
 
 export interface IContractsInputs {
   privateKey: string;
@@ -100,7 +100,7 @@ export interface ITransactionGas {
   maxPriorityFeePerGas: number;
 }
 
-export interface IVaultBalance {
+export interface IContractBalance {
   eth: number;
   usdt: number;
 }
@@ -116,7 +116,8 @@ export interface IContractsStore {
   allAccounts: string[];
   chainId: number | null;
   balance: string;
-  contractBalance: IVaultBalance;
+  contractBalance: IContractBalance;
+  vaultBalance: IVaultBalance | null;
   signature: IContractsSignature;
   inputs: IContractsInputs;
   loading: IContractsLoading;

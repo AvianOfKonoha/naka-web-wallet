@@ -40,6 +40,7 @@ const updateHistoryList = () => {
   if (contractsStore.loading.history) {
     return;
   }
+  contractsStore.resetWithdrawalsList();
   contractsStore.updateOffsetDays(days.value);
   contractsStore.getWithdrawalHistory();
 };
@@ -74,12 +75,13 @@ watch(days, () => {
     </div>
     <div class="history__selector">
       <label for="days">Sort by time</label>
-      <select id="days" class="history__selector--select" v-model="days">
-        <option
-          :disabled="contractsStore.loading.history"
-          v-for="time in timeList"
-          :value="time.value"
-        >
+      <select
+        id="days"
+        class="history__selector--select"
+        v-model="days"
+        :disabled="contractsStore.loading.history"
+      >
+        <option v-for="time in timeList" :value="time.value">
           {{ time.text }}
         </option>
       </select>

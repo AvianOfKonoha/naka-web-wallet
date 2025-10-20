@@ -248,12 +248,7 @@ onMounted(() => {
         />
         <div class="spacer"></div>
         <Card
-          :amount="
-            contractsStore.activeRequest
-              ? contractsStore.contractBalance.usdt +
-                contractsStore.activeRequest.amount
-              : contractsStore.contractBalance.usdt
-          "
+          :amount="contractsStore.contractBalance.usdt"
         />
       </div>
       <HistoryList />

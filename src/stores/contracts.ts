@@ -16,8 +16,10 @@ import {Web3} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_PRODUCTION,
-  NETWORKS, POLYGON_RPC_URL,
-  polygonMainnet, RPC_LIST,
+  NETWORKS,
+  POLYGON_RPC_URL,
+  polygonMainnet,
+  RPC_LIST,
   USDT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
@@ -45,6 +47,7 @@ export const useContractsStore = defineStore('contracts', {
     connectedAccount: '',
     chainId: null,
     balance: '',
+    vaultBalance: null,
     contractBalance: {
       eth: 0,
       usdt: 0
@@ -701,11 +704,15 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
-        const balance: IVaultBalance = await this.vaultContract.methods
+        this.vaultBalance = await this.vaultContract.methods
           .getProtocolTokenBalances()
           .call();
 
-        const converted = formatUint256toNumber(balance.avaliableBalance);
+        if (!this.vaultBalance) {
+          return;
+        }
+
+        const converted = formatUint256toNumber(this.vaultBalance.balance);
 
         this.contractBalance = {
           ...this.contractBalance,
@@ -755,19 +762,23 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
-      const web3Instance = new Web3(this.rpc.url)
-      const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
+      const web3Instance = new Web3(this.rpc.url);
+      const vaultContract = new web3Instance.eth.Contract(
+        VaultABI,
+        this.vaultAddress
+      );
 
       try {
         /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
-        this.withdrawalRequests = (await (
-            vaultContract as any
-        ).getPastEvents('WithdrawRequest', {
-          fromBlock: Math.ceil(
-            this.lastBlock - this.blocksOffset * this.daysOffset
-          ),
-          toBlock: 'latest'
-        })) as IVaultEvent<IWithdrawRequestData>[];
+        this.withdrawalRequests = (await (vaultContract as any).getPastEvents(
+          'WithdrawRequest',
+          {
+            fromBlock: Math.ceil(
+              this.lastBlock - this.blocksOffset * this.daysOffset
+            ),
+            toBlock: 'latest'
+          }
+        )) as IVaultEvent<IWithdrawRequestData>[];
       } catch (error) {
         console.error(
           'Error fetching withdraw requests; ',
@@ -808,7 +819,14 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Take the latest WithdrawalRequest event as the active request */
         const latestRequest = this.withdrawalRequests.reverse()[0];
-        console.log('latest: ', latestRequest)
+
+        /** If for whatever reason the public indexer doesn't work open a prompt notifying the user he has an outstanding withdrawal request */
+        if (!latestRequest && thresholdPassed) {
+          this.thresholdPrompt =
+            'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
+          this.updateModal({overtime: true});
+          return;
+        }
 
         /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
         const blockRequest = (await this.web3.eth.getBlock(
@@ -833,7 +851,7 @@ export const useContractsStore = defineStore('contracts', {
         );
 
         /** By default, the unlockTime fetched from the SC is of type bigint. Once converted to the number it shows the time in seconds. First we need to multiply it with 1000 to convert it to milliseconds, then we can use Date to mutate it */
-        this.activeRequest = !latestRequest ? null : {
+        this.activeRequest = {
           address: `${decodedInput[1]}`, //Recipients address
           amount: formatUint256toNumber(latestRequest.returnValues.amount),
           date: new Date(
@@ -846,18 +864,6 @@ export const useContractsStore = defineStore('contracts', {
               ? 'ready'
               : 'pending'
         };
-
-        /** If for whatever reason the public indexer doesn't work open a prompt notifying the user he has an outstanding withdrawal request */
-        if (!this.activeRequest && thresholdPassed) {
-          this.thresholdPrompt =
-              'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
-          this.updateModal({overtime: true});
-          return;
-        }
-
-        if(!this.activeRequest){
-          return;
-        }
 
         /** If more than ten days have passed since making withdrawal request, prompt the user to either cancel or complete withdrawal request */
         const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
@@ -882,8 +888,9 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Get the cancel transaction receipt */
-        const transactionReceipt =
-          await this.web3.eth.getTransactionReceipt(cancelTxHash);
+        const transactionReceipt = await this.web3.eth.getTransactionReceipt(
+          cancelTxHash
+        );
 
         /** Stop propagation if there is no transaction with provided hash */
         if (!transactionReceipt) {
@@ -954,13 +961,16 @@ export const useContractsStore = defineStore('contracts', {
 
     async getCancelledWithdrawals() {
       /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
-      const web3Instance = new Web3(this.rpc.url)
-      const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
+      const web3Instance = new Web3(this.rpc.url);
+      const vaultContract = new web3Instance.eth.Contract(
+        VaultABI,
+        this.vaultAddress
+      );
 
       try {
         /** Fetch all cancelled withdrawals events that manifest after successful "withdraw" method requests from the Vault contract */
         const cancelledWithdrawals = (await (
-            vaultContract as any
+          vaultContract as any
         ).getPastEvents('CanceledWithdrawReservation', {
           fromBlock: Math.ceil(
             this.lastBlock - this.blocksOffset * this.daysOffset
@@ -1007,8 +1017,11 @@ export const useContractsStore = defineStore('contracts', {
 
     async getCompletedWithdrawals() {
       /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
-      const web3Instance = new Web3(this.rpc.url)
-      const vaultContract = new web3Instance.eth.Contract(VaultABI, this.vaultAddress);
+      const web3Instance = new Web3(this.rpc.url);
+      const vaultContract = new web3Instance.eth.Contract(
+        VaultABI,
+        this.vaultAddress
+      );
 
       try {
         /** Fetch all "Withdrawal" events that manifest after successful "withdraw" method requests from the Vault contract */
@@ -1016,7 +1029,7 @@ export const useContractsStore = defineStore('contracts', {
           'Withdrawal',
           {
             fromBlock: Math.ceil(
-              this.lastBlock - (this.blocksOffset * this.daysOffset)
+              this.lastBlock - this.blocksOffset * this.daysOffset
             ),
             toBlock: 'latest'
           }
@@ -1049,13 +1062,13 @@ export const useContractsStore = defineStore('contracts', {
           (error as Error).message
         );
 
-        const errorMessage = (error as any).data?.message
-        if(errorMessage){
-          toast.error(errorMessage)
+        const errorMessage = (error as any).data?.message;
+        if (errorMessage) {
+          toast.error(errorMessage);
           return;
         }
 
-        toast.error((error as Error).message)
+        toast.error((error as Error).message);
       }
     },
 
@@ -1227,7 +1240,12 @@ export const useContractsStore = defineStore('contracts', {
         this.updateModal({completeWithdraw: false});
         this.updateModal({overtime: false});
         bottomToast(
-          `Withdraw to: ${this.activeRequest.address.substring(0, 4)}...${this.activeRequest.address.slice(-4)} has been successfully completed.`,
+          `Withdraw to: ${this.activeRequest.address.substring(
+            0,
+            4
+          )}...${this.activeRequest.address.slice(
+            -4
+          )} has been successfully completed.`,
           3000,
           'toast__wide toast__withdrawal'
         );

@@ -8,7 +8,6 @@ const contractsStore = useContractsStore()
 
 /*Watchers*/
 watch(() => contractsStore.rpc, () => {
-  console.log('initial state changed')
   contractsStore.resetWithdrawalsList();
   contractsStore.getWithdrawalHistory();
 })
