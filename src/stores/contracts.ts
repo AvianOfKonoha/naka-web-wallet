@@ -214,6 +214,8 @@ export const useContractsStore = defineStore('contracts', {
 
     resetWithdrawalsList() {
       this.activeRequest = null;
+      this.cancelledWithdrawals = [];
+      this.completedWithdrawals = [];
       this.withdrawals = [];
     },
 
@@ -767,6 +769,8 @@ export const useContractsStore = defineStore('contracts', {
             toBlock: 'latest'
           }
         )) as IVaultEvent<IWithdrawRequestData>[];
+
+        console.log('reset: ', this.withdrawalRequests);
       } catch (error) {
         console.error(
           'Error fetching withdraw requests; ',
