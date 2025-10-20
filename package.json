@@ -1,8 +1,7 @@
 {
-  "name": "vue-client",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
+  "name": "naka-fund-withdrawal",
+  "version": "1.0.0",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
