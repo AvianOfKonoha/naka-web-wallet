@@ -194,7 +194,10 @@ onMounted(() => {
         USD₮0
       </div>
     </div>
-    <div class="overtime__buttons">
+    <div
+      class="overtime__buttons"
+      :class="{complete: contractsStore.activeRequest}"
+    >
       <div class="cancel__button">
         <button
           type="button"
@@ -207,7 +210,7 @@ onMounted(() => {
           </span>
         </button>
       </div>
-      <div class="complete__button">
+      <div class="complete__button" v-if="contractsStore.activeRequest">
         <button
           type="button"
           aria-label="Complete withdrawal"
@@ -247,9 +250,7 @@ onMounted(() => {
           buttonText="Withdraw external"
         />
         <div class="spacer"></div>
-        <Card
-          :amount="contractsStore.contractBalance.usdt"
-        />
+        <Card :amount="contractsStore.contractBalance.usdt" />
       </div>
       <HistoryList />
     </div>

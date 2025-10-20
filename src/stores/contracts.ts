@@ -29,7 +29,6 @@ import type {
   IBlock,
   ICancelledWithdrawReservationData,
   IReservation,
-  IVaultBalance,
   IVaultEvent,
   IWithdrawRequestData
 } from '@/types/vault.ts';
@@ -823,7 +822,7 @@ export const useContractsStore = defineStore('contracts', {
         /** If for whatever reason the public indexer doesn't work open a prompt notifying the user he has an outstanding withdrawal request */
         if (!latestRequest && thresholdPassed) {
           this.thresholdPrompt =
-            'It seems the Polygon chain is experiencing a lot of traffic right now. We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel or complete your withdrawal.';
+            'We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel your withdrawal.';
           this.updateModal({overtime: true});
           return;
         }
@@ -853,14 +852,12 @@ export const useContractsStore = defineStore('contracts', {
         /** By default, the unlockTime fetched from the SC is of type bigint. Once converted to the number it shows the time in seconds. First we need to multiply it with 1000 to convert it to milliseconds, then we can use Date to mutate it */
         this.activeRequest = {
           address: `${decodedInput[1]}`, //Recipients address
-          amount: formatUint256toNumber(latestRequest.returnValues.amount),
+          amount: formatUint256toNumber(reservationStatus.amount),
           date: new Date(
-            (Number(latestRequest.returnValues.unlockTime) -
-              Number(lockDuration)) *
-              1000
+            (Number(reservationStatus.unlockTime) - Number(lockDuration)) * 1000
           ),
           status:
-            Number(latestRequest.returnValues.unlockTime) * 1000 < Date.now()
+            Number(reservationStatus.unlockTime) * 1000 < Date.now()
               ? 'ready'
               : 'pending'
         };
@@ -1250,6 +1247,7 @@ export const useContractsStore = defineStore('contracts', {
           'toast__wide toast__withdrawal'
         );
         await this.getWithdrawalHistory();
+        await this.getVaultBalance();
       } catch (error) {
         console.error('Error withdrawing funds: ', (error as Error).message);
         toast.error(`Error withdrawing funds: ${(error as Error).message}`);

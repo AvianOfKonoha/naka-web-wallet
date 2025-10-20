@@ -453,11 +453,11 @@
     &--overtime {
       .overtime {
         &__buttons {
-          @include framework.grid-column-layout(
-            1fr 1fr,
-            framework.$defaultGridGap
-          );
+          @include framework.grid-column-layout(1fr, framework.$defaultGridGap);
           align-items: center;
+          &.complete {
+            grid-template-columns: 1fr 1fr;
+          }
           .complete {
             &__button {
               padding: unset;
@@ -640,8 +640,7 @@
                     #{map.get(framework.$colors, 'gray-950')}
                   )
                   content-box;
-                -webkit-mask:
-                  repeating-conic-gradient(
+                -webkit-mask: repeating-conic-gradient(
                     #0000 0deg,
                     #000 1deg 20deg,
                     #0000 21deg 36deg
@@ -1215,8 +1214,9 @@
                 &__max {
                   width: 90px;
                 }
-                &__currency{
-                  padding: 0 calc(#{framework.$defaultPadding} * 2) 0 calc(#{framework.$defaultPadding} / 2);
+                &__currency {
+                  padding: 0 calc(#{framework.$defaultPadding} * 2) 0
+                    calc(#{framework.$defaultPadding} / 2);
                 }
               }
             }
