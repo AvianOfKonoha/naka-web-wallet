@@ -278,21 +278,10 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({balance: true});
 
       try {
-        /** Step 1: Connect to metamask and extract balance in ETH or its derivation */
+        /** Connect to metamask and extract balance in ETH or its derivation */
         const balance = await this.web3.eth.getBalance(this.connectedAccount);
         const balanceEth = this.web3.utils.fromWei(balance, 'ether');
         this.balance = parseFloat(balanceEth).toFixed(5);
-
-        /*TODO: Add USD conversion if necessary*/
-        /** Step 2: Fetch ETH price in USD */
-        /*const res = await fetch(
-          `https://api.coingecko.com/api/v3/simple/price?ids=${this.activeNetwork.id}&vs_currencies=usd`
-        );
-        const data = await res.json();
-        const ethPrice = data.ethereum.usd;*/
-
-        /** Step 3: Multiply and fragment to 2 decimal points */
-        /*this.balance = (parseFloat(balanceEth) * ethPrice).toFixed(2);*/
       } catch (error) {
         console.error(error);
       } finally {
@@ -1233,6 +1222,9 @@ export const useContractsStore = defineStore('contracts', {
               : undefined
           });
 
+        /** Re-fetch contract balance */
+        await this.getVaultBalance();
+
         /** Close the modal and re-fetch withdrawal list */
         this.updateModal({completeWithdraw: false});
         this.updateModal({overtime: false});
@@ -1247,7 +1239,6 @@ export const useContractsStore = defineStore('contracts', {
           'toast__wide toast__withdrawal'
         );
         await this.getWithdrawalHistory();
-        await this.getVaultBalance();
       } catch (error) {
         console.error('Error withdrawing funds: ', (error as Error).message);
         toast.error(`Error withdrawing funds: ${(error as Error).message}`);
