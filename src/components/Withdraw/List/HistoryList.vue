@@ -6,6 +6,11 @@ import {useContractsStore} from '@/stores/contracts.ts';
 import {ref, watch} from 'vue';
 
 /*Constants*/
+const todayPortion = (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24;
+const thisYearDays = Math.floor(
+  (new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) /
+    (1000 * 60 * 60 * 24)
+);
 const timeList = [
   {
     text: 'Last hour',
@@ -13,7 +18,7 @@ const timeList = [
   },
   {
     text: 'Today',
-    value: (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24
+    value: todayPortion
   },
   {
     text: '5 days',
@@ -29,12 +34,7 @@ const timeList = [
   },
   {
     text: 'This year',
-    value:
-      Math.floor(
-        (new Date().getTime() -
-          new Date(new Date().getFullYear(), 0, 1).getTime()) /
-          (1000 * 60 * 60 * 24)
-      ) + 1
+    value: thisYearDays + todayPortion
   }
 ];
 
