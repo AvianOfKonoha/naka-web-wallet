@@ -16,16 +16,25 @@ const timeList = [
     value: (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24
   },
   {
-    text: '2 days',
-    value: 2
-  },
-  {
     text: '5 days',
     value: 5
   },
   {
     text: '10 days',
     value: 10
+  },
+  {
+    text: 'This month',
+    value: new Date().getDate()
+  },
+  {
+    text: 'This year',
+    value:
+      Math.floor(
+        (new Date().getTime() -
+          new Date(new Date().getFullYear(), 0, 1).getTime()) /
+          (1000 * 60 * 60 * 24)
+      ) + 1
   }
 ];
 

@@ -17,7 +17,6 @@ import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_PRODUCTION,
   NETWORKS,
-  POLYGON_RPC_URL,
   polygonMainnet,
   RPC_LIST,
   USDT_ADDRESS_PRODUCTION
@@ -136,7 +135,7 @@ export const useContractsStore = defineStore('contracts', {
     blocksOffset: 5000,
     completedWithdrawals: [],
     cancelledWithdrawals: [],
-    daysOffset: 2,
+    daysOffset: (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24,
     thresholdPrompt: '',
     rpc: RPC_LIST[0]
   }),
