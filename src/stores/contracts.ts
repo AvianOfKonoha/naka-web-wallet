@@ -219,6 +219,11 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     resetConnectedForm() {
+      if (this.wallets.connected.step === 2) {
+        this.resetWithdrawalsList();
+        this.getWithdrawalHistory();
+      }
+
       this.updateError({connected: false});
       this.updateWallet('connected', {step: 1});
       this.updateFormField(null, 'connected', 'amount');
@@ -226,6 +231,11 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     resetExternalForm() {
+      if (this.wallets.external.step === 3) {
+        this.resetWithdrawalsList();
+        this.getWithdrawalHistory();
+      }
+
       this.updateError({external: false});
       this.updateWallet('external', {step: 1});
       this.updateFormField(null, 'external', 'amount');
