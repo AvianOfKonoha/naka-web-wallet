@@ -130,7 +130,7 @@ export const USDT_ADDRESS_STAGING =
 export const USDT_ADDRESS_PRODUCTION =
   '0xc2132d05d31c914a87c6611c10748aeb04b58e8f';
 
-export const POLYGON_RPC_URL = 'https://polygon.gateway.tenderly.co'
+export const POLYGON_RPC_URL = 'https://polygon.gateway.tenderly.co';
 
 export const RPC_LIST = [
   {
@@ -141,4 +141,4 @@ export const RPC_LIST = [
     name: 'Polygon RPC',
     url: 'https://polygon-rpc.com'
   }
-]
+];

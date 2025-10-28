@@ -768,8 +768,6 @@ export const useContractsStore = defineStore('contracts', {
             toBlock: 'latest'
           }
         )) as IVaultEvent<IWithdrawRequestData>[];
-
-        console.log('reset: ', this.withdrawalRequests);
       } catch (error) {
         console.error(
           'Error fetching withdraw requests; ',
@@ -810,6 +808,10 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Take the latest WithdrawalRequest event as the active request */
         const latestRequest = this.withdrawalRequests.reverse()[0];
+
+        if (!latestRequest) {
+          return;
+        }
 
         /** If for whatever reason the public indexer doesn't work open a prompt notifying the user he has an outstanding withdrawal request */
         if (!latestRequest && thresholdPassed) {
@@ -1241,6 +1243,8 @@ export const useContractsStore = defineStore('contracts', {
           3000,
           'toast__wide toast__withdrawal'
         );
+
+        this.resetWithdrawalsList();
         await this.getWithdrawalHistory();
       } catch (error) {
         console.error('Error withdrawing funds: ', (error as Error).message);
@@ -1253,6 +1257,7 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async cancelWithdrawRequest() {
+      /*TODO: Reset history*/
       if (
         this.loading.cancelWithdraw ||
         !this.vaultContract ||
@@ -1279,6 +1284,8 @@ export const useContractsStore = defineStore('contracts', {
         this.updateModal({cancelWithdraw: false});
         this.updateModal({overtime: false});
         await this.getVaultBalance();
+
+        this.resetWithdrawalsList();
         await this.getWithdrawalHistory();
 
         toast.success('Withdrawal request canceled');
