@@ -140,9 +140,5 @@ export const RPC_LIST = [
   {
     name: 'Polygon RPC',
     url: 'https://polygon-rpc.com'
-  },
-  {
-    name: 'NAKA',
-    url: 'http://polygon-node.gocrypto.tech:8545'
   }
 ];
