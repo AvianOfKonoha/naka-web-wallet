@@ -28,7 +28,9 @@ const copyAddress = () => {
     <div class="modal__title">Define address</div>
     <div class="process__description external__form--description">
       <div class="process__description--text">
-        You are about to withdraw USDT funds from your balance to an external wallet. Make sure the selected wallet supports the selected currency and blockchain network.
+        You are about to withdraw USDT funds from your balance to an external
+        wallet. Make sure the selected wallet supports the selected currency and
+        blockchain network.
       </div>
       <div class="external__form--info">
         <div class="info__icon">
@@ -65,9 +67,11 @@ const copyAddress = () => {
           </svg>
         </div>
         <div class="info__detail">
-          <div class="info__details--title">Only USD₮0 from Polygon</div>
+          <div class="info__details--title">Only USDT0 from Polygon</div>
           <div class="info__details--text">
-            You will withdraw USDT0 on the Polygon network. When sending USDT on the Polygon network, you’re actually using USDT0, the omnichain version of USDT.
+            You will withdraw USDT0 on the Polygon network. When sending USDT on
+            the Polygon network, you’re actually using USDT0, the omnichain
+            version of USDT.
           </div>
         </div>
       </div>
@@ -143,7 +147,7 @@ const copyAddress = () => {
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
         {{ formatWithAtLeastTwoDecimals(props.form.amount.value as number) }}
-        USD₮0
+        USDT0
       </div>
     </div>
     <div class="connected__form--submit">

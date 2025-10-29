@@ -71,7 +71,7 @@ watch(
           step="0.00001"
           v-model="props.amountData.value"
         />
-        <span class="amount__currency">USD₮0</span>
+        <span class="amount__currency">USDT0</span>
         <button
           v-if="props.amountData.value"
           type="reset"

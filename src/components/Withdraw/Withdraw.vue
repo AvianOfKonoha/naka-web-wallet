@@ -191,7 +191,7 @@ onMounted(() => {
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
         {{ formatWithAtLeastTwoDecimals(contractsStore.activeRequest.amount) }}
-        USD₮0
+        USDT0
       </div>
     </div>
     <div

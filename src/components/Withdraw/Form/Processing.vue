@@ -22,7 +22,7 @@ const props = defineProps<{
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
         {{ formatWithAtLeastTwoDecimals(props.amountData.value as number) }}
-        USD₮0
+        USDT0
       </div>
     </div>
     <div class="process__button">

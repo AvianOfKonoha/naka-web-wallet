@@ -395,6 +395,7 @@ export const useContractsStore = defineStore('contracts', {
       this.vaultContract = null;
       this.factoryContract = null;
       sessionStorage.removeItem('firstSign');
+      this.resetWithdrawalsList();
     },
 
     updateNetwork() {
