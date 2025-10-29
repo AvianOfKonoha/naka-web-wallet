@@ -155,7 +155,7 @@ export const useContractsStore = defineStore('contracts', {
   },
   actions: {
     initializeWeb3(provider?: any) {
-      this.provider = window.ethereum || provider;
+      this.provider = provider || window.ethereum;
       this.web3 = new Web3(this.provider);
 
       this.updateNetwork();
@@ -371,7 +371,7 @@ export const useContractsStore = defineStore('contracts', {
         }
 
         try {
-          await window.ethereum.request({
+          await this.provider.request({
             method: 'wallet_addEthereumChain',
             params: [polygonMainnet]
           });
@@ -436,13 +436,14 @@ export const useContractsStore = defineStore('contracts', {
 
       this.provider.on('accountsChanged', (accounts: string[]) => {
         /** If the accounts array is populated simply return and don't do anything */
-        if (accounts.length) {
+        /*if (accounts.length) {
           return;
-        }
+        }*/
 
         /** If the accounts array is empty clear the state and show the disconnected state on app */
         this.updateModal({connect: false});
         this.disconnectMetamask();
+        this.connectMetamask();
       });
     },
 
@@ -471,7 +472,7 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Fetch all connected account from the metamask */
-        const accounts = await window.ethereum.request({
+        const accounts = await this.provider.request({
           method: 'eth_accounts'
         });
 
@@ -1201,7 +1202,7 @@ export const useContractsStore = defineStore('contracts', {
         }
 
         toast.error(
-          (error as Error).message.replace(
+          (error as Error).message?.replace(
             'Returned error: MetaMask Tx Signature: ',
             ''
           )
