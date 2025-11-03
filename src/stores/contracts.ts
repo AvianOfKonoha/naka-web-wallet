@@ -594,7 +594,7 @@ export const useContractsStore = defineStore('contracts', {
           /** Make a withdrawal request to Vault SC */
           await this.vaultContract.methods
             .withdrawRequest(
-              USDT_ADDRESS_PRODUCTION,
+              this.currencyToken,
               this.connectedAccount,
               formatNumberToUint256(this.form.connected.amount.value)
             )
@@ -669,7 +669,7 @@ export const useContractsStore = defineStore('contracts', {
           /** Make a withdrawal request to Vault SC */
           await this.vaultContract.methods
             .withdrawRequest(
-              USDT_ADDRESS_PRODUCTION,
+              this.currencyToken,
               this.form.external.address.value,
               formatNumberToUint256(this.form.external.amount.value)
             )
@@ -839,6 +839,7 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Take the latest WithdrawalRequest event as the active request */
         const latestRequest = this.withdrawalRequests.reverse()[0];
+        console.log('latest request: ', latestRequest);
 
         if (!latestRequest) {
           return;
@@ -1248,7 +1249,7 @@ export const useContractsStore = defineStore('contracts', {
       try {
         await this.vaultContract.methods
           .withdraw(
-            USDT_ADDRESS_PRODUCTION,
+            this.currencyToken,
             this.activeRequest.address,
             formatNumberToUint256(this.activeRequest.amount)
           )
@@ -1310,7 +1311,7 @@ export const useContractsStore = defineStore('contracts', {
       try {
         /** Make a request to the Vault smart contract to cancel the active withdraw request. It takes in one argument - currency token address */
         await this.vaultContract.methods
-          .cancelWithdrawRequest(USDT_ADDRESS_PRODUCTION)
+          .cancelWithdrawRequest(this.currencyToken)
           .send({
             from: this.connectedAccount,
             gas: `${this.transactionGas.gas}`,
