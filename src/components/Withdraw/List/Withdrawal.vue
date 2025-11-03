@@ -5,7 +5,7 @@ import {
   localizeDateTime
 } from '@/utils/helpers.ts';
 import {useContractsStore} from '@/stores/contracts.ts';
-import {CURRENCIES, DEFAULT_CURRENCY} from '../../../utils/constants.ts';
+import {CURRENCIES, DEFAULT_CURRENCY} from '@/utils/constants.ts';
 
 /*Props*/
 const props = defineProps<{
