@@ -276,14 +276,30 @@
                     position: absolute;
                     height: 48px;
                     width: 32px;
-                    right: 0;
+                    right: 85px;
                     @include framework.flex-layout(flex, center, center, unset);
                     background-color: map.get(framework.$colors, 'white');
                   }
                 }
               }
               &__currency {
-                padding-right: 48px;
+                padding-right: 10px;
+                &--text {
+                  width: 75px;
+                  background-color: map.get(framework.$colors, 'gray-100');
+                  border-radius: framework.$formRadius;
+                  display: block;
+                  padding: 5px;
+                  text-align: center;
+                }
+                select {
+                  width: 75px;
+                  border: unset;
+                  @include framework.font-style('14', 'primary');
+                  padding: 5px;
+                  background-color: map.get(framework.$colors, 'gray-100');
+                  border-radius: framework.$formRadius;
+                }
               }
               &__max {
                 height: 48px;
@@ -1215,8 +1231,6 @@
                   width: 90px;
                 }
                 &__currency {
-                  padding: 0 calc(#{framework.$defaultPadding} * 2) 0
-                    calc(#{framework.$defaultPadding} / 2);
                 }
               }
             }

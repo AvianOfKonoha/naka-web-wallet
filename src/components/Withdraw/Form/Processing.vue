@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import type {IFormField} from '@/types/general.ts';
 import {formatWithAtLeastTwoDecimals} from '@/utils/helpers.ts';
+import {useContractsStore} from '@/stores/contracts.ts';
 
 /*Props*/
 const props = defineProps<{
   amountData: IFormField<number | null>;
 }>();
+
+/*Global state*/
+const contractStore = useContractsStore();
 </script>
 
 <template>
@@ -22,7 +26,7 @@ const props = defineProps<{
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
         {{ formatWithAtLeastTwoDecimals(props.amountData.value as number) }}
-        USDT0
+        {{ contractStore.selectedCurrency }}
       </div>
     </div>
     <div class="process__button">

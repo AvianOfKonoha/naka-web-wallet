@@ -5,6 +5,7 @@ import {
   localizeDateTime
 } from '@/utils/helpers.ts';
 import {useContractsStore} from '@/stores/contracts.ts';
+import {CURRENCIES, DEFAULT_CURRENCY} from '../../../utils/constants.ts';
 
 /*Props*/
 const props = defineProps<{
@@ -69,7 +70,11 @@ const openCancelModal = () => {
         </div>
       </div>
       <div class="withdrawal__amount">
-        -{{ formatWithAtLeastTwoDecimals(props.withdrawal.amount) }} USDT
+        -{{ formatWithAtLeastTwoDecimals(props.withdrawal.amount) }}
+        {{
+          CURRENCIES.find((item) => item.value === props.withdrawal.token)
+            ?.name || DEFAULT_CURRENCY
+        }}
       </div>
     </div>
     <div class="withdrawal__row--button">

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /*Props*/
 import NetworkIcon from '@/components/Withdraw/NetworkIcon.vue';
+import {DEFAULT_CURRENCY} from '@/utils/constants.ts';
 
 const props = defineProps<{
   title: string;
@@ -19,7 +20,7 @@ const props = defineProps<{
       <div class="box__chain--text">Supported:</div>
       <div class="box__chain--network">
         <NetworkIcon network="polygon" />
-        <span>USDT0 on Polygon</span>
+        <span>{{ DEFAULT_CURRENCY }} on Polygon</span>
       </div>
     </div>
     <div class="box__button">

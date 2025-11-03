@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {formatWithAtLeastTwoDecimals} from '@/utils/helpers.ts';
+import {DEFAULT_CURRENCY} from '../../../utils/constants.ts';
 
 /*Props*/
 const props = defineProps<{amount: number}>();
@@ -34,7 +35,7 @@ const props = defineProps<{amount: number}>();
         <div class="value__number">
           {{ formatWithAtLeastTwoDecimals(props.amount) }}
         </div>
-        <div class="value__currency">USDT</div>
+        <div class="value__currency">{{ DEFAULT_CURRENCY }}</div>
       </div>
     </div>
   </div>

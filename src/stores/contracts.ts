@@ -16,14 +16,18 @@ import {Web3} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_PRODUCTION,
+  CURRENCIES,
+  DEFAULT_CURRENCY,
   NETWORKS,
   polygonMainnet,
   RPC_LIST,
+  USDC_ADDRESS_PRODUCTION,
   USDT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
 import VaultABI from '@/assets/abi/Vault.json';
 import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
+import usdcABI from '@/assets/abi/USDC.json';
 import type {
   IBlock,
   ICancelledWithdrawReservationData,
@@ -137,7 +141,12 @@ export const useContractsStore = defineStore('contracts', {
     cancelledWithdrawals: [],
     daysOffset: (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24,
     thresholdPrompt: '',
-    rpc: RPC_LIST[0]
+    rpc: RPC_LIST[0],
+    usdc: {
+      contract: null,
+      balance: 0
+    },
+    currencyToken: USDT_ADDRESS_PRODUCTION
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -151,6 +160,12 @@ export const useContractsStore = defineStore('contracts', {
         id: NETWORKS[state.chainId as keyof typeof NETWORKS].id || 'No id',
         symbol: NETWORKS[state.chainId as keyof typeof NETWORKS].symbol || ''
       };
+    },
+    selectedCurrency: (state) => {
+      return (
+        CURRENCIES.find((item) => item.value === state.currencyToken)?.name ||
+        DEFAULT_CURRENCY
+      );
     }
   },
   actions: {
@@ -708,6 +723,10 @@ export const useContractsStore = defineStore('contracts', {
         this.vaultBalance = await this.vaultContract.methods
           .getProtocolTokenBalances()
           .call();
+        const usdcBalance = (await this.usdc.contract?.methods
+          .balanceOf(this.vaultAddress)
+          .call()) as bigint;
+        this.usdc.balance = formatUint256toNumber(usdcBalance);
 
         if (!this.vaultBalance) {
           return;
@@ -865,7 +884,8 @@ export const useContractsStore = defineStore('contracts', {
           status:
             Number(reservationStatus.unlockTime) * 1000 < Date.now()
               ? 'ready'
-              : 'pending'
+              : 'pending',
+          token: latestRequest.returnValues.token
         };
 
         /** If more than ten days have passed since making withdrawal request, prompt the user to either cancel or complete withdrawal request */
@@ -1001,7 +1021,8 @@ export const useContractsStore = defineStore('contracts', {
               address: cancelledTx ? cancelledTx.recipient : '',
               amount: formatUint256toNumber(cancellation.returnValues.amount),
               date: new Date(Number(timestamp) * 1000),
-              status: 'cancelled'
+              status: 'cancelled',
+              token: cancellation.returnValues.token
             };
           }
         );
@@ -1052,7 +1073,8 @@ export const useContractsStore = defineStore('contracts', {
               address: withdrawal.returnValues.recipient, //Recipients address
               amount: formatUint256toNumber(withdrawal.returnValues.amount),
               date: new Date(Number(timestamp) * 1000),
-              status: 'complete'
+              status: 'complete',
+              token: withdrawal.returnValues.token
             };
           }
         );
@@ -1121,6 +1143,10 @@ export const useContractsStore = defineStore('contracts', {
       try {
         /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
         this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
+        this.usdc.contract = new this.web3.eth.Contract(
+          usdcABI,
+          USDC_ADDRESS_PRODUCTION
+        );
 
         /** Get the list of all withdrawals */
         await this.getWithdrawalHistory();

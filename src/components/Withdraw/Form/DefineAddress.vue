@@ -4,6 +4,8 @@ import {
   copyToClipboard,
   formatWithAtLeastTwoDecimals
 } from '@/utils/helpers.ts';
+import {DEFAULT_CURRENCY} from '@/utils/constants.ts';
+import {useContractsStore} from '@/stores/contracts.ts';
 
 /*Props*/
 const props = defineProps<{
@@ -13,6 +15,9 @@ const props = defineProps<{
   errorActive: boolean;
   loading: boolean;
 }>();
+
+/*Global state*/
+const contractStore = useContractsStore();
 
 /*Methods*/
 const copyAddress = () => {
@@ -28,7 +33,7 @@ const copyAddress = () => {
     <div class="modal__title">Define address</div>
     <div class="process__description external__form--description">
       <div class="process__description--text">
-        You are about to withdraw USDT funds from your balance to an external
+        You are about to withdraw USDT0 funds from your balance to an external
         wallet. Make sure the selected wallet supports the selected currency and
         blockchain network.
       </div>
@@ -67,11 +72,13 @@ const copyAddress = () => {
           </svg>
         </div>
         <div class="info__detail">
-          <div class="info__details--title">Only USDT0 from Polygon</div>
+          <div class="info__details--title">
+            Only {{ DEFAULT_CURRENCY }} from Polygon
+          </div>
           <div class="info__details--text">
-            You will withdraw USDT0 on the Polygon network. When sending USDT on
-            the Polygon network, you’re actually using USDT0, the omnichain
-            version of USDT.
+            You will withdraw {{ DEFAULT_CURRENCY }} on the Polygon network.
+            When sending USDT0 on the Polygon network, you’re actually using
+            {{ DEFAULT_CURRENCY }}, the omnichain version of USDT0.
           </div>
         </div>
       </div>
@@ -147,7 +154,7 @@ const copyAddress = () => {
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
         {{ formatWithAtLeastTwoDecimals(props.form.amount.value as number) }}
-        USDT0
+        {{ contractStore.selectedCurrency }}
       </div>
     </div>
     <div class="connected__form--submit">

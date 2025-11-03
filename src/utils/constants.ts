@@ -129,6 +129,8 @@ export const USDT_ADDRESS_STAGING =
   '0x5DC14a664d551F24e9f7A4C9c6215a84E44f0f1E';
 export const USDT_ADDRESS_PRODUCTION =
   '0xc2132d05d31c914a87c6611c10748aeb04b58e8f';
+export const USDC_ADDRESS_PRODUCTION =
+  '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359';
 
 export const POLYGON_RPC_URL = 'https://polygon.gateway.tenderly.co';
 
@@ -140,5 +142,22 @@ export const RPC_LIST = [
   {
     name: 'Polygon RPC',
     url: 'https://polygon-rpc.com'
+  },
+  {
+    name: 'NAKA',
+    url: 'http://polygon-node.gocrypto.tech:8545'
+  }
+];
+
+export const DEFAULT_CURRENCY = 'USDT0';
+
+export const CURRENCIES = [
+  {
+    name: 'USDT0',
+    value: USDT_ADDRESS_PRODUCTION
+  },
+  {
+    name: 'USDC',
+    value: USDC_ADDRESS_PRODUCTION
   }
 ];

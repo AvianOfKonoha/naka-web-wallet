@@ -2,6 +2,7 @@
 import type {IFormField} from '@/types/general.ts';
 import {ref, watch} from 'vue';
 import {useContractsStore} from '@/stores/contracts.ts';
+import {CURRENCIES, DEFAULT_CURRENCY} from '@/utils/constants.ts';
 
 /*Props */
 const props = defineProps<{
@@ -71,7 +72,23 @@ watch(
           step="0.00001"
           v-model="props.amountData.value"
         />
-        <span class="amount__currency">USDT0</span>
+        <span class="amount__currency">
+          <span
+            class="amount__currency--text"
+            v-if="!contractsStore.usdc.balance"
+            >{{ DEFAULT_CURRENCY }}</span
+          >
+          <select
+            v-if="contractsStore.usdc.balance"
+            name="token"
+            id="token"
+            v-model="contractsStore.currencyToken"
+          >
+            <option v-for="currency in CURRENCIES" :value="currency.value">
+              {{ currency.name }}
+            </option>
+          </select>
+        </span>
         <button
           v-if="props.amountData.value"
           type="reset"

@@ -1,6 +1,10 @@
 import type {Contract, ContractAbi, Web3} from 'web3';
 import type {IFormField} from '@/types/general.ts';
-import type {IVaultBalance, IVaultEvent, IWithdrawRequestData} from '@/types/vault.ts';
+import type {
+  IVaultBalance,
+  IVaultEvent,
+  IWithdrawRequestData
+} from '@/types/vault.ts';
 
 export interface IContractsInputs {
   privateKey: string;
@@ -62,6 +66,7 @@ export interface IWithdrawal {
   date: Date;
   amount: number;
   status: string;
+  token: string;
 }
 
 export interface IConnectedForm {
@@ -110,6 +115,11 @@ export interface IRpc {
   url: string;
 }
 
+export interface IUsdc {
+  contract: Contract<ContractAbi> | null;
+  balance: number;
+}
+
 export interface IContractsStore {
   web3: Web3 | null;
   connectedAccount: string;
@@ -143,5 +153,7 @@ export interface IContractsStore {
   blocksOffset: number;
   daysOffset: number;
   thresholdPrompt: string;
-  rpc: IRpc
+  rpc: IRpc;
+  usdc: IUsdc;
+  currencyToken: string;
 }

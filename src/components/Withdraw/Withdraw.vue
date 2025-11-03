@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
 import {onMounted} from 'vue';
-import {NetworkEnum, polygonMainnet} from '@/utils/constants.ts';
+import {
+  DEFAULT_CURRENCY,
+  NetworkEnum,
+  polygonMainnet
+} from '@/utils/constants.ts';
 import {toast} from 'vue3-toastify';
 import Modal from '@/components/UI/Modal.vue';
 import ConnectedWallet from '@/components/Withdraw/Form/ConnectedWallet.vue';
@@ -191,7 +195,7 @@ onMounted(() => {
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
         {{ formatWithAtLeastTwoDecimals(contractsStore.activeRequest.amount) }}
-        USDT0
+        {{ DEFAULT_CURRENCY }}
       </div>
     </div>
     <div
