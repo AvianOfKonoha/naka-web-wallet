@@ -841,7 +841,6 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Take the latest WithdrawalRequest event as the active request */
         const latestRequest = this.withdrawalRequests.reverse()[0];
-        console.log('latest request: ', latestRequest);
 
         if (!latestRequest) {
           return;
@@ -1183,7 +1182,6 @@ export const useContractsStore = defineStore('contracts', {
           .getVaultAddressByOwner(this.connectedAccount)
           .call();
         const vaultExists = parseInt(this.vaultAddress, 16);
-        console.log('factory: ', this.vaultAddress);
 
         /** If the Vault contract has already been created stop propagation otherwise proceed to Vault creation */
         if (vaultExists) {
