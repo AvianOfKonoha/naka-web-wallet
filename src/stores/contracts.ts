@@ -231,6 +231,8 @@ export const useContractsStore = defineStore('contracts', {
       this.cancelledWithdrawals = [];
       this.completedWithdrawals = [];
       this.withdrawals = [];
+      this.daysOffset =
+        (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24;
     },
 
     resetConnectedForm() {
@@ -1181,6 +1183,7 @@ export const useContractsStore = defineStore('contracts', {
           .getVaultAddressByOwner(this.connectedAccount)
           .call();
         const vaultExists = parseInt(this.vaultAddress, 16);
+        console.log('factory: ', this.vaultAddress);
 
         /** If the Vault contract has already been created stop propagation otherwise proceed to Vault creation */
         if (vaultExists) {
@@ -1219,7 +1222,7 @@ export const useContractsStore = defineStore('contracts', {
         );
 
         toast.remove(loadingToast);
-        toast.success(`Vault contract successfully created:`);
+        toast.success(`Vault contract successfully created`);
       } catch (error) {
         toast.remove(loadingToast);
 

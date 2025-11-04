@@ -2,7 +2,11 @@
 import type {IFormField} from '@/types/general.ts';
 import {ref, watch} from 'vue';
 import {useContractsStore} from '@/stores/contracts.ts';
-import {CURRENCIES, DEFAULT_CURRENCY} from '@/utils/constants.ts';
+import {
+  CURRENCIES,
+  DEFAULT_CURRENCY,
+  USDC_ADDRESS_PRODUCTION
+} from '@/utils/constants.ts';
 
 /*Props */
 const props = defineProps<{
@@ -39,6 +43,10 @@ const preventNegative = (event: any) => {
 
 const checkBalance = () => {
   if (!props.amountData.value) {
+    return;
+  }
+
+  if (contractsStore.currencyToken === USDC_ADDRESS_PRODUCTION) {
     return;
   }
 
