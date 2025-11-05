@@ -42,6 +42,8 @@ const preventNegative = (event: any) => {
 };
 
 const checkBalance = () => {
+  updateError(false);
+
   if (!props.amountData.value) {
     return;
   }
@@ -51,9 +53,9 @@ const checkBalance = () => {
   }
 
   if (contractsStore.contractBalance.usdt >= props.amountData.value) {
-    updateError(false);
     return;
   }
+
   updateError(true);
 };
 
