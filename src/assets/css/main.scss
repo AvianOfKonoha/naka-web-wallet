@@ -275,6 +275,9 @@ main {
         }
       }
     }
+    &__toast-body {
+      word-break: break-word;
+    }
     &__toast {
       font-family: NeueMontreal, sans-serif;
       &--info {
@@ -324,7 +327,7 @@ main {
   }
 }
 
-footer{
+footer {
   width: 100%;
   height: 55px;
   display: grid;
@@ -332,11 +335,11 @@ footer{
   justify-content: end;
   padding: 5px framework.$defaultPadding;
   background-color: rgba(map.get(framework.$colors, 'white'), 0.9);
-  .naka{
-    &__rpc{
+  .naka {
+    &__rpc {
       @include framework.flex-layout(inline-flex, unset, center, 5px);
-      .rpc{
-        &__label{
+      .rpc {
+        &__label {
           @include framework.font-style('12', 'gray-300');
           position: relative;
         }
@@ -345,7 +348,6 @@ footer{
   }
 }
 
-
 @media screen and (max-width: 1200px) {
   main {
     &.naka {
@@ -353,7 +355,7 @@ footer{
       padding-bottom: calc(#{framework.$defaultPadding} * 4);
     }
   }
-  footer{
+  footer {
     position: relative;
   }
 }
