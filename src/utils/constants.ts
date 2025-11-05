@@ -117,18 +117,26 @@ export const polygonMainnet = {
     symbol: 'POL',
     decimals: 18
   },
-  rpcUrls: ['https://polygon-rpc.com/'],
-  blockExplorerUrls: ['https://polygonscan.com/']
+  rpcUrls: ['https://polygon-rpc.com'],
+  blockExplorerUrls: ['https://polygonscan.com']
 };
 
 export const CONTRACT_ADDRESS_STAGING =
-    '0x574383E627bA8ac7442d1f5a8369830c9e64A00D';
+  '0x574383E627bA8ac7442d1f5a8369830c9e64A00';
+//issuer 1: 0x8619dDE66AbeDf8818690F79feF00Bb433FDEA7f
+//issuer 2: 0x574383E627bA8ac7442d1f5a8369830c9e64A00
+
 export const CONTRACT_ADDRESS_PRODUCTION =
-    '0x9ac93245367975b06013C1EE0204A5E42e91b57B';
+  '0x9ac93245367975b06013C1EE0204A5E42e91b57B';
+//issuer 1: 0x68eA8A05D52CFe66031383FEA4e3256cFE9ff5Ce
+//issuer 2: 0x9ac93245367975b06013C1EE0204A5E42e91b57B
+
 export const USDT_ADDRESS_STAGING =
   '0x5DC14a664d551F24e9f7A4C9c6215a84E44f0f1E';
+
 export const USDT_ADDRESS_PRODUCTION =
   '0xc2132d05d31c914a87c6611c10748aeb04b58e8f';
+
 export const USDC_ADDRESS_PRODUCTION =
   '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359';
 

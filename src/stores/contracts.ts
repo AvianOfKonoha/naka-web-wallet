@@ -575,8 +575,14 @@ export const useContractsStore = defineStore('contracts', {
       if (
         this.loading.withdrawConnected ||
         !this.form.connected.amount.value ||
-        this.contractBalance.usdt < this.form.connected.amount.value ||
         !this.vaultContract
+      ) {
+        return;
+      }
+
+      if (
+        this.currencyToken === USDT_ADDRESS_PRODUCTION &&
+        this.contractBalance.usdt < this.form.connected.amount.value
       ) {
         return;
       }
@@ -644,8 +650,14 @@ export const useContractsStore = defineStore('contracts', {
         this.loading.withdrawExternal ||
         !this.form.external.amount.value ||
         !this.vaultContract ||
-        this.contractBalance.usdt < this.form.external.amount.value ||
         !this.form.external.amount.value
+      ) {
+        return;
+      }
+
+      if (
+        this.currencyToken === USDT_ADDRESS_PRODUCTION &&
+        this.contractBalance.usdt < this.form.external.amount.value
       ) {
         return;
       }
@@ -841,10 +853,6 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Take the latest WithdrawalRequest event as the active request */
         const latestRequest = this.withdrawalRequests.reverse()[0];
-
-        if (!latestRequest) {
-          return;
-        }
 
         /** If for whatever reason the public indexer doesn't work open a prompt notifying the user he has an outstanding withdrawal request */
         if (!latestRequest && thresholdPassed) {
