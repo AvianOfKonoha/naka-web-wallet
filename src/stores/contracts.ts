@@ -382,7 +382,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Make a connection to the Vault Smart Contract - Check if the metamask address has already made a contract. In case it hasn't, create a new Vault contract. Finally, save the contract to the global state */
         await this.connectContract();
       } catch (error) {
-        if ((error as any).cause?.code !== 4902) {
+        if ((error as any).code !== 4902) {
           toast.error(`${(error as Error).message}`);
           return;
         }
