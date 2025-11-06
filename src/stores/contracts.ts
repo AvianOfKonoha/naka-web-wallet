@@ -452,11 +452,6 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.provider.on('accountsChanged', (accounts: string[]) => {
-        /** If the accounts array is populated simply return and don't do anything */
-        /*if (accounts.length) {
-          return;
-        }*/
-
         /** If the accounts array is empty clear the state and show the disconnected state on app */
         this.updateModal({connect: false});
         this.disconnectMetamask();
