@@ -56,10 +56,6 @@ export const useContractsStore = defineStore('contracts', {
     },
     provider: null,
     allAccounts: [],
-    signature: {
-      message: 'Please sign this message to confirm you own this wallet',
-      value: ''
-    },
     inputs: {
       privateKey: '',
       nonce: '',
@@ -170,9 +166,11 @@ export const useContractsStore = defineStore('contracts', {
   },
   actions: {
     initializeWeb3(provider?: any) {
+      /** Initialize provider either from the browser (on desktop) or Metamask SDK (on mobile) */
       this.provider = provider || window.ethereum;
       this.web3 = new Web3(this.provider);
 
+      /** Listen to account and network changes */
       this.updateNetwork();
       this.onAccountsChanged();
     },
@@ -364,12 +362,7 @@ export const useContractsStore = defineStore('contracts', {
         this.allAccounts = accounts;
         this.connectedAccount = accounts[0];
 
-        /** Prompt a user to sign a message via their Metamask using their private key to prove ownership of their wallet without spending any tokens or sending a transaction */
-        this.signature.value = await this.web3.eth.personal.sign(
-          this.signature.message,
-          this.connectedAccount,
-          ''
-        );
+        /** Send the fist sign action to session storage */
         sessionStorage.setItem('firstSign', 'true');
 
         /** Extract the chain id of the current account from the MetaMask */
@@ -402,8 +395,8 @@ export const useContractsStore = defineStore('contracts', {
 
     disconnectMetamask() {
       this.connectedAccount = '';
+      this.vaultAddress = '';
       this.chainId = null;
-      this.signature.value = '';
       this.balance = '';
       this.contractBalance = {
         eth: 0,
@@ -473,8 +466,6 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.initializeWeb3(ethereum);
-      this.updateNetwork();
-      this.onAccountsChanged();
     },
 
     async checkConnection() {
@@ -857,6 +848,11 @@ export const useContractsStore = defineStore('contracts', {
           return;
         }
 
+        /** In case of missing latest request stop propagation */
+        if (!latestRequest) {
+          return;
+        }
+
         /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
         const blockRequest = (await this.web3.eth.getBlock(
           latestRequest.blockNumber,
@@ -906,6 +902,7 @@ export const useContractsStore = defineStore('contracts', {
           'Error fetching active request: ',
           (error as Error).message
         );
+        toast.error((error as Error).message);
       }
     },
 
@@ -1239,6 +1236,8 @@ export const useContractsStore = defineStore('contracts', {
           )
         );
         console.error('Error connecting to Vault: ', (error as Error).message);
+      } finally {
+        toast.remove(loadingToast);
       }
     },
 

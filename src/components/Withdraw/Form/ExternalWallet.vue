@@ -19,9 +19,10 @@ const resetAddress = () => {
 
 const onAddressChange = () => {
   contractsStore.updateError({externalAddress: false});
+  const addressRegEx = /^0x[A-F0-9]{40}$/;
 
   if (
-    contractsStore.form.external.address.value.startsWith('0x') ||
+    addressRegEx.test(contractsStore.form.external.address.value) ||
     contractsStore.form.external.address.value.length < 2
   ) {
     return;

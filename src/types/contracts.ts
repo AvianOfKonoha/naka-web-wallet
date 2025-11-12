@@ -40,11 +40,6 @@ export interface IContractsDeployer {
   contractAddress: string;
 }
 
-export interface IContractsSignature {
-  message: string;
-  value: string;
-}
-
 export interface IContractsModal {
   connect: boolean;
   withdrawConnected: boolean;
@@ -128,7 +123,6 @@ export interface IContractsStore {
   balance: string;
   contractBalance: IContractBalance;
   vaultBalance: IVaultBalance | null;
-  signature: IContractsSignature;
   inputs: IContractsInputs;
   loading: IContractsLoading;
   transactionHash: IContractsHash;
