@@ -95,7 +95,7 @@ export interface IContractsErrors {
 
 export interface ITransactionGas {
   gas: number;
-  gasPrice: number;
+  gasPrice?: number;
   maxFeePerGas: number;
   maxPriorityFeePerGas: number;
 }
@@ -137,7 +137,7 @@ export interface IContractsStore {
   error: IContractsErrors;
   vaultContract: Contract<ContractAbi> | null;
   factoryContract: Contract<ContractAbi> | null;
-  transactionGas: ITransactionGas | null;
+  transactionGas: ITransactionGas;
   activeRequest: IWithdrawal | null;
   lastBlock: number;
   withdrawalRequests: IVaultEvent<IWithdrawRequestData>[];

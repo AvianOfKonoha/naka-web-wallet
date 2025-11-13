@@ -87,3 +87,12 @@ export const formatWithAtLeastTwoDecimals = (value: number) => {
   /** Already has 2 or more decimals, return as is */
   return value;
 };
+
+export const validateAddress = (address: string) => {
+  if (!address) {
+    return false;
+  }
+
+  const addressRegEx = /^0x[a-fA-F0-9]{40}$/;
+  return addressRegEx.test(address);
+};

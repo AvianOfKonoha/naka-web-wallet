@@ -4,6 +4,7 @@ import DefineAmount from '@/components/Withdraw/Form/DefineAmount.vue';
 import DefineAddress from '@/components/Withdraw/Form/DefineAddress.vue';
 import Processing from '@/components/Withdraw/Form/Processing.vue';
 import Unsuccessful from '@/components/Withdraw/Form/Unsuccessful.vue';
+import {validateAddress} from '@/utils/helpers.ts';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -19,10 +20,10 @@ const resetAddress = () => {
 
 const onAddressChange = () => {
   contractsStore.updateError({externalAddress: false});
-  const addressRegEx = /^0x[A-F0-9]{40}$/;
 
+  /** Check that the wallet address is indeed the correct format */
   if (
-    addressRegEx.test(contractsStore.form.external.address.value) ||
+    validateAddress(contractsStore.form.external.address.value) ||
     contractsStore.form.external.address.value.length < 2
   ) {
     return;
