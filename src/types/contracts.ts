@@ -40,11 +40,6 @@ export interface IContractsDeployer {
   contractAddress: string;
 }
 
-export interface IContractsSignature {
-  message: string;
-  value: string;
-}
-
 export interface IContractsModal {
   connect: boolean;
   withdrawConnected: boolean;
@@ -100,7 +95,7 @@ export interface IContractsErrors {
 
 export interface ITransactionGas {
   gas: number;
-  gasPrice: number;
+  gasPrice?: number;
   maxFeePerGas: number;
   maxPriorityFeePerGas: number;
 }
@@ -128,7 +123,6 @@ export interface IContractsStore {
   balance: string;
   contractBalance: IContractBalance;
   vaultBalance: IVaultBalance | null;
-  signature: IContractsSignature;
   inputs: IContractsInputs;
   loading: IContractsLoading;
   transactionHash: IContractsHash;
@@ -143,7 +137,7 @@ export interface IContractsStore {
   error: IContractsErrors;
   vaultContract: Contract<ContractAbi> | null;
   factoryContract: Contract<ContractAbi> | null;
-  transactionGas: ITransactionGas | null;
+  transactionGas: ITransactionGas;
   activeRequest: IWithdrawal | null;
   lastBlock: number;
   withdrawalRequests: IVaultEvent<IWithdrawRequestData>[];

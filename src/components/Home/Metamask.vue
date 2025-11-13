@@ -11,7 +11,6 @@ onMounted(() => {
   contractsStore.updateFirstSign(!!sessionStorage.getItem('firstSign'));
   contractsStore.connectMobile();
   contractsStore.checkConnection();
-  contractsStore.getEstimatedGas();
   contractsStore.getLastNetworkBlock();
   contractsStore.estimateBlocksPerHour();
 });

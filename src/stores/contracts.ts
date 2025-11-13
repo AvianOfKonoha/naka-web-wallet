@@ -12,7 +12,7 @@ import type {
   IWallet,
   IWithdrawal
 } from '@/types/contracts.ts';
-import {Web3} from 'web3';
+import {Contract, Web3, type ContractAbi} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
   CONTRACT_ADDRESS_PRODUCTION,
@@ -39,7 +39,8 @@ import {
   bottomToast,
   formatNumberToUint256,
   formatUint256toNumber,
-  isMobileChrome
+  isMobileChrome,
+  validateAddress
 } from '@/utils/helpers.ts';
 
 export const useContractsStore = defineStore('contracts', {
@@ -56,10 +57,6 @@ export const useContractsStore = defineStore('contracts', {
     },
     provider: null,
     allAccounts: [],
-    signature: {
-      message: 'Please sign this message to confirm you own this wallet',
-      value: ''
-    },
     inputs: {
       privateKey: '',
       nonce: '',
@@ -131,7 +128,12 @@ export const useContractsStore = defineStore('contracts', {
     },
     factoryContract: null,
     vaultContract: null,
-    transactionGas: null,
+    transactionGas: {
+      gas: 0,
+      gasPrice: 0,
+      maxFeePerGas: 0,
+      maxPriorityFeePerGas: 0
+    },
     activeRequest: null,
     lastBlock: 0,
     withdrawalRequests: [],
@@ -170,9 +172,11 @@ export const useContractsStore = defineStore('contracts', {
   },
   actions: {
     initializeWeb3(provider?: any) {
+      /** Initialize provider either from the browser (on desktop) or Metamask SDK (on mobile) */
       this.provider = provider || window.ethereum;
       this.web3 = new Web3(this.provider);
 
+      /** Listen to account and network changes */
       this.updateNetwork();
       this.onAccountsChanged();
     },
@@ -364,12 +368,7 @@ export const useContractsStore = defineStore('contracts', {
         this.allAccounts = accounts;
         this.connectedAccount = accounts[0];
 
-        /** Prompt a user to sign a message via their Metamask using their private key to prove ownership of their wallet without spending any tokens or sending a transaction */
-        this.signature.value = await this.web3.eth.personal.sign(
-          this.signature.message,
-          this.connectedAccount,
-          ''
-        );
+        /** Send the fist sign action to session storage */
         sessionStorage.setItem('firstSign', 'true');
 
         /** Extract the chain id of the current account from the MetaMask */
@@ -402,8 +401,8 @@ export const useContractsStore = defineStore('contracts', {
 
     disconnectMetamask() {
       this.connectedAccount = '';
+      this.vaultAddress = '';
       this.chainId = null;
-      this.signature.value = '';
       this.balance = '';
       this.contractBalance = {
         eth: 0,
@@ -473,8 +472,6 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.initializeWeb3(ethereum);
-      this.updateNetwork();
-      this.onAccountsChanged();
     },
 
     async checkConnection() {
@@ -501,65 +498,36 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
-    async getEstimatedGas() {
+    async getEstimatedGas(
+      contract: unknown,
+      method: string,
+      args: unknown[],
+      buffer = 1.2
+    ) {
       if (!this.web3) {
         return;
       }
 
-      /** Initialize the last number of block to filter through on block explorer */
-      const blocksToScan = 30;
-
       try {
-        /** Fetch the latest block */
-        const latest = await this.web3.eth.getBlockNumber();
+        /** Estimate gas needed for specific method */
+        const estimatedGas = await (contract as Contract<ContractAbi>).methods[
+          method
+        ](...args).estimateGas({from: this.connectedAccount});
 
-        /** Set the array to be populated with gas */
-        const gasUsed = [];
+        /** Get the rest of the gas data */
+        const gasData = await (
+          await fetch('https://gasstation.polygon.technology/v2')
+        ).json();
+        const maxFeePerGas = Math.floor(gasData.fast.maxFee * 1e9); // convert gwei → wei
+        const maxPriorityFeePerGas = Math.floor(
+          gasData.fast.maxPriorityFee * 1e9
+        );
 
-        /** Fill in the gas used in the last 30 blocks */
-        for (let i = 0; i < blocksToScan; i++) {
-          const block = await this.web3.eth.getBlock(Number(latest) - i, true);
-
-          for (const tx of block.transactions) {
-            // 1️⃣  must target our VaultRegistry
-            // 2️⃣  must have the createVault method selector
-            // const receipt = await this.web3.eth.getTransactionReceipt(tx.hash);
-            gasUsed.push({
-              gas: Number(tx['gas' as keyof typeof tx]),
-              gasPrice: Number(tx['gasPrice' as keyof typeof tx]),
-              maxFeePerGas: Number(tx['maxFeePerGas' as keyof typeof tx]),
-              maxPriorityFeePerGas: Number(
-                tx['maxPriorityFeePerGas' as keyof typeof tx]
-              )
-            });
-          }
-        }
-
-        if (!gasUsed.length) {
-          throw new Error('No createVault txs found in last 30 blocks');
-        }
-
+        /** Add buffer to the estimated gas */
         this.transactionGas = {
-          gas: Math.floor(
-            gasUsed
-              .filter((item) => !isNaN(item.gas))
-              .reduce((a, b) => a + b.gas, 0) / gasUsed.length
-          ),
-          gasPrice: Math.floor(
-            gasUsed
-              .filter((item) => !isNaN(item.gasPrice))
-              .reduce((a, b) => a + b.gasPrice, 0) / gasUsed.length
-          ),
-          maxFeePerGas: Math.floor(
-            gasUsed
-              .filter((item) => !isNaN(item.maxFeePerGas))
-              .reduce((a, b) => a + b.maxFeePerGas, 0) / gasUsed.length
-          ),
-          maxPriorityFeePerGas: Math.floor(
-            gasUsed
-              .filter((item) => !isNaN(item.maxPriorityFeePerGas))
-              .reduce((a, b) => a + b.maxPriorityFeePerGas, 0) / gasUsed.length
-          )
+          gas: Math.floor(Number(estimatedGas) * buffer),
+          maxFeePerGas: maxFeePerGas,
+          maxPriorityFeePerGas: maxFeePerGas
         };
       } catch (error) {
         console.error('Error estimating gas: ', (error as Error).message);
@@ -594,6 +562,13 @@ export const useContractsStore = defineStore('contracts', {
       try {
         /** On amount screen call the "withdrawRequest" method from the Vault SC. On success the withdraw request is pending for an hour before the user can complete it */
         if (this.wallets.connected.step === 1) {
+          /** Fetch estimated gas */
+          await this.getEstimatedGas(this.vaultContract, 'withdrawRequest', [
+            this.currencyToken,
+            this.connectedAccount,
+            formatNumberToUint256(this.form.connected.amount.value)
+          ]);
+
           /** Make a withdrawal request to Vault SC */
           await this.vaultContract.methods
             .withdrawRequest(
@@ -603,15 +578,9 @@ export const useContractsStore = defineStore('contracts', {
             )
             .send({
               from: this.connectedAccount,
-              gas: this.transactionGas?.gas
-                ? `${this.transactionGas.gas}`
-                : undefined,
-              maxFeePerGas: this.transactionGas?.maxFeePerGas
-                ? `${this.transactionGas.maxFeePerGas}`
-                : undefined,
-              maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
-                ? `${this.transactionGas.maxPriorityFeePerGas}`
-                : undefined
+              gas: `${this.transactionGas.gas}`,
+              maxFeePerGas: `${this.transactionGas.maxFeePerGas}`,
+              maxPriorityFeePerGas: `${this.transactionGas.maxPriorityFeePerGas}`
             });
 
           /** Proceed to the next step */
@@ -632,9 +601,6 @@ export const useContractsStore = defineStore('contracts', {
         toast.error(`${(error as Error).message}`);
         this.updateError({connected: true});
         this.updateLoading({withdrawConnected: false});
-
-        /** Estimate gas from the last 30 blocks on the chain */
-        await this.getEstimatedGas();
       } finally {
         this.updateLoading({withdrawConnected: false});
       }
@@ -675,6 +641,13 @@ export const useContractsStore = defineStore('contracts', {
         }
 
         if (this.wallets.external.step === 2) {
+          /** Fetch estimated gas */
+          await this.getEstimatedGas(this.vaultContract, 'withdrawRequest', [
+            this.currencyToken,
+            this.form.external.address.value,
+            formatNumberToUint256(this.form.external.amount.value)
+          ]);
+
           /** Make a withdrawal request to Vault SC */
           await this.vaultContract.methods
             .withdrawRequest(
@@ -684,15 +657,9 @@ export const useContractsStore = defineStore('contracts', {
             )
             .send({
               from: this.connectedAccount,
-              gas: this.transactionGas?.gas
-                ? `${this.transactionGas.gas}`
-                : undefined,
-              maxFeePerGas: this.transactionGas?.maxFeePerGas
-                ? `${this.transactionGas.maxFeePerGas}`
-                : undefined,
-              maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
-                ? `${this.transactionGas.maxPriorityFeePerGas}`
-                : undefined
+              gas: `${this.transactionGas.gas}`,
+              maxFeePerGas: `${this.transactionGas.maxFeePerGas}`,
+              maxPriorityFeePerGas: `${this.transactionGas.maxPriorityFeePerGas}`
             });
 
           /** Proceed to the next step */
@@ -714,9 +681,6 @@ export const useContractsStore = defineStore('contracts', {
         toast.error(`${(error as Error).message}`);
         this.updateError({external: true});
         this.updateLoading({withdrawExternal: false});
-
-        /** Estimate gas from the last 30 blocks on the chain */
-        await this.getEstimatedGas();
       } finally {
         this.updateLoading({withdrawExternal: false});
       }
@@ -799,12 +763,15 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Get all events from the requests made with withdrawRequest methods. The event contains an unclock time and an amount requested to withdraw but no recipient address */
+        const fromBlock =
+          this.blocksOffset * this.daysOffset <= this.lastBlock
+            ? Math.ceil(this.lastBlock - this.blocksOffset * this.daysOffset)
+            : 0;
+
         this.withdrawalRequests = (await (vaultContract as any).getPastEvents(
           'WithdrawRequest',
           {
-            fromBlock: Math.ceil(
-              this.lastBlock - this.blocksOffset * this.daysOffset
-            ),
+            fromBlock: fromBlock,
             toBlock: 'latest'
           }
         )) as IVaultEvent<IWithdrawRequestData>[];
@@ -847,13 +814,18 @@ export const useContractsStore = defineStore('contracts', {
         await this.getWithdrawRequests();
 
         /** Take the latest WithdrawalRequest event as the active request */
-        const latestRequest = this.withdrawalRequests.reverse()[0];
+        const latestRequest = this.withdrawalRequests?.at(-1);
 
         /** If for whatever reason the public indexer doesn't work open a prompt notifying the user he has an outstanding withdrawal request */
         if (!latestRequest && thresholdPassed) {
           this.thresholdPrompt =
             'We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel your withdrawal.';
           this.updateModal({overtime: true});
+          return;
+        }
+
+        /** In case there is no withdrawal request stop propagation */
+        if (!latestRequest) {
           return;
         }
 
@@ -906,6 +878,7 @@ export const useContractsStore = defineStore('contracts', {
           'Error fetching active request: ',
           (error as Error).message
         );
+        toast.error((error as Error).message);
       }
     },
 
@@ -1184,7 +1157,8 @@ export const useContractsStore = defineStore('contracts', {
         this.vaultAddress = await this.factoryContract.methods
           .getVaultAddressByOwner(this.connectedAccount)
           .call();
-        const vaultExists = parseInt(this.vaultAddress, 16);
+        const vaultExists =
+          validateAddress(this.vaultAddress) && parseInt(this.vaultAddress, 16);
 
         /** If the Vault contract has already been created stop propagation otherwise proceed to Vault creation */
         if (vaultExists) {
@@ -1193,23 +1167,19 @@ export const useContractsStore = defineStore('contracts', {
           return;
         }
 
-        /** Estimate gas from the last 30 blocks on the chain */
-        await this.getEstimatedGas();
+        /** Fetch estimated gas */
+        await this.getEstimatedGas(this.factoryContract, 'createVault', [
+          this.connectedAccount
+        ]);
 
         /** Make a request to "createVault" method on the factory contract to create a new Vault contract that will connect to the wallet address and the user will be able to withdraw funds from */
         const factoryTransaction = await this.factoryContract.methods
           .createVault(this.connectedAccount)
           .send({
             from: this.connectedAccount,
-            gas: this.transactionGas?.gas
-              ? `${this.transactionGas.gas}`
-              : undefined,
-            maxFeePerGas: this.transactionGas?.maxFeePerGas
-              ? `${this.transactionGas.maxFeePerGas}`
-              : undefined,
-            maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
-              ? `${this.transactionGas.maxPriorityFeePerGas}`
-              : undefined
+            gas: `${this.transactionGas.gas}`,
+            maxFeePerGas: `${this.transactionGas.maxFeePerGas}`,
+            maxPriorityFeePerGas: `${this.transactionGas.maxPriorityFeePerGas}`
           });
 
         if (!factoryTransaction.events) {
@@ -1239,6 +1209,8 @@ export const useContractsStore = defineStore('contracts', {
           )
         );
         console.error('Error connecting to Vault: ', (error as Error).message);
+      } finally {
+        toast.remove(loadingToast);
       }
     },
 
@@ -1251,6 +1223,14 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({withdraw: true});
 
       try {
+        /** Fetch estimated gas */
+        await this.getEstimatedGas(this.vaultContract, 'withdraw', [
+          this.currencyToken,
+          this.activeRequest.address,
+          formatNumberToUint256(this.activeRequest.amount)
+        ]);
+
+        /** Make withdraw request */
         await this.vaultContract.methods
           .withdraw(
             this.currencyToken,
@@ -1259,15 +1239,9 @@ export const useContractsStore = defineStore('contracts', {
           )
           .send({
             from: this.connectedAccount,
-            gas: this.transactionGas?.gas
-              ? `${this.transactionGas.gas}`
-              : undefined,
-            maxFeePerGas: this.transactionGas?.maxFeePerGas
-              ? `${this.transactionGas.maxFeePerGas}`
-              : undefined,
-            maxPriorityFeePerGas: this.transactionGas?.maxPriorityFeePerGas
-              ? `${this.transactionGas.maxPriorityFeePerGas}`
-              : undefined
+            gas: `${this.transactionGas.gas}`,
+            maxFeePerGas: `${this.transactionGas.maxFeePerGas}`,
+            maxPriorityFeePerGas: `${this.transactionGas.maxPriorityFeePerGas}`
           });
 
         /** Re-fetch contract balance */
@@ -1293,7 +1267,6 @@ export const useContractsStore = defineStore('contracts', {
         console.error('Error withdrawing funds: ', (error as Error).message);
         toast.error(`Error withdrawing funds: ${(error as Error).message}`);
         this.updateLoading({withdraw: false});
-        await this.getEstimatedGas();
       } finally {
         this.updateLoading({withdraw: false});
       }
@@ -1313,6 +1286,13 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({cancelWithdraw: true});
 
       try {
+        /** Fetch estimated gas */
+        await this.getEstimatedGas(
+          this.vaultContract,
+          'cancelWithdrawRequest',
+          [this.currencyToken]
+        );
+
         /** Make a request to the Vault smart contract to cancel the active withdraw request. It takes in one argument - currency token address */
         await this.vaultContract.methods
           .cancelWithdrawRequest(this.currencyToken)
@@ -1335,7 +1315,6 @@ export const useContractsStore = defineStore('contracts', {
       } catch (error) {
         toast.error(`${(error as Error).message}`);
         this.updateLoading({cancelWithdraw: false});
-        await this.getEstimatedGas();
       } finally {
         this.updateLoading({cancelWithdraw: false});
       }
