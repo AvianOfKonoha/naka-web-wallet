@@ -140,6 +140,9 @@ export const USDT_ADDRESS_PRODUCTION =
 export const USDC_ADDRESS_PRODUCTION =
   '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359';
 
+export const XAUT_ADDRESS_PRODUCTION =
+  '0x6D205337F45D6850c3c3006e28d5b52c8a432c35';
+
 export const POLYGON_RPC_URL = 'https://polygon.gateway.tenderly.co';
 
 export const RPC_LIST = [
@@ -163,5 +166,9 @@ export const CURRENCIES = [
   {
     name: 'USDC',
     value: USDC_ADDRESS_PRODUCTION
+  },
+  {
+    name: 'XAUT0',
+    value: XAUT_ADDRESS_PRODUCTION
   }
 ];

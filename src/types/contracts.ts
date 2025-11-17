@@ -110,7 +110,7 @@ export interface IRpc {
   url: string;
 }
 
-export interface IUsdc {
+export interface ICurrency {
   contract: Contract<ContractAbi> | null;
   balance: number;
 }
@@ -148,6 +148,7 @@ export interface IContractsStore {
   daysOffset: number;
   thresholdPrompt: string;
   rpc: IRpc;
-  usdc: IUsdc;
+  usdc: ICurrency;
+  xaut: ICurrency;
   currencyToken: string;
 }

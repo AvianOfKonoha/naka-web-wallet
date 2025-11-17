@@ -22,12 +22,14 @@ import {
   polygonMainnet,
   RPC_LIST,
   USDC_ADDRESS_PRODUCTION,
-  USDT_ADDRESS_PRODUCTION
+  USDT_ADDRESS_PRODUCTION,
+  XAUT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
 import VaultABI from '@/assets/abi/Vault.json';
 import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
 import usdcABI from '@/assets/abi/USDC.json';
+import xautABI from '@/assets/abi/XAUT.json';
 import type {
   IBlock,
   ICancelledWithdrawReservationData,
@@ -145,6 +147,10 @@ export const useContractsStore = defineStore('contracts', {
     thresholdPrompt: '',
     rpc: RPC_LIST[0],
     usdc: {
+      contract: null,
+      balance: 0
+    },
+    xaut: {
       contract: null,
       balance: 0
     },
@@ -696,10 +702,18 @@ export const useContractsStore = defineStore('contracts', {
         this.vaultBalance = await this.vaultContract.methods
           .getProtocolTokenBalances()
           .call();
+
+        /** Set USDC balance */
         const usdcBalance = (await this.usdc.contract?.methods
           .balanceOf(this.vaultAddress)
           .call()) as bigint;
         this.usdc.balance = formatUint256toNumber(usdcBalance);
+
+        /** Set XAUT balance */
+        const xautBalance = (await this.xaut.contract?.methods
+          .balanceOf(this.vaultAddress)
+          .call()) as bigint;
+        this.xaut.balance = formatUint256toNumber(xautBalance);
 
         if (!this.vaultBalance) {
           return;
@@ -1121,9 +1135,17 @@ export const useContractsStore = defineStore('contracts', {
       try {
         /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
         this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
+
+        /** Set USDC contract */
         this.usdc.contract = new this.web3.eth.Contract(
           usdcABI,
           USDC_ADDRESS_PRODUCTION
+        );
+
+        /** Set XAUT contract */
+        this.xaut.contract = new this.web3.eth.Contract(
+          xautABI,
+          XAUT_ADDRESS_PRODUCTION
         );
 
         /** Get the list of all withdrawals */

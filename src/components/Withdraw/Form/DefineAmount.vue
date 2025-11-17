@@ -5,7 +5,8 @@ import {useContractsStore} from '@/stores/contracts.ts';
 import {
   CURRENCIES,
   DEFAULT_CURRENCY,
-  USDC_ADDRESS_PRODUCTION
+  USDC_ADDRESS_PRODUCTION,
+  XAUT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
 
 /*Props */
@@ -48,7 +49,11 @@ const checkBalance = () => {
     return;
   }
 
-  if (contractsStore.currencyToken === USDC_ADDRESS_PRODUCTION) {
+  if (
+    [USDC_ADDRESS_PRODUCTION, XAUT_ADDRESS_PRODUCTION].includes(
+      contractsStore.currencyToken
+    )
+  ) {
     return;
   }
 
@@ -85,11 +90,11 @@ watch(
         <span class="amount__currency">
           <span
             class="amount__currency--text"
-            v-if="!contractsStore.usdc.balance"
+            v-if="!contractsStore.usdc.balance && !contractsStore.xaut.balance"
             >{{ DEFAULT_CURRENCY }}</span
           >
           <select
-            v-if="contractsStore.usdc.balance"
+            v-if="contractsStore.usdc.balance || contractsStore.xaut.balance"
             name="token"
             id="token"
             v-model="contractsStore.currencyToken"
