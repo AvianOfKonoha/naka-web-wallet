@@ -154,7 +154,8 @@ export const useContractsStore = defineStore('contracts', {
       contract: null,
       balance: 0
     },
-    currencyToken: USDT_ADDRESS_PRODUCTION
+    currencyToken: USDT_ADDRESS_PRODUCTION,
+    tokens: [CURRENCIES[0]]
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -708,12 +709,30 @@ export const useContractsStore = defineStore('contracts', {
           .balanceOf(this.vaultAddress)
           .call()) as bigint;
         this.usdc.balance = formatUint256toNumber(usdcBalance);
+        if (this.usdc.balance) {
+          this.tokens = [
+            ...this.tokens,
+            {
+              name: 'USDC',
+              value: USDC_ADDRESS_PRODUCTION
+            }
+          ];
+        }
 
         /** Set XAUT balance */
         const xautBalance = (await this.xaut.contract?.methods
           .balanceOf(this.vaultAddress)
           .call()) as bigint;
         this.xaut.balance = formatUint256toNumber(xautBalance);
+        if (this.xaut.balance) {
+          this.tokens = [
+            ...this.tokens,
+            {
+              name: 'XAUT0',
+              value: XAUT_ADDRESS_PRODUCTION
+            }
+          ];
+        }
 
         if (!this.vaultBalance) {
           return;

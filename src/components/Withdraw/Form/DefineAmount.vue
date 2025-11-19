@@ -3,11 +3,11 @@ import type {IFormField} from '@/types/general.ts';
 import {ref, watch} from 'vue';
 import {useContractsStore} from '@/stores/contracts.ts';
 import {
-  CURRENCIES,
   DEFAULT_CURRENCY,
   USDC_ADDRESS_PRODUCTION,
   XAUT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
+import type {IToken} from '@/types/contracts.ts';
 
 /*Props */
 const props = defineProps<{
@@ -90,16 +90,19 @@ watch(
         <span class="amount__currency">
           <span
             class="amount__currency--text"
-            v-if="!contractsStore.usdc.balance && !contractsStore.xaut.balance"
+            v-if="contractsStore.tokens.length === 1"
             >{{ DEFAULT_CURRENCY }}</span
           >
           <select
-            v-if="contractsStore.usdc.balance || contractsStore.xaut.balance"
+            v-if="contractsStore.tokens.length > 1"
             name="token"
             id="token"
             v-model="contractsStore.currencyToken"
           >
-            <option v-for="currency in CURRENCIES" :value="currency.value">
+            <option
+              v-for="currency in contractsStore.tokens"
+              :value="currency.value"
+            >
               {{ currency.name }}
             </option>
           </select>

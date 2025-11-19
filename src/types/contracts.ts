@@ -110,6 +110,11 @@ export interface IRpc {
   url: string;
 }
 
+export interface IToken {
+  name: string;
+  value: string;
+}
+
 export interface ICurrency {
   contract: Contract<ContractAbi> | null;
   balance: number;
@@ -151,4 +156,5 @@ export interface IContractsStore {
   usdc: ICurrency;
   xaut: ICurrency;
   currencyToken: string;
+  tokens: IToken[];
 }
