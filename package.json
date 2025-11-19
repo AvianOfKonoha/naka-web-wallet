@@ -9,8 +9,8 @@
     "type-check": "vue-tsc --build",
     "build:origin": "vite build --config vite.config.ts",
     "build:naka": "vite build --config vite.config.naka.ts",
-    "deploy:origin": "pnpm run build:origin && gh-pages -d dist",
-    "deploy:naka": "pnpm run build:naka && gh-pages -d dist --remote naka",
+    "deploy:origin": "gh-pages -d dist",
+    "deploy:naka": "gh-pages -d dist --remote naka",
     "deploy:both": "pnpm run deploy:origin && pnpm run deploy:naka"
   },
   "dependencies": {
