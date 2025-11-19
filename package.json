@@ -4,12 +4,13 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "vite build",
     "preview": "vite preview",
-    "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "deploy:origin": "gh-pages -d dist",
-    "deploy:naka": "gh-pages -d dist --remote naka",
+    "build:origin": "vite build --config vite.config.ts",
+    "build:naka": "vite build --config vite.config.naka.ts",
+    "deploy:origin": "pnpm run build:origin && gh-pages -d dist",
+    "deploy:naka": "pnpm run build:naka && gh-pages -d dist --remote naka",
     "deploy:both": "pnpm run deploy:origin && pnpm run deploy:naka"
   },
   "dependencies": {
