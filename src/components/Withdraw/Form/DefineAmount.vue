@@ -7,7 +7,6 @@ import {
   USDC_ADDRESS_PRODUCTION,
   XAUT_ADDRESS_PRODUCTION
 } from '@/utils/constants.ts';
-import type {IToken} from '@/types/contracts.ts';
 
 /*Props */
 const props = defineProps<{
