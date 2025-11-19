@@ -11,5 +11,8 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  base: '/naka-web-wallet'
+  base: '/naka-web-wallet',
+  build: {
+    assetsDir: 'naka-web-wallet/assets'
+  }
 });
