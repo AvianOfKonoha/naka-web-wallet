@@ -72,8 +72,10 @@ const openCancelModal = () => {
       <div class="withdrawal__amount">
         -{{ formatWithAtLeastTwoDecimals(props.withdrawal.amount) }}
         {{
-          CURRENCIES.find((item) => item.value === props.withdrawal.token)
-            ?.name || DEFAULT_CURRENCY
+          CURRENCIES.find(
+            (item) =>
+              item.value.toLowerCase() === props.withdrawal.token.toLowerCase()
+          )?.name || DEFAULT_CURRENCY
         }}
       </div>
     </div>
