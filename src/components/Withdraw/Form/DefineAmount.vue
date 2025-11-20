@@ -86,26 +86,6 @@ watch(
           step="0.00001"
           v-model="props.amountData.value"
         />
-        <span class="amount__currency">
-          <span
-            class="amount__currency--text"
-            v-if="contractsStore.tokens.length === 1"
-            >{{ DEFAULT_CURRENCY }}</span
-          >
-          <select
-            v-if="contractsStore.tokens.length > 1"
-            name="token"
-            id="token"
-            v-model="contractsStore.currencyToken"
-          >
-            <option
-              v-for="currency in contractsStore.tokens"
-              :value="currency.value"
-            >
-              {{ currency.name }}
-            </option>
-          </select>
-        </span>
         <button
           v-if="props.amountData.value"
           type="reset"
@@ -132,6 +112,29 @@ watch(
             </defs>
           </svg>
         </button>
+      </div>
+      <div class="amount__wrap amount__wrap--currency">
+        <div class="amount__currency">
+          <div
+            class="amount__currency--text"
+            v-if="contractsStore.tokens.length === 1"
+          >
+            {{ DEFAULT_CURRENCY }}
+          </div>
+          <select
+            v-if="contractsStore.tokens.length > 1"
+            name="token"
+            id="token"
+            v-model="contractsStore.currencyToken"
+          >
+            <option
+              v-for="currency in contractsStore.tokens"
+              :value="currency.value"
+            >
+              {{ currency.name }}
+            </option>
+          </select>
+        </div>
       </div>
       <button
         type="button"

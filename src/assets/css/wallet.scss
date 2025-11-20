@@ -237,7 +237,7 @@
           }
           &--amount {
             @include framework.grid-column-layout(
-              1fr auto,
+              1fr auto auto,
               calc(#{framework.$defaultGridGap} / 2)
             );
             position: relative;
@@ -252,6 +252,10 @@
                   framework.$defaultGridGap
                 );
                 align-items: center;
+                &--currency {
+                  width: 80px;
+                  @include framework.flex-layout(flex, center, center, unset);
+                }
                 &.error {
                   border-color: map.get(framework.$colors, 'red-400');
                 }
@@ -283,22 +287,21 @@
                 }
               }
               &__currency {
-                padding-right: 10px;
+                @include framework.font-style('default', 'gray-400');
+                height: 100%;
                 &--text {
-                  width: 75px;
-                  background-color: map.get(framework.$colors, 'gray-100');
-                  border-radius: framework.$formRadius;
-                  display: block;
-                  padding: 5px;
-                  text-align: center;
+                  @include framework.flex-layout(flex, center, center, unset);
+                  height: 100%;
+                  user-select: none;
                 }
                 select {
-                  width: 75px;
                   border: unset;
-                  @include framework.font-style('14', 'primary');
-                  padding: 5px;
-                  background-color: map.get(framework.$colors, 'gray-100');
                   border-radius: framework.$formRadius;
+                  font-family: 'NeueMontreal', sans-serif;
+                  @include framework.font-style('default', 'gray-400');
+                  background: unset;
+                  padding: unset;
+                  height: 100%;
                 }
               }
               &__max {
@@ -1303,6 +1306,26 @@
       }
       &--button {
         padding: 0 calc(#{framework.$defaultPadding} * 1.5);
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 350px) {
+  .modal {
+    &__withdraw {
+      &--connected {
+        .connected {
+          &__form {
+            &--amount {
+              .amount {
+                &__max {
+                  width: 70px;
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
