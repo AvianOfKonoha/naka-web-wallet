@@ -82,7 +82,6 @@ watch(
           :required="props.amountData.required"
           min="0"
           @input="preventNegative"
-          placeholder="0.00000"
           step="0.00001"
           v-model="props.amountData.value"
         />
