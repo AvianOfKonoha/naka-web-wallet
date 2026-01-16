@@ -130,8 +130,8 @@ export const avalancheMainnet = {
     decimals: 18
   },
   rpcUrls: [
-    'https://avalanche-mainnet.infura.io',
-    'https://api.avax.network/ext/bc/C/rpc'
+    'https://api.avax.network/ext/bc/C/rpc',
+    'https://avalanche-mainnet.infura.io'
   ],
   blockExplorerUrls: ['https://snowtrace.io']
 };
@@ -196,8 +196,20 @@ export const CHAINS = [
     gas: 'https://cdn.routescan.io/api/evm/43114/gas-price?',
     rpcs: [
       {
-        name: 'Infura',
-        url: 'https://avalanche-mainnet.infura.io'
+        name: 'PublicNode',
+        url: 'https://avalanche-c-chain-rpc.publicnode.com'
+      },
+      {
+        name: 'Chainstack',
+        url: 'https://avalanche-c-chain.publicnode.com'
+      },
+      {
+        name: '1rpc',
+        url: 'https://1rpc.io/avax/c'
+      },
+      {
+        name: 'OmniaTech',
+        url: 'https://endpoints.omniatech.io/v1/avax/mainnet/public'
       },
       {
         name: 'Avax Network',
