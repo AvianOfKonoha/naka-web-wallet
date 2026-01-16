@@ -3,8 +3,7 @@ import {RouterView} from 'vue-router';
 import {useContractsStore} from '@/stores/contracts.ts';
 import Header from '@/components/Header/Header.vue';
 import {onMounted} from 'vue';
-import {RPC_LIST} from "@/utils/constants.ts";
-import Footer from "@/components/Footer/Footer.vue";
+import Footer from '@/components/Footer/Footer.vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();

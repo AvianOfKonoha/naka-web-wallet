@@ -121,54 +121,105 @@ export const polygonMainnet = {
   blockExplorerUrls: ['https://polygonscan.com']
 };
 
-export const CONTRACT_ADDRESS_STAGING =
+export const avalancheMainnet = {
+  chainId: '0xa86a', // 43114 in hex
+  chainName: 'Avalanche C-Chain',
+  nativeCurrency: {
+    name: 'Avalanche',
+    symbol: 'AVAX',
+    decimals: 18
+  },
+  rpcUrls: [
+    'https://avalanche-mainnet.infura.io',
+    'https://api.avax.network/ext/bc/C/rpc'
+  ],
+  blockExplorerUrls: ['https://snowtrace.io']
+};
+
+export const POLYGON_CONTRACT_ADDRESS_STAGING =
   '0x574383E627bA8ac7442d1f5a8369830c9e64A00';
 //issuer 1: 0x8619dDE66AbeDf8818690F79feF00Bb433FDEA7f
-//issuer 2: 0x574383E627bA8ac7442d1f5a8369830c9e64A00
+//issuer 2 and 3: 0x574383E627bA8ac7442d1f5a8369830c9e64A00
 
-export const CONTRACT_ADDRESS_PRODUCTION =
+export const POLYGON_CONTRACT_ADDRESS_PRODUCTION =
   '0x9ac93245367975b06013C1EE0204A5E42e91b57B';
 //issuer 1: 0x68eA8A05D52CFe66031383FEA4e3256cFE9ff5Ce
-//issuer 2: 0x9ac93245367975b06013C1EE0204A5E42e91b57B
+//issuer 2 and 3: 0x9ac93245367975b06013C1EE0204A5E42e91b57B
 
-export const USDT_ADDRESS_STAGING =
+export const AVAX_CONTRACT_ADDRESS_STAGING =
+  '0x410e7c2c6d717445215734D3d7c9CC0c6D043B8d';
+//issuer 3: 0x410e7c2c6d717445215734D3d7c9CC0c6D043B8d
+
+export const AVAX_CONTRACT_ADDRESS_PRODUCTION =
+  '0x133B0823C58A4cd91470d1545cd65b7063Df4FDB';
+//issuer 3: 0x133B0823C58A4cd91470d1545cd65b7063Df4FDB
+
+export const CHAINS = [
+  {
+    //Polygon
+    id: 137,
+    hexId: polygonMainnet.chainId,
+    contract: POLYGON_CONTRACT_ADDRESS_PRODUCTION,
+    name: 'Polygon',
+    gas: 'https://gasstation.polygon.technology/v2',
+    rpcs: [
+      {
+        name: 'Tenderly',
+        url: 'https://polygon.gateway.tenderly.co'
+      },
+      {
+        name: 'Polygon RPC',
+        url: 'https://polygon-rpc.com'
+      }
+    ],
+    currencies: [
+      {
+        name: 'USDT0',
+        value: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f'
+      },
+      {
+        name: 'USDC',
+        value: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'
+      },
+      {
+        name: 'XAUT0',
+        value: '0xf1815bd50389c46847f0bda824ec8da914045d14'
+      }
+    ]
+  },
+  {
+    /*Avalanche*/
+    id: 43114,
+    hexId: avalancheMainnet.chainId,
+    contract: AVAX_CONTRACT_ADDRESS_PRODUCTION,
+    name: 'Avalanche',
+    gas: 'https://cdn.routescan.io/api/evm/43114/gas-price?',
+    rpcs: [
+      {
+        name: 'Infura',
+        url: 'https://avalanche-mainnet.infura.io'
+      },
+      {
+        name: 'Avax Network',
+        url: 'https://api.avax.network/ext/bc/C/rpc'
+      }
+    ],
+    currencies: [
+      {
+        name: 'USDT',
+        value: '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7'
+      },
+      {
+        name: 'USDC',
+        value: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E'
+      },
+      {
+        name: 'XAUT0',
+        value: '0x2775d5105276781B4b85bA6eA6a6653bEeD1dd32'
+      }
+    ]
+  }
+];
+
+export const POLYGON_USDT_ADDRESS_STAGING =
   '0x5DC14a664d551F24e9f7A4C9c6215a84E44f0f1E';
-
-export const USDT_ADDRESS_PRODUCTION =
-  '0xc2132d05d31c914a87c6611c10748aeb04b58e8f';
-
-export const USDC_ADDRESS_PRODUCTION =
-  '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359';
-
-export const XAUT_ADDRESS_PRODUCTION =
-  '0xf1815bd50389c46847f0bda824ec8da914045d14';
-
-export const POLYGON_RPC_URL = 'https://polygon.gateway.tenderly.co';
-
-export const RPC_LIST = [
-  {
-    name: 'Tenderly',
-    url: 'https://polygon.gateway.tenderly.co'
-  },
-  {
-    name: 'Polygon RPC',
-    url: 'https://polygon-rpc.com'
-  }
-];
-
-export const DEFAULT_CURRENCY = 'USDT0';
-
-export const CURRENCIES = [
-  {
-    name: 'USDT0',
-    value: USDT_ADDRESS_PRODUCTION
-  },
-  {
-    name: 'USDC',
-    value: USDC_ADDRESS_PRODUCTION
-  },
-  {
-    name: 'XAUT0',
-    value: XAUT_ADDRESS_PRODUCTION
-  }
-];

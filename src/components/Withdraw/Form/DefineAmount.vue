@@ -2,11 +2,6 @@
 import type {IFormField} from '@/types/general.ts';
 import {ref, watch} from 'vue';
 import {useContractsStore} from '@/stores/contracts.ts';
-import {
-  DEFAULT_CURRENCY,
-  USDC_ADDRESS_PRODUCTION,
-  XAUT_ADDRESS_PRODUCTION
-} from '@/utils/constants.ts';
 
 /*Props */
 const props = defineProps<{
@@ -48,11 +43,7 @@ const checkBalance = () => {
     return;
   }
 
-  if (
-    [USDC_ADDRESS_PRODUCTION, XAUT_ADDRESS_PRODUCTION].includes(
-      contractsStore.currencyToken
-    )
-  ) {
+  if (contractsStore.currencyToken) {
     return;
   }
 
@@ -116,9 +107,11 @@ watch(
         <div class="amount__currency">
           <div
             class="amount__currency--text"
-            v-if="contractsStore.tokens.length === 1"
+            v-if="
+              contractsStore.tokens.length === 1 && contractsStore.activeChain
+            "
           >
-            {{ DEFAULT_CURRENCY }}
+            {{ contractsStore.activeChain.currencies[0].name }}
           </div>
           <select
             v-if="contractsStore.tokens.length > 1"

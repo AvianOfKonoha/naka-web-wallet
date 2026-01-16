@@ -1,13 +1,16 @@
 <script setup lang="ts">
-/*Props*/
 import NetworkIcon from '@/components/Withdraw/NetworkIcon.vue';
-import {DEFAULT_CURRENCY} from '@/utils/constants.ts';
+import {useContractsStore} from '@/stores/contracts.ts';
 
+/*Props*/
 const props = defineProps<{
   title: string;
   description: string;
   buttonText: string;
 }>();
+
+/*Global state*/
+const contractsStore = useContractsStore();
 </script>
 
 <template>
@@ -18,9 +21,12 @@ const props = defineProps<{
     </div>
     <div class="box__chain">
       <div class="box__chain--text">Supported:</div>
-      <div class="box__chain--network">
+      <div class="box__chain--network" v-if="contractsStore.activeChain">
         <NetworkIcon network="polygon" />
-        <span>{{ DEFAULT_CURRENCY }} on Polygon</span>
+        <span
+          >{{ contractsStore.activeChain.currencies[0].name }} on
+          {{ contractsStore.activeChain.name }}</span
+        >
       </div>
     </div>
     <div class="box__button">

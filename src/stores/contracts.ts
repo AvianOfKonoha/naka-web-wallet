@@ -15,15 +15,10 @@ import type {
 import {Contract, Web3, type ContractAbi} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
-  CONTRACT_ADDRESS_PRODUCTION,
-  CURRENCIES,
-  DEFAULT_CURRENCY,
+  avalancheMainnet,
+  CHAINS,
   NETWORKS,
-  polygonMainnet,
-  RPC_LIST,
-  USDC_ADDRESS_PRODUCTION,
-  USDT_ADDRESS_PRODUCTION,
-  XAUT_ADDRESS_PRODUCTION
+  polygonMainnet
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
 import VaultABI from '@/assets/abi/Vault.json';
@@ -50,7 +45,6 @@ export const useContractsStore = defineStore('contracts', {
     web3: null,
     firstSign: false,
     connectedAccount: '',
-    chainId: null,
     balance: '',
     vaultBalance: null,
     contractBalance: {
@@ -145,7 +139,10 @@ export const useContractsStore = defineStore('contracts', {
     cancelledWithdrawals: [],
     daysOffset: (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24,
     thresholdPrompt: '',
-    rpc: RPC_LIST[0],
+    rpc: {
+      name: '',
+      url: ''
+    },
     usdc: {
       contract: null,
       balance: 0
@@ -154,31 +151,47 @@ export const useContractsStore = defineStore('contracts', {
       contract: null,
       balance: 0
     },
-    currencyToken: USDT_ADDRESS_PRODUCTION,
-    tokens: [CURRENCIES[0]]
+    currencyToken: '',
+    tokens: [],
+    activeChain: null
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
+      if (!state.activeChain) {
+        return {
+          name: 'Unknown Chain',
+          icon: './img/icons/bitcoin-btc-logo.png',
+          id: '/',
+          symbol: ''
+        };
+      }
+
       return {
         name:
-          NETWORKS[state.chainId as keyof typeof NETWORKS].name ||
-          `Unknown Chain (ID: ${state.chainId})`,
+          NETWORKS[state.activeChain.id as keyof typeof NETWORKS].name ||
+          `Unknown Chain (ID: ${state.activeChain.id})`,
         icon:
-          NETWORKS[state.chainId as keyof typeof NETWORKS].icon ||
+          NETWORKS[state.activeChain.id as keyof typeof NETWORKS].icon ||
           './img/icons/bitcoin-btc-logo.png',
-        id: NETWORKS[state.chainId as keyof typeof NETWORKS].id || 'No id',
-        symbol: NETWORKS[state.chainId as keyof typeof NETWORKS].symbol || ''
+        id: NETWORKS[state.activeChain.id as keyof typeof NETWORKS].id || '/',
+        symbol:
+          NETWORKS[state.activeChain.id as keyof typeof NETWORKS].symbol || ''
       };
     },
     selectedCurrency: (state) => {
+      if (!state.activeChain) {
+        return;
+      }
+
       return (
-        CURRENCIES.find((item) => item.value === state.currencyToken)?.name ||
-        DEFAULT_CURRENCY
+        state.activeChain.currencies.find(
+          (item) => item.value === state.currencyToken
+        )?.name || state.activeChain.currencies[0].name
       );
     }
   },
   actions: {
-    initializeWeb3(provider?: any) {
+    async initializeWeb3(provider?: any) {
       /** Initialize provider either from the browser (on desktop) or Metamask SDK (on mobile) */
       this.provider = provider || window.ethereum;
       this.web3 = new Web3(this.provider);
@@ -186,6 +199,25 @@ export const useContractsStore = defineStore('contracts', {
       /** Listen to account and network changes */
       this.updateNetwork();
       this.onAccountsChanged();
+
+      /** Set initial chain */
+      const chainId = await this.web3.eth.getChainId();
+      const parsedId = Number(chainId);
+      const currentChain = CHAINS.find((item) => item.id === parsedId);
+
+      if (!currentChain) {
+        toast.error('Switch to either Polygon or Avalanche chain');
+        return;
+      }
+
+      this.activeChain = currentChain;
+
+      /** Set initial currency token */
+      this.tokens = [this.activeChain.currencies[0]];
+      this.currencyToken = this.activeChain.currencies[0].value;
+
+      /** Set initial rpc list */
+      this.rpc = this.activeChain.rpcs[0];
     },
 
     updateLoading(loader: Partial<IContractsLoading>) {
@@ -304,8 +336,14 @@ export const useContractsStore = defineStore('contracts', {
       });
     },
 
-    updateChain(chainId: number) {
-      this.chainId = chainId;
+    updateChain(chainId: string) {
+      const currentChain = CHAINS.find((item) => item.hexId === chainId);
+
+      if (!currentChain) {
+        return;
+      }
+
+      this.activeChain = currentChain;
     },
 
     async getBalance() {
@@ -363,11 +401,23 @@ export const useContractsStore = defineStore('contracts', {
           throw new Error('No accounts found.');
         }
 
+        /** Extract the chain id of the current account from the MetaMask if none is set */
+        if (!this.activeChain) {
+          const chainId = await this.web3.eth.getChainId();
+          const currentChain = CHAINS.find(
+            (item) => Number(chainId) === item.id
+          );
+          if (!currentChain) {
+            return;
+          }
+          this.activeChain = currentChain;
+        }
+
         /** Switch the chain to Polygon mainnet - it is the chain of the Vault SC. The call to the chain change is conditioned on two things -> #1 If the user has never connected the dApp to the MetaMask and they're not on mobile device outside Metamask or the user is on desktop device the polygon chain will be switched in metamask app/extension. #2 If the user has already connected the app to the metamask the chain switcher will commence. In any other case this step will be skipped. */
         if ((!this.firstSign && !isMobileChrome()) || this.firstSign) {
           await this.provider.request({
             method: 'wallet_switchEthereumChain',
-            params: [{chainId: polygonMainnet.chainId}]
+            params: [{chainId: this.activeChain.hexId}]
           });
         }
 
@@ -377,10 +427,6 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Send the fist sign action to session storage */
         sessionStorage.setItem('firstSign', 'true');
-
-        /** Extract the chain id of the current account from the MetaMask */
-        const chainId = await this.web3.eth.getChainId();
-        this.updateChain(Number(chainId));
 
         /** Extract the balance of the current chain in USDT */
         await this.getBalance();
@@ -398,6 +444,10 @@ export const useContractsStore = defineStore('contracts', {
             method: 'wallet_addEthereumChain',
             params: [polygonMainnet]
           });
+          await this.provider.request({
+            method: 'wallet_addEthereumChain',
+            params: [avalancheMainnet]
+          });
         } catch (addError) {
           console.error('Failed to add Polygon network:', addError);
         }
@@ -409,7 +459,7 @@ export const useContractsStore = defineStore('contracts', {
     disconnectMetamask() {
       this.connectedAccount = '';
       this.vaultAddress = '';
-      this.chainId = null;
+      this.activeChain = null;
       this.balance = '';
       this.contractBalance = {
         eth: 0,
@@ -427,27 +477,42 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      console.log('update network');
+
       this.provider.on('chainChanged', async (chainId: string) => {
-        if (chainId === polygonMainnet.chainId) {
-          return;
-        }
-
-        /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
-        this.disconnectMetamask();
-
-        /*TODO: Uncomment and remove upper part if multiple networks are allowed*/
-
-        /** If the user has not made the first connection to the metamask wallet end propagation */
-        /*if (!this.connectedAccount) {
+        /*if (chainId === polygonMainnet.chainId) {
           return;
         }*/
 
+        console.log('chain changed: ', chainId);
+
+        /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
+        // this.disconnectMetamask();
+
+        /*TODO: Uncomment and remove upper part if multiple networks are allowed*/
         /** Update chain id (network) -> The chainId that gets passed through chainChanged event is of type string and a hex format (0x...). We need to parse it to an integer in order to properly map it to its name */
-        /*const parsedId = parseInt(chainId, 16);
-        this.updateChain(parsedId);*/
+        this.updateChain(chainId);
+
+        /** If the user has not made the first connection to the metamask wallet end propagation */
+        if (!this.connectedAccount) {
+          return;
+        }
+
+        /** Fetch contract */
+        await this.connectContract();
+
+        if (!this.activeChain) {
+          return;
+        }
+        /** Set currency token */
+        this.tokens = [this.activeChain.currencies[0]];
+        this.currencyToken = this.activeChain.currencies[0].value;
+
+        /** Set rpc list */
+        this.rpc = this.activeChain.rpcs[0];
 
         /** Fetch balance from the current chain */
-        // await this.getBalance();
+        await this.getBalance();
       });
     },
 
@@ -511,7 +576,7 @@ export const useContractsStore = defineStore('contracts', {
       args: unknown[],
       buffer = 1.2
     ) {
-      if (!this.web3) {
+      if (!this.web3 || !this.activeChain) {
         return;
       }
 
@@ -521,20 +586,36 @@ export const useContractsStore = defineStore('contracts', {
           method
         ](...args).estimateGas({from: this.connectedAccount});
 
+        /** Fetch the fee history of the last 5 blocks */
+        const feeHistory = await this.provider.request({
+          method: 'eth_feeHistory',
+          params: [
+            '0x5', // last 5 blocks
+            'latest',
+            [25, 50, 75] // percentiles for priority fee
+          ]
+        });
+
+        /** convert the hex values of fees to big int */
+        const baseFee = BigInt(feeHistory.baseFeePerGas.at(-1));
+        const priorityFee = BigInt(feeHistory.reward.at(-1)[1]); // 50th percentile
+
         /** Get the rest of the gas data */
-        const gasData = await (
-          await fetch('https://gasstation.polygon.technology/v2')
-        ).json();
-        const maxFeePerGas = Math.floor(gasData.fast.maxFee * 1e9); // convert gwei → wei
-        const maxPriorityFeePerGas = Math.floor(
-          gasData.fast.maxPriorityFee * 1e9
-        );
+        const gasData = await (await fetch(this.activeChain.gas)).json();
+        const maxFeePerGas =
+          this.activeChain.hexId === polygonMainnet.chainId
+            ? Math.floor(gasData.fast.maxFee * 1e9) // convert gwei → wei
+            : Number(baseFee * 2n + priorityFee) * 10;
+        const maxPriorityFeePerGas =
+          this.activeChain.hexId === polygonMainnet.chainId
+            ? Math.floor(gasData.fast.maxPriorityFee * 1e9)
+            : Number(priorityFee);
 
         /** Add buffer to the estimated gas */
         this.transactionGas = {
           gas: Math.floor(Number(estimatedGas) * buffer),
           maxFeePerGas: maxFeePerGas,
-          maxPriorityFeePerGas: maxFeePerGas
+          maxPriorityFeePerGas: maxPriorityFeePerGas
         };
       } catch (error) {
         console.error('Error estimating gas: ', (error as Error).message);
@@ -550,8 +631,12 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      if (!this.activeChain) {
+        return;
+      }
+
       if (
-        this.currencyToken === USDT_ADDRESS_PRODUCTION &&
+        this.currencyToken === this.activeChain.currencies[0].value &&
         this.contractBalance.usdt < this.form.connected.amount.value
       ) {
         return;
@@ -623,8 +708,13 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      if (!this.activeChain) {
+        toast.error('Switch to either Polygon or Avalanche chain');
+        return;
+      }
+
       if (
-        this.currencyToken === USDT_ADDRESS_PRODUCTION &&
+        this.currencyToken === this.activeChain.currencies[0].value &&
         this.contractBalance.usdt < this.form.external.amount.value
       ) {
         return;
@@ -698,6 +788,11 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      if (!this.activeChain) {
+        toast.error('Switch to either Polygon or Avalanche chain');
+        return;
+      }
+
       try {
         /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
         this.vaultBalance = await this.vaultContract.methods
@@ -714,7 +809,9 @@ export const useContractsStore = defineStore('contracts', {
             ...this.tokens,
             {
               name: 'USDC',
-              value: USDC_ADDRESS_PRODUCTION
+              value:
+                this.activeChain.currencies.find((item) => item.name === 'USDC')
+                  ?.value || ''
             }
           ];
         }
@@ -729,7 +826,10 @@ export const useContractsStore = defineStore('contracts', {
             ...this.tokens,
             {
               name: 'XAUT0',
-              value: XAUT_ADDRESS_PRODUCTION
+              value:
+                this.activeChain.currencies.find(
+                  (item) => item.name === 'XAUT0'
+                )?.value || ''
             }
           ];
         }
@@ -922,9 +1022,8 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Get the cancel transaction receipt */
-        const transactionReceipt = await this.web3.eth.getTransactionReceipt(
-          cancelTxHash
-        );
+        const transactionReceipt =
+          await this.web3.eth.getTransactionReceipt(cancelTxHash);
 
         /** Stop propagation if there is no transaction with provided hash */
         if (!transactionReceipt) {
@@ -1151,6 +1250,11 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      if (!this.activeChain) {
+        toast.error('Switch to either Polygon or Avalanche chain');
+        return;
+      }
+
       try {
         /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
         this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
@@ -1158,13 +1262,15 @@ export const useContractsStore = defineStore('contracts', {
         /** Set USDC contract */
         this.usdc.contract = new this.web3.eth.Contract(
           usdcABI,
-          USDC_ADDRESS_PRODUCTION
+          this.activeChain.currencies.find((item) => item.name === 'USDC')
+            ?.value || ''
         );
 
         /** Set XAUT contract */
         this.xaut.contract = new this.web3.eth.Contract(
           xautABI,
-          XAUT_ADDRESS_PRODUCTION
+          this.activeChain.currencies.find((item) => item.name === 'XAUT0')
+            ?.value || ''
         );
 
         /** Get the list of all withdrawals */
@@ -1185,10 +1291,25 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
+      if (!this.activeChain) {
+        toast.error('Switch to either Polygon or Avalanche chain');
+        return;
+      }
+
+      /** Add non-avax-polygon prevention */
+      if (
+        ![polygonMainnet.chainId, avalancheMainnet.chainId].includes(
+          this.activeChain.hexId
+        )
+      ) {
+        toast.error('Switch to either Polygon and Avalanche chain');
+        return;
+      }
+
       /** Initialize factory contract by providing the registry ABI and the factory contract's address to the contract class then save it to the global state */
       this.factoryContract = new this.web3.eth.Contract(
         VaultRegistryABI,
-        CONTRACT_ADDRESS_PRODUCTION
+        this.activeChain.contract
       );
 
       const loadingToast = toast.loading('Connecting to the contract...');
@@ -1250,6 +1371,8 @@ export const useContractsStore = defineStore('contracts', {
           )
         );
         console.error('Error connecting to Vault: ', (error as Error).message);
+
+        this.disconnectMetamask();
       } finally {
         toast.remove(loadingToast);
       }

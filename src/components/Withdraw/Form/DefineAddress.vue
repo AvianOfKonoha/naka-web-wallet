@@ -4,7 +4,6 @@ import {
   copyToClipboard,
   formatWithAtLeastTwoDecimals
 } from '@/utils/helpers.ts';
-import {DEFAULT_CURRENCY} from '@/utils/constants.ts';
 import {useContractsStore} from '@/stores/contracts.ts';
 
 /*Props*/
@@ -17,7 +16,7 @@ const props = defineProps<{
 }>();
 
 /*Global state*/
-const contractStore = useContractsStore();
+const contractsStore = useContractsStore();
 
 /*Methods*/
 const copyAddress = () => {
@@ -71,14 +70,19 @@ const copyAddress = () => {
             </defs>
           </svg>
         </div>
-        <div class="info__detail">
+        <div class="info__detail" v-if="contractsStore.activeChain">
           <div class="info__details--title">
-            Only {{ DEFAULT_CURRENCY }} from Polygon
+            Only
+            {{ contractsStore.activeChain.currencies[0].name }}
+            from Polygon
           </div>
           <div class="info__details--text">
-            You will withdraw {{ DEFAULT_CURRENCY }} on the Polygon network.
-            When sending USDT0 on the Polygon network, you’re actually using
-            {{ DEFAULT_CURRENCY }}, the omnichain version of USDT0.
+            You will withdraw
+            {{ contractsStore.activeChain.currencies[0].name }}
+            on the Polygon network. When sending USDT0 on the Polygon network,
+            you’re actually using
+            {{ contractsStore.activeChain.currencies[0].name }}, the omnichain
+            version of USDT0.
           </div>
         </div>
       </div>
@@ -154,7 +158,7 @@ const copyAddress = () => {
       <div class="statement__label">Amount:</div>
       <div class="statement__value">
         {{ formatWithAtLeastTwoDecimals(props.form.amount.value as number) }}
-        {{ contractStore.selectedCurrency }}
+        {{ contractsStore.selectedCurrency }}
       </div>
     </div>
     <div class="connected__form--submit">

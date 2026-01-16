@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {RPC_LIST} from '@/utils/constants.ts';
 import {useContractsStore} from '@/stores/contracts.ts';
 import {watch} from 'vue';
 
@@ -10,6 +9,10 @@ const contractsStore = useContractsStore();
 watch(
   () => contractsStore.rpc,
   () => {
+    if (contractsStore.loading.history) {
+      return;
+    }
+
     contractsStore.resetWithdrawalsList();
     contractsStore.getWithdrawalHistory();
   }
@@ -18,7 +21,11 @@ watch(
 
 <template>
   <footer
-    v-if="contractsStore.vaultContract && !contractsStore.loading.connect"
+    v-if="
+      contractsStore.vaultContract &&
+      !contractsStore.loading.connect &&
+      contractsStore.activeChain
+    "
   >
     <div class="naka__rpc withdraw__screen--history">
       <label class="rpc__label" for="rpc">RPC</label>
@@ -27,8 +34,11 @@ watch(
         name="rpc"
         id="rpc"
         class="history__selector--select"
+        :disabled="contractsStore.loading.history"
       >
-        <option v-for="rpc in RPC_LIST" :value="rpc">{{ rpc.name }}</option>
+        <option v-for="rpc in contractsStore.activeChain.rpcs" :value="rpc">
+          {{ rpc.name }}
+        </option>
       </select>
     </div>
   </footer>

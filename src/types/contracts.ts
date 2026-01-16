@@ -120,11 +120,20 @@ export interface ICurrency {
   balance: number;
 }
 
+export interface IChain {
+  id: number;
+  hexId: string;
+  name: string;
+  contract: string;
+  rpcs: IRpc[];
+  gas: string;
+  currencies: IToken[];
+}
+
 export interface IContractsStore {
   web3: Web3 | null;
   connectedAccount: string;
   allAccounts: string[];
-  chainId: number | null;
   balance: string;
   contractBalance: IContractBalance;
   vaultBalance: IVaultBalance | null;
@@ -157,4 +166,5 @@ export interface IContractsStore {
   xaut: ICurrency;
   currencyToken: string;
   tokens: IToken[];
+  activeChain: IChain | null;
 }

@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
 import {onMounted} from 'vue';
-import {
-  DEFAULT_CURRENCY,
-  NetworkEnum,
-  polygonMainnet
-} from '@/utils/constants.ts';
+import {NetworkEnum, polygonMainnet} from '@/utils/constants.ts';
 import {toast} from 'vue3-toastify';
 import Modal from '@/components/UI/Modal.vue';
 import ConnectedWallet from '@/components/Withdraw/Form/ConnectedWallet.vue';
@@ -20,7 +16,7 @@ const contractsStore = useContractsStore();
 
 /*Methods*/
 const setPolygonChain = async () => {
-  if (contractsStore.chainId === NetworkEnum.POLYGON) {
+  if (contractsStore.activeChain?.id === NetworkEnum.POLYGON) {
     return;
   }
 
@@ -30,7 +26,7 @@ const setPolygonChain = async () => {
       method: 'wallet_switchEthereumChain',
       params: [{chainId: polygonMainnet.chainId}]
     });
-    contractsStore.updateChain(NetworkEnum.POLYGON);
+    contractsStore.updateChain(polygonMainnet.chainId);
 
     /** Retrieve the balance from the wallet and populate the global state */
     await contractsStore.getBalance();
@@ -95,7 +91,7 @@ const closeOvertimeModal = () => {
 
 /*Lifecycle hooks*/
 onMounted(() => {
-  setPolygonChain();
+  // setPolygonChain();
 });
 </script>
 
@@ -193,9 +189,9 @@ onMounted(() => {
     </div>
     <div class="process__statement" v-if="contractsStore.activeRequest">
       <div class="statement__label">Amount:</div>
-      <div class="statement__value">
+      <div class="statement__value" v-if="contractsStore.activeChain">
         {{ formatWithAtLeastTwoDecimals(contractsStore.activeRequest.amount) }}
-        {{ DEFAULT_CURRENCY }}
+        {{ contractsStore.activeChain.currencies[0].name }}
       </div>
     </div>
     <div

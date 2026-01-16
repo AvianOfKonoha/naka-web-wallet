@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import {formatWithAtLeastTwoDecimals} from '@/utils/helpers.ts';
-import {DEFAULT_CURRENCY} from '../../../utils/constants.ts';
+import {useContractsStore} from '@/stores/contracts.ts';
 
 /*Props*/
 const props = defineProps<{amount: number}>();
+
+/*Global state*/
+const contractsStore = useContractsStore();
 </script>
 
 <template>
@@ -35,7 +38,9 @@ const props = defineProps<{amount: number}>();
         <div class="value__number">
           {{ formatWithAtLeastTwoDecimals(props.amount) }}
         </div>
-        <div class="value__currency">{{ DEFAULT_CURRENCY }}</div>
+        <div class="value__currency" v-if="contractsStore.activeChain">
+          {{ contractsStore.activeChain.currencies[0].name }}
+        </div>
       </div>
     </div>
   </div>
