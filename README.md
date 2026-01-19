@@ -247,3 +247,29 @@ Preview the production build using Vite’s built-in preview server:
 ```bash
 pnpm run preview
 ```
+
+## 🛠️ Publishing new version
+
+1. Build the new version with "pnpm build:(remote)"
+
+```bash
+pnpm run build:naka
+```
+
+2. Add all the files to git (including dist which is by default excluded in .gitignore)
+
+```bash
+pnpm add .
+```
+
+3. Commit changes and push to a relevant remote branch
+
+```bash
+git push naka main
+```
+
+4. Deploy the new version to github pages (the remote name should be the same as deploy:(remote))
+
+```bash
+pnpm run deploy:naka
+```
