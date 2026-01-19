@@ -1508,7 +1508,7 @@ export const useContractsStore = defineStore('contracts', {
       /** If the active chain is either Polygon or Avalanche stop propagation */
       if (
         this.activeChain &&
-        [(NetworkEnum.POLYGON, NetworkEnum.AVALANCHE)].includes(
+        [NetworkEnum.POLYGON, NetworkEnum.AVALANCHE].includes(
           this.activeChain.id
         )
       ) {
