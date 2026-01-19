@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import {useContractsStore} from '@/stores/contracts.ts';
 import {onMounted} from 'vue';
-import {NetworkEnum, polygonMainnet} from '@/utils/constants.ts';
-import {toast} from 'vue3-toastify';
 import Modal from '@/components/UI/Modal.vue';
 import ConnectedWallet from '@/components/Withdraw/Form/ConnectedWallet.vue';
 import ExternalWallet from '@/components/Withdraw/Form/ExternalWallet.vue';
@@ -13,27 +11,6 @@ import HistoryList from '@/components/Withdraw/List/HistoryList.vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
-
-/*Methods*/
-const setPolygonChain = async () => {
-  if (contractsStore.activeChain?.id === NetworkEnum.POLYGON) {
-    return;
-  }
-
-  try {
-    /** Set the Metamask chain to Polygon mainnet and update chain id in global state */
-    await contractsStore.provider.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{chainId: polygonMainnet.chainId}]
-    });
-    contractsStore.updateChain(polygonMainnet.chainId);
-
-    /** Retrieve the balance from the wallet and populate the global state */
-    await contractsStore.getBalance();
-  } catch (error) {
-    toast.error((error as Error).message);
-  }
-};
 
 const closeConnectedModal = () => {
   contractsStore.updateModal({withdrawConnected: false});
@@ -88,11 +65,6 @@ const closeOvertimeModal = () => {
   contractsStore.updateLoading({completeWithdraw: false});
   contractsStore.updateLoading({cancelWithdraw: false});
 };
-
-/*Lifecycle hooks*/
-onMounted(() => {
-  // setPolygonChain();
-});
 </script>
 
 <template>

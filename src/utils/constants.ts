@@ -7,7 +7,8 @@ export enum NetworkEnum {
   POLYGON = 137,
   FANTOM_OPERA = 250,
   MEGA = 6342,
-  ARBITRUM = 42151
+  ARBITRUM = 42151,
+  AVALANCHE = 43114
 }
 
 export const NETWORKS = {

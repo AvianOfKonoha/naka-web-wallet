@@ -17,6 +17,7 @@ import {toast} from 'vue3-toastify';
 import {
   avalancheMainnet,
   CHAINS,
+  NetworkEnum,
   NETWORKS,
   polygonMainnet
 } from '@/utils/constants.ts';
@@ -344,6 +345,13 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.activeChain = currentChain;
+
+      /** Set active chain's currency token */
+      this.tokens = [this.activeChain.currencies[0]];
+      this.currencyToken = this.activeChain.currencies[0].value;
+
+      /** Set active chain's rpc list */
+      this.rpc = this.activeChain.rpcs[0];
     },
 
     async getBalance() {
@@ -382,6 +390,9 @@ export const useContractsStore = defineStore('contracts', {
       if (this.loading.connect) {
         return;
       }
+
+      /** Switch to Avalanche chain if the selected chain is neither Polygon nor Avalanche */
+      await this.setAvaxChain();
 
       /** If the user has already connected their MetaMask, signed the wallet and created a Vault contract, end propagation */
       if (this.vaultContract && !this.loading.connect) {
@@ -473,7 +484,7 @@ export const useContractsStore = defineStore('contracts', {
 
     updateNetwork() {
       /** If the metamask doesn't exist end propagation and prompt the user to install it */
-      if (!this.provider) {
+      if (!this.provider || !this.vaultContract) {
         return;
       }
 
@@ -1490,6 +1501,35 @@ export const useContractsStore = defineStore('contracts', {
           'Error fetching the last block: ',
           (error as Error).message
         );
+      }
+    },
+
+    async setAvaxChain() {
+      /** If the active chain is either Polygon or Avalanche stop propagation */
+      if (
+        this.activeChain &&
+        [(NetworkEnum.POLYGON, NetworkEnum.AVALANCHE)].includes(
+          this.activeChain.id
+        )
+      ) {
+        return;
+      }
+
+      /** Notify the user of the switch */
+      toast.info('Switching to Avalanche chain...', {autoClose: 5000});
+
+      try {
+        /** Set the Metamask chain to Polygon mainnet and update chain id in global state */
+        await this.provider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{chainId: avalancheMainnet.chainId}]
+        });
+        this.updateChain(avalancheMainnet.chainId);
+
+        /** Retrieve the balance from the wallet and populate the global state */
+        await this.getBalance();
+      } catch (error) {
+        toast.error((error as Error).message);
       }
     }
   }
