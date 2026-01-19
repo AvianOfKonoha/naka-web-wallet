@@ -32,9 +32,10 @@ const copyAddress = () => {
     <div class="modal__title">Define address</div>
     <div class="process__description external__form--description">
       <div class="process__description--text">
-        You are about to withdraw USDT0 funds from your balance to an external
-        wallet. Make sure the selected wallet supports the selected currency and
-        blockchain network.
+        You are about to withdraw
+        {{ contractsStore.activeChain.currencies[0].name }} funds from your
+        balance to an external wallet. Make sure the selected wallet supports
+        the selected currency and blockchain network.
       </div>
       <div class="external__form--info">
         <div class="info__icon">
@@ -74,15 +75,16 @@ const copyAddress = () => {
           <div class="info__details--title">
             Only
             {{ contractsStore.activeChain.currencies[0].name }}
-            from Polygon
+            from {{ contractsStore.activeChain.name }}
           </div>
           <div class="info__details--text">
             You will withdraw
             {{ contractsStore.activeChain.currencies[0].name }}
-            on the Polygon network. When sending USDT0 on the Polygon network,
-            you’re actually using
+            on the {{ contractsStore.activeChain.name }} network. When sending
+            {{ contractsStore.activeChain.currencies[0].name }} on the
+            {{ contractsStore.activeChain.name }} network, you’re actually using
             {{ contractsStore.activeChain.currencies[0].name }}, the omnichain
-            version of USDT0.
+            version of {{ contractsStore.activeChain.currencies[0].name }}.
           </div>
         </div>
       </div>

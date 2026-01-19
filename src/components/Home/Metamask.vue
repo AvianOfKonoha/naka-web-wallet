@@ -23,7 +23,8 @@ onMounted(() => {
         <h1 class="home__box--title">Connect Wallet</h1>
       </div>
       <p class="home__box--text">
-        To continue, please connect your wallet on the Polygon Network.
+        To continue, please connect your wallet on the Polygon or Avalanche
+        Network.
       </p>
       <div class="home__box--info">
         <div class="info__icon">

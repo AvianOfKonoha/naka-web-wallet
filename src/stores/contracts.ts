@@ -449,7 +449,7 @@ export const useContractsStore = defineStore('contracts', {
             params: [avalancheMainnet]
           });
         } catch (addError) {
-          console.error('Failed to add Polygon network:', addError);
+          console.error('Failed to add new chain:', addError);
         }
       } finally {
         this.updateLoading({connect: false});
@@ -1289,7 +1289,7 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      /** Add non-avax-polygon prevention */
+      /** Prevent propagation if chain is not Polygon or Avalanche */
       if (
         ![polygonMainnet.chainId, avalancheMainnet.chainId].includes(
           this.activeChain.hexId
