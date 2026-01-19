@@ -214,6 +214,10 @@ export const CHAINS = [
       {
         name: 'Avax Network',
         url: 'https://api.avax.network/ext/bc/C/rpc'
+      },
+      {
+        name: 'DRPC',
+        url: 'https://avalanche.drpc.org'
       }
     ],
     currencies: [

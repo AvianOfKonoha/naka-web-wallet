@@ -477,14 +477,10 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      console.log('update network');
-
       this.provider.on('chainChanged', async (chainId: string) => {
         /*if (chainId === polygonMainnet.chainId) {
           return;
         }*/
-
-        console.log('chain changed: ', chainId);
 
         /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
         // this.disconnectMetamask();
@@ -635,10 +631,7 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      if (
-        this.currencyToken === this.activeChain.currencies[0].value &&
-        this.contractBalance.usdt < this.form.connected.amount.value
-      ) {
+      if (this.contractBalance.usdt < this.form.connected.amount.value) {
         return;
       }
 

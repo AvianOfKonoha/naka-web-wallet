@@ -280,7 +280,7 @@
                     position: absolute;
                     height: 48px;
                     width: 32px;
-                    right: 85px;
+                    right: 0;
                     @include framework.flex-layout(flex, center, center, unset);
                     background-color: map.get(framework.$colors, 'white');
                   }
@@ -659,7 +659,8 @@
                     #{map.get(framework.$colors, 'gray-950')}
                   )
                   content-box;
-                -webkit-mask: repeating-conic-gradient(
+                -webkit-mask:
+                  repeating-conic-gradient(
                     #0000 0deg,
                     #000 1deg 20deg,
                     #0000 21deg 36deg
