@@ -818,6 +818,8 @@ export const useContractsStore = defineStore('contracts', {
           .getProtocolTokenBalances()
           .call();
 
+        this.tokens = [this.activeChain.currencies[0]];
+
         /** Set USDC balance */
         const usdcBalance = (await this.usdc.contract?.methods
           .balanceOf(this.vaultAddress)
