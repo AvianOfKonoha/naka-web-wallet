@@ -207,7 +207,6 @@ export const useContractsStore = defineStore('contracts', {
       const currentChain = CHAINS.find((item) => item.id === parsedId);
 
       if (!currentChain) {
-        toast.error('Switch to either Polygon or Avalanche chain');
         return;
       }
 
@@ -499,7 +498,7 @@ export const useContractsStore = defineStore('contracts', {
         this.updateChain(chainId);
 
         /** If the user has not made the first connection to the metamask wallet end propagation */
-        if (!this.connectedAccount) {
+        if (!this.vaultContract) {
           return;
         }
 
@@ -701,7 +700,6 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       if (!this.activeChain) {
-        toast.error('Switch to either Polygon or Avalanche chain');
         return;
       }
 
@@ -781,18 +779,14 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       if (!this.activeChain) {
-        toast.error('Switch to either Polygon or Avalanche chain');
         return;
       }
 
       try {
-        console.log('new vault: ', this.vaultContract._address);
         /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
         this.vaultBalance = await this.vaultContract.methods
           .getProtocolTokenBalances()
           .call();
-
-        console.log('new vault balance: ', this.vaultBalance?.balance);
 
         /** Set USDC balance */
         const usdcBalance = (await this.usdc.contract?.methods
@@ -1191,13 +1185,13 @@ export const useContractsStore = defineStore('contracts', {
           (error as Error).message
         );
 
-        const errorMessage = (error as any).data?.message;
+        /*const errorMessage = (error as any).data?.message;
         if (errorMessage) {
           toast.error(errorMessage);
           return;
         }
 
-        toast.error((error as Error).message);
+        toast.error((error as Error).message);*/
       }
     },
 
@@ -1245,7 +1239,6 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       if (!this.activeChain) {
-        toast.error('Switch to either Polygon or Avalanche chain');
         return;
       }
 
@@ -1272,9 +1265,6 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Fetch Vault balance */
         await this.getVaultBalance();
-        toast.success(
-          `Successfully connected to the Vault contract on ${this.activeChain.name}`
-        );
       } catch (error) {
         console.error(
           'Error setting vault contract: ',
@@ -1289,7 +1279,6 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       if (!this.activeChain) {
-        toast.error('Switch to either Polygon or Avalanche chain');
         return;
       }
 
@@ -1355,9 +1344,17 @@ export const useContractsStore = defineStore('contracts', {
         toast.success(`Vault contract successfully created`);
       } catch (error) {
         toast.remove(loadingToast);
+        this.disconnectMetamask();
 
         if ((error as any).cause?.code === -32603) {
           toast.error("Couldn't connect to the contract.");
+          return;
+        }
+
+        if ((error as any).code === 205) {
+          toast.error(
+            'NAKA Fund Withdrawal is only supported on Polygon and Avalanche'
+          );
           return;
         }
 
@@ -1367,9 +1364,6 @@ export const useContractsStore = defineStore('contracts', {
             ''
           )
         );
-        console.error('Error connecting to Vault: ', (error as Error).message);
-
-        this.disconnectMetamask();
       } finally {
         toast.remove(loadingToast);
       }
@@ -1501,8 +1495,8 @@ export const useContractsStore = defineStore('contracts', {
       /** If the active chain is either Polygon or Avalanche stop propagation */
       if (
         this.activeChain &&
-        [NetworkEnum.POLYGON, NetworkEnum.AVALANCHE].includes(
-          this.activeChain.id
+        [polygonMainnet.chainId, avalancheMainnet.chainId].includes(
+          this.activeChain.hexId
         )
       ) {
         return;
