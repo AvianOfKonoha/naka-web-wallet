@@ -486,8 +486,6 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      console.log('update network');
-
       this.provider.on('chainChanged', async (chainId: string) => {
         /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
         // this.disconnectMetamask();

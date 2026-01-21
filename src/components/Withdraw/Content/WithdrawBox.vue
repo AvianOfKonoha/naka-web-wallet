@@ -22,7 +22,7 @@ const contractsStore = useContractsStore();
     <div class="box__chain">
       <div class="box__chain--text">Supported:</div>
       <div class="box__chain--network" v-if="contractsStore.activeChain">
-        <NetworkIcon network="polygon" />
+        <NetworkIcon />
         <span
           >{{ contractsStore.activeChain.currencies[0].name }} on
           {{ contractsStore.activeChain.name }}</span
