@@ -721,7 +721,8 @@ export const useContractsStore = defineStore('contracts', {
         this.loading.withdrawExternal ||
         !this.form.external.amount.value ||
         !this.vaultContract ||
-        !this.form.external.amount.value
+        !this.form.external.amount.value ||
+        !this.web3
       ) {
         return;
       }
@@ -766,7 +767,9 @@ export const useContractsStore = defineStore('contracts', {
           await this.vaultContract.methods
             .withdrawRequest(
               this.currencyToken,
-              this.form.external.address.value,
+              this.web3.utils.toChecksumAddress(
+                this.form.external.address.value
+              ),
               formatNumberToUint256(this.form.external.amount.value)
             )
             .send({
