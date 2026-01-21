@@ -601,11 +601,14 @@ export const useContractsStore = defineStore('contracts', {
         const priorityFee = BigInt(feeHistory.reward.at(-1)[1]); // 50th percentile
 
         /** Get the rest of the gas data */
-        const gasData = await (await fetch(this.activeChain.gas)).json();
+        const gasData =
+          this.activeChain.hexId === polygonMainnet.chainId
+            ? await (await fetch(this.activeChain.gas)).json()
+            : null;
         const maxFeePerGas =
           this.activeChain.hexId === polygonMainnet.chainId
             ? Math.floor(gasData.fast.maxFee * 1e9) // convert gwei → wei
-            : Number(baseFee * 2n + priorityFee) * 10;
+            : Number(baseFee * 2n + priorityFee);
         const maxPriorityFeePerGas =
           this.activeChain.hexId === polygonMainnet.chainId
             ? Math.floor(gasData.fast.maxPriorityFee * 1e9)
