@@ -596,9 +596,27 @@ export const useContractsStore = defineStore('contracts', {
           ]
         });
 
-        /** convert the hex values of fees to big int */
-        const baseFee = BigInt(feeHistory.baseFeePerGas.at(-1));
-        const priorityFee = BigInt(feeHistory.reward.at(-1)[1]); // 50th percentile
+        function percentile(values: bigint[], p: number): bigint {
+          if (values.length === 0) return 0n;
+          const idx = Math.floor(values.length * (p / 100));
+          return values[Math.min(idx, values.length - 1)];
+        }
+
+        const rewards = feeHistory.reward
+          .flat()
+          .map((hex: number) => BigInt(hex))
+          .filter((v: any) => v > 0n);
+
+        rewards.sort((a: number, b: number) => (a < b ? -1 : 1));
+
+        const maxPriorityFeePerGasCalc = percentile(rewards, 50); // p50
+
+        const pendingBlock = await this.provider.request({
+          method: 'eth_getBlockByNumber',
+          params: ['pending', false]
+        });
+
+        const baseFeeCalc = BigInt(pendingBlock.baseFeePerGas);
 
         /** Get the rest of the gas data */
         const gasData =
@@ -608,11 +626,11 @@ export const useContractsStore = defineStore('contracts', {
         const maxFeePerGas =
           this.activeChain.hexId === polygonMainnet.chainId
             ? Math.floor(gasData.fast.maxFee * 1e9) // convert gwei → wei
-            : Number(baseFee * 2n + priorityFee);
+            : Number(baseFeeCalc * 2n + maxPriorityFeePerGasCalc) * 10;
         const maxPriorityFeePerGas =
           this.activeChain.hexId === polygonMainnet.chainId
             ? Math.floor(gasData.fast.maxPriorityFee * 1e9)
-            : Number(priorityFee);
+            : Number(maxPriorityFeePerGasCalc);
 
         /** Add buffer to the estimated gas */
         this.transactionGas = {
