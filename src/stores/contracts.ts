@@ -1209,14 +1209,14 @@ export const useContractsStore = defineStore('contracts', {
       this.updateLoading({history: true});
 
       try {
-        /** Fetch active withdrawal request */
-        await this.getActiveRequest();
-
         /** Fetch cancelled withdrawals */
         await this.getCancelledWithdrawals();
 
         /** Fetch completed withdrawals */
         await this.getCompletedWithdrawals();
+
+        /** Fetch active withdrawal request */
+        await this.getActiveRequest();
 
         /** Save the cancelled and completed withdrawals to one list and sort them by date */
         const withdrawalList = [
