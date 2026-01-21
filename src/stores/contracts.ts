@@ -759,7 +759,7 @@ export const useContractsStore = defineStore('contracts', {
           /** Fetch estimated gas */
           await this.getEstimatedGas(this.vaultContract, 'withdrawRequest', [
             this.currencyToken,
-            this.form.external.address.value,
+            this.web3.utils.toChecksumAddress(this.form.external.address.value),
             formatNumberToUint256(this.form.external.amount.value)
           ]);
 
