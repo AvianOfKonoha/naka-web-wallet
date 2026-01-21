@@ -469,7 +469,6 @@ export const useContractsStore = defineStore('contracts', {
     disconnectMetamask() {
       this.connectedAccount = '';
       this.vaultAddress = '';
-      this.activeChain = null;
       this.balance = '';
       this.contractBalance = {
         eth: 0,
