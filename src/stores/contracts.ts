@@ -496,6 +496,12 @@ export const useContractsStore = defineStore('contracts', {
         /** Update chain id (network) -> The chainId that gets passed through chainChanged event is of type string and a hex format (0x...). We need to parse it to an integer in order to properly map it to its name */
         this.updateChain(chainId);
 
+        /** Get last block */
+        await this.getLastNetworkBlock();
+
+        /** Estimate block per hour */
+        await this.estimateBlocksPerHour();
+
         /** If the user has not made the first connection to the metamask wallet end propagation */
         if (!this.vaultContract) {
           return;
@@ -506,12 +512,6 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Fetch balance from the current chain */
         await this.getBalance();
-
-        /** Get last block */
-        await this.getLastNetworkBlock();
-
-        /** Estimate block per hour */
-        await this.estimateBlocksPerHour();
       });
     },
 
