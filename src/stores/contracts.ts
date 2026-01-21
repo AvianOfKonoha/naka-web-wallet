@@ -487,6 +487,9 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.provider.on('chainChanged', async (chainId: string) => {
+        /** Init loading history */
+        this.updateLoading({history: true});
+
         /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
         // this.disconnectMetamask();
 
