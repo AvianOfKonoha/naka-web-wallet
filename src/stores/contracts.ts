@@ -484,15 +484,13 @@ export const useContractsStore = defineStore('contracts', {
 
     updateNetwork() {
       /** If the metamask doesn't exist end propagation and prompt the user to install it */
-      if (!this.provider || !this.vaultContract) {
+      if (!this.provider) {
         return;
       }
 
-      this.provider.on('chainChanged', async (chainId: string) => {
-        /*if (chainId === polygonMainnet.chainId) {
-          return;
-        }*/
+      console.log('update network');
 
+      this.provider.on('chainChanged', async (chainId: string) => {
         /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
         // this.disconnectMetamask();
 
@@ -507,16 +505,6 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Fetch contract */
         await this.connectContract();
-
-        if (!this.activeChain) {
-          return;
-        }
-        /** Set currency token */
-        this.tokens = [this.activeChain.currencies[0]];
-        this.currencyToken = this.activeChain.currencies[0].value;
-
-        /** Set rpc list */
-        this.rpc = this.activeChain.rpcs[0];
 
         /** Fetch balance from the current chain */
         await this.getBalance();
@@ -798,10 +786,13 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       try {
+        console.log('new vault: ', this.vaultContract._address);
         /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
         this.vaultBalance = await this.vaultContract.methods
           .getProtocolTokenBalances()
           .call();
+
+        console.log('new vault balance: ', this.vaultBalance?.balance);
 
         /** Set USDC balance */
         const usdcBalance = (await this.usdc.contract?.methods
@@ -1015,7 +1006,6 @@ export const useContractsStore = defineStore('contracts', {
           'Error fetching active request: ',
           (error as Error).message
         );
-        toast.error((error as Error).message);
       }
     },
 
@@ -1282,6 +1272,9 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Fetch Vault balance */
         await this.getVaultBalance();
+        toast.success(
+          `Successfully connected to the Vault contract on ${this.activeChain.name}`
+        );
       } catch (error) {
         console.error(
           'Error setting vault contract: ',
