@@ -506,6 +506,12 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Fetch balance from the current chain */
         await this.getBalance();
+
+        /** Get last block */
+        await this.getLastNetworkBlock();
+
+        /** Estimate block per hour */
+        await this.estimateBlocksPerHour();
       });
     },
 
