@@ -71,13 +71,13 @@ const copyAddress = () => {
             </defs>
           </svg>
         </div>
-        <div class="info__detail" v-if="contractsStore.activeChain">
+        <div class="info__detail" v-if="contractsStore.activeChain?.id === 137">
           <div class="info__details--title">
             Only
             {{ contractsStore.activeChain.currencies[0].name }}
             from {{ contractsStore.activeChain.name }}
           </div>
-          <div class="info__details--text">
+          <div class="info__details--text" v-if="contractsStore.activeChain.id">
             You will withdraw
             {{ contractsStore.activeChain.currencies[0].name }}
             on the {{ contractsStore.activeChain.name }} network. When sending

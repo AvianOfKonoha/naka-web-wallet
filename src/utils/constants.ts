@@ -126,7 +126,7 @@ export const avalancheMainnet = {
   chainId: '0xa86a', // 43114 in hex
   chainName: 'Avalanche C-Chain',
   nativeCurrency: {
-    name: 'Avalanche',
+    name: 'Avalanche C-Chain',
     symbol: 'AVAX',
     decimals: 18
   },
@@ -193,7 +193,7 @@ export const CHAINS = [
     id: 43114,
     hexId: avalancheMainnet.chainId,
     contract: AVAX_CONTRACT_ADDRESS_PRODUCTION,
-    name: 'Avalanche',
+    name: 'Avalanche C-Chain',
     gas: 'https://cdn.routescan.io/api/evm/43114/gas-price?',
     rpcs: [
       {

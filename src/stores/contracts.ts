@@ -855,6 +855,7 @@ export const useContractsStore = defineStore('contracts', {
           ];
         }
 
+        /** Check if the currency token currently active still has balance in the vault. If not reset the selection to the first item in the currency array */
         const currencyTokenActive = this.tokens.some(
           (item) => item.value === this.currencyToken
         );
