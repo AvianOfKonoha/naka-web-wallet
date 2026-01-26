@@ -532,16 +532,15 @@
                 @include framework.font-style('default', 'gray-400');
               }
               &__chain {
-                @include framework.flex-layout(
-                  flex,
-                  center,
-                  center,
-                  framework.$defaultGridGap
+                @include framework.grid-gap(
+                  calc(#{framework.$defaultPadding} / 2)
                 );
+                justify-items: start;
                 padding: 0 calc(#{framework.$defaultPadding} / 2);
                 &--text {
                   @include framework.font-style('14', 'gray-400');
                   text-transform: uppercase;
+                  line-height: 1;
                 }
                 &--network {
                   background-color: map.get(framework.$colors, 'gray-950');
