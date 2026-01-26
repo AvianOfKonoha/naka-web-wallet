@@ -493,6 +493,18 @@ export const useContractsStore = defineStore('contracts', {
         /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
         // this.disconnectMetamask();
 
+        /** Close all modals and reset forms */
+        this.updateModal({
+          connect: false,
+          withdrawConnected: false,
+          withdrawExternal: false,
+          cancelWithdraw: false,
+          completeWithdraw: false,
+          overtime: false
+        });
+        this.resetConnectedForm();
+        this.resetExternalForm();
+
         /*TODO: Uncomment and remove upper part if multiple networks are allowed*/
         /** Update chain id (network) -> The chainId that gets passed through chainChanged event is of type string and a hex format (0x...). We need to parse it to an integer in order to properly map it to its name */
         this.updateChain(chainId);
