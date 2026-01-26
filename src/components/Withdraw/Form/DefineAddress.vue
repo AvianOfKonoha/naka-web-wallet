@@ -33,9 +33,9 @@ const copyAddress = () => {
     <div class="process__description external__form--description">
       <div class="process__description--text">
         You are about to withdraw
-        {{ contractsStore.activeChain.currencies[0].name }} funds from your
-        balance to an external wallet. Make sure the selected wallet supports
-        the selected currency and blockchain network.
+        {{ contractsStore.selectedCurrency }} funds from your balance to an
+        external wallet. Make sure the selected wallet supports the selected
+        currency and blockchain network.
       </div>
       <div class="external__form--info">
         <div class="info__icon">
@@ -71,13 +71,13 @@ const copyAddress = () => {
             </defs>
           </svg>
         </div>
-        <div class="info__detail" v-if="contractsStore.activeChain?.id === 137">
-          <div class="info__details--title">
+        <!--        <div class="info__detail" v-if="contractsStore.activeChain?.id === 137">
+          <div class="info__details&#45;&#45;title">
             Only
             {{ contractsStore.activeChain.currencies[0].name }}
             from {{ contractsStore.activeChain.name }}
           </div>
-          <div class="info__details--text" v-if="contractsStore.activeChain.id">
+          <div class="info__details&#45;&#45;text" v-if="contractsStore.activeChain.id">
             You will withdraw
             {{ contractsStore.activeChain.currencies[0].name }}
             on the {{ contractsStore.activeChain.name }} network. When sending
@@ -86,7 +86,7 @@ const copyAddress = () => {
             {{ contractsStore.activeChain.currencies[0].name }}, the omnichain
             version of {{ contractsStore.activeChain.currencies[0].name }}.
           </div>
-        </div>
+        </div>-->
       </div>
     </div>
     <div class="external__form--address">

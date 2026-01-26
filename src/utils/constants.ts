@@ -69,7 +69,7 @@ export const NETWORKS = {
   43114: {
     id: 'avalanche-2',
     symbol: 'AVAX',
-    name: 'Avalanche C-Chain',
+    name: 'Avalanche (C-Chain)',
     icon: './img/icons/avalanche-avax-logo.png'
   },
   59141: {
@@ -193,7 +193,7 @@ export const CHAINS = [
     id: 43114,
     hexId: avalancheMainnet.chainId,
     contract: AVAX_CONTRACT_ADDRESS_PRODUCTION,
-    name: 'Avalanche C-Chain',
+    name: 'Avalanche (C-Chain)',
     gas: 'https://cdn.routescan.io/api/evm/43114/gas-price?',
     rpcs: [
       {
