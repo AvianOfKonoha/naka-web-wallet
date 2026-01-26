@@ -5,6 +5,7 @@ import {
   formatWithAtLeastTwoDecimals
 } from '@/utils/helpers.ts';
 import {useContractsStore} from '@/stores/contracts.ts';
+import Notification from '@/components/UI/Notification.vue';
 
 /*Props*/
 const props = defineProps<{
@@ -37,6 +38,32 @@ const copyAddress = () => {
         external wallet. Make sure the selected wallet supports the selected
         currency and blockchain network.
       </div>
+      <Notification v-if="contractsStore.activeChain">
+        <div class="info__details&#45;&#45;title">
+          Only
+          {{ contractsStore.activeChain.currencies[0].name }}
+          on {{ contractsStore.activeChain.name }}
+        </div>
+        <div
+          class="info__details&#45;&#45;text"
+          v-if="contractsStore.activeChain.id"
+        >
+          You will withdraw
+          {{ contractsStore.activeChain.currencies[0].name }}
+          on the {{ contractsStore.activeChain.name }} network.
+          {{
+            contractsStore.activeChain.id === 137 &&
+            contractsStore.selectedCurrency === 'USDT0'
+              ? `When sending
+          ${contractsStore.activeChain.currencies[0].name}
+          on the ${contractsStore.activeChain.name} network, you’re actually
+          using ${contractsStore.activeChain.currencies[0].name}, the
+          omnichain version of
+          ${contractsStore.activeChain.currencies[0].name}.`
+              : ''
+          }}
+        </div>
+      </Notification>
     </div>
     <div class="external__form--address">
       <div class="address__input">
