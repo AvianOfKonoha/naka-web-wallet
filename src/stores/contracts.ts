@@ -855,6 +855,13 @@ export const useContractsStore = defineStore('contracts', {
           ];
         }
 
+        const currencyTokenActive = this.tokens.some(
+          (item) => item.value === this.currencyToken
+        );
+        if (!currencyTokenActive) {
+          this.currencyToken = this.tokens[0].value;
+        }
+
         if (!this.vaultBalance) {
           return;
         }
