@@ -55,11 +55,11 @@ const copyAddress = () => {
             contractsStore.activeChain.id === 137 &&
             contractsStore.selectedCurrency === 'USDT0'
               ? `When sending
-          ${contractsStore.activeChain.currencies[0].name}
+          ${contractsStore.selectedCurrency}
           on the ${contractsStore.activeChain.name} network, you’re actually
-          using ${contractsStore.activeChain.currencies[0].name}, the
+          using ${contractsStore.selectedCurrency}, the
           omnichain version of
-          ${contractsStore.activeChain.currencies[0].name}.`
+          ${contractsStore.selectedCurrency}.`
               : ''
           }}
         </div>
