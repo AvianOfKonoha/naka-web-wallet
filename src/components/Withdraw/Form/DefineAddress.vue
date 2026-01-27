@@ -41,7 +41,7 @@ const copyAddress = () => {
       <Notification v-if="contractsStore.activeChain">
         <div class="info__details&#45;&#45;title">
           Only
-          {{ contractsStore.activeChain.currencies[0].name }}
+          {{ contractsStore.selectedCurrency }}
           on {{ contractsStore.activeChain.name }}
         </div>
         <div
@@ -49,7 +49,7 @@ const copyAddress = () => {
           v-if="contractsStore.activeChain.id"
         >
           You will withdraw
-          {{ contractsStore.activeChain.currencies[0].name }}
+          {{ contractsStore.selectedCurrency }}
           on the {{ contractsStore.activeChain.name }} network.
           {{
             contractsStore.activeChain.id === 137 &&
