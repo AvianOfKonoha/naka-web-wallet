@@ -12,12 +12,11 @@ import type {
   IWallet,
   IWithdrawal
 } from '@/types/contracts.ts';
-import {Contract, Web3, type ContractAbi} from 'web3';
+import {Contract, Web3, type ContractAbi, type EIP1193Provider} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
   avalancheMainnet,
   CHAINS,
-  NetworkEnum,
   NETWORKS,
   polygonMainnet
 } from '@/utils/constants.ts';
@@ -40,6 +39,7 @@ import {
   isMobileChrome,
   validateAddress
 } from '@/utils/helpers.ts';
+import {markRaw} from 'vue';
 
 export const useContractsStore = defineStore('contracts', {
   state: (): IContractsStore => ({
@@ -194,8 +194,8 @@ export const useContractsStore = defineStore('contracts', {
   actions: {
     async initializeWeb3(provider?: any) {
       /** Initialize provider either from the browser (on desktop) or Metamask SDK (on mobile) */
-      this.provider = provider || window.ethereum;
-      this.web3 = new Web3(this.provider);
+      this.provider = markRaw(provider || window.ethereum);
+      this.web3 = markRaw(new Web3(this.provider));
 
       /** Listen to account and network changes */
       this.updateNetwork();
@@ -466,6 +466,15 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
+    resetBalance() {
+      this.balance = '';
+      this.contractBalance = {
+        eth: 0,
+        usdt: 0
+      };
+      this.vaultBalance = null;
+    },
+
     disconnectMetamask() {
       this.connectedAccount = '';
       this.vaultAddress = '';
@@ -476,6 +485,7 @@ export const useContractsStore = defineStore('contracts', {
       };
       this.vaultContract = null;
       this.factoryContract = null;
+      this.vaultBalance = null;
       sessionStorage.removeItem('firstSign');
       this.resetWithdrawalsList();
     },
@@ -487,11 +497,12 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.provider.on('chainChanged', async (chainId: string) => {
+        console.log('chainId changed', chainId);
         /** Init loading history */
         this.updateLoading({history: true});
 
-        /** Disconnect metamask because as of right now the Vault SC only operates on Polygon */
-        // this.disconnectMetamask();
+        /** Reset balance data */
+        this.resetBalance();
 
         /** Close all modals and reset forms */
         this.updateModal({
@@ -825,10 +836,16 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       try {
+        console.log('get vault balance. ', this.vaultContract);
         /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
         this.vaultBalance = await this.vaultContract.methods
           .getProtocolTokenBalances()
           .call();
+
+        console.log(
+          `get vault balance from ${this.vaultContract}: `,
+          this.vaultBalance
+        );
 
         this.tokens = [this.activeChain.currencies[0]];
 
@@ -885,6 +902,8 @@ export const useContractsStore = defineStore('contracts', {
           ...this.contractBalance,
           usdt: converted
         };
+
+        console.log('contract balance: ', this.contractBalance.usdt);
       } catch (error) {
         console.error(
           'Error fetching vault balance: ',
