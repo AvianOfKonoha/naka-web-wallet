@@ -171,6 +171,8 @@ export const CHAINS = [
     vaultAbi: polygonVaultAbi,
     registryAbi: polygonRegistryAbi,
     balanceCall: 'getProtocolTokenBalances',
+    reservationCall: 'getWithdrawProtocolTokenReservation',
+    reservationLockCall: 'getProtocolTokenWithdrawalReservationLockDuration',
     rpcs: [
       {
         name: 'Tenderly',
@@ -206,6 +208,8 @@ export const CHAINS = [
     vaultAbi: avaxVaultAbi,
     registryAbi: avaxRegistryAbi,
     balanceCall: 'getPaymentTokenBalances',
+    reservationCall: 'getWithdrawPaymentTokenReservation',
+    reservationLockCall: 'getPaymentTokenWithdrawalReservationLockDuration',
     rpcs: [
       {
         name: 'PublicNode',

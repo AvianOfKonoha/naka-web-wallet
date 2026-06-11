@@ -975,15 +975,21 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getActiveRequest() {
-      if (!this.factoryContract || !this.vaultContract || !this.web3) {
+      if (
+        !this.factoryContract ||
+        !this.vaultContract ||
+        !this.web3 ||
+        !this.activeChain
+      ) {
         return;
       }
 
       try {
         /** Fetch the reserved withdrawal request amount and unlock time from the smart contract */
-        const reservationStatus: IReservation = await this.vaultContract.methods
-          .getWithdrawProtocolTokenReservation()
-          .call();
+        const reservationStatus: IReservation =
+          await this.vaultContract.methods[
+            this.activeChain.reservationCall
+          ]().call();
         const reservationAmount = Number(reservationStatus.amount);
 
         /** When there are no reserved funds reset the active request and stop propagation */
@@ -993,9 +999,10 @@ export const useContractsStore = defineStore('contracts', {
         }
 
         /** Fetch a lock duration of the withdrawal request from the factory contract */
-        const lockDuration: bigint = await this.factoryContract.methods
-          .getProtocolTokenWithdrawalReservationLockDuration()
-          .call();
+        const lockDuration: bigint =
+          await this.factoryContract.methods[
+            this.activeChain.reservationLockCall
+          ]().call();
 
         /** Check if more than time has passed than the amount of lock duration, which means the request is ready to be completed by the user */
         const thresholdPassed =

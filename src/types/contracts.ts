@@ -131,6 +131,8 @@ export interface IChain {
   vaultAbi: ContractAbi;
   registryAbi: ContractAbi;
   balanceCall: string;
+  reservationCall: string;
+  reservationLockCall: string;
 }
 
 export interface IContractsStore {
