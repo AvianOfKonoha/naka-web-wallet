@@ -115,6 +115,25 @@
         "type": "address"
       }
     ],
+    "name": "ExchangeGatewayChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldValue",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newValue",
+        "type": "address"
+      }
+    ],
     "name": "FeeVaultAddressChanged",
     "type": "event"
   },
@@ -130,13 +149,13 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "maxProtocolAmountSingle",
+        "name": "maxPaymentAmountSingle",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "maxProtocolAmountDaily",
+        "name": "maxPaymentAmountDaily",
         "type": "uint256"
       },
       {
@@ -161,13 +180,13 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "maxProtocolAmountSingle",
+        "name": "maxPaymentAmountSingle",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "maxProtocolAmountDaily",
+        "name": "maxPaymentAmountDaily",
         "type": "uint256"
       },
       {
@@ -178,6 +197,56 @@
       }
     ],
     "name": "KYCLevelChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint16",
+        "name": "tokenId",
+        "type": "uint16"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "oldValue",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "newValue",
+        "type": "uint256"
+      }
+    ],
+    "name": "MaxApprovedPaymentTokenDefaultAmountChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "nftAddress",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "userAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "NftSalvaged",
     "type": "event"
   },
   {
@@ -217,6 +286,31 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "uint16",
+        "name": "tokenId",
+        "type": "uint16"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldValue",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newValue",
+        "type": "address"
+      }
+    ],
+    "name": "PaymentRouterAddressForWhitelistedTokenChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "oldValue",
         "type": "address"
@@ -229,6 +323,63 @@
       }
     ],
     "name": "PaymentRouterChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "oldValue",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "newValue",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentTokenProcessPaymentReservationTimeOutDurationChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "oldValue",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "newValue",
+        "type": "uint256"
+      }
+    ],
+    "name": "PaymentTokenWithdrawalReservationLockDurationChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldValue",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newValue",
+        "type": "address"
+      }
+    ],
+    "name": "PluginManagerAddressChanged",
     "type": "event"
   },
   {
@@ -267,44 +418,6 @@
       }
     ],
     "name": "ProtocolTokenChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "oldValue",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "newValue",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProtocolTokenProcessPaymentReservationTimeOutDurationChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "oldValue",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "newValue",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProtocolTokenWithdrawalReservationLockDurationChanged",
     "type": "event"
   },
   {
@@ -393,12 +506,55 @@
       },
       {
         "indexed": true,
-        "internalType": "bool",
-        "name": "isWhitelisted",
-        "type": "bool"
+        "internalType": "uint16",
+        "name": "tokenId",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxApprovedPaymentTokenDefaultAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "paymentRouterAddress",
+        "type": "address"
       }
     ],
-    "name": "TokenWhitelistChanged",
+    "name": "TokenWhitelistAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint16",
+        "name": "tokenId",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "maxApprovedPaymentTokenDefaultAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "paymentRouterAddress",
+        "type": "address"
+      }
+    ],
+    "name": "TokenWhitelistRemoved",
     "type": "event"
   },
   {
@@ -631,12 +787,12 @@
       },
       {
         "internalType": "uint256",
-        "name": "maxProtocolAmountSingle_",
+        "name": "maxPaymentAmountSingle_",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "maxProtocolAmountDaily_",
+        "name": "maxPaymentAmountDaily_",
         "type": "uint256"
       },
       {
@@ -655,6 +811,21 @@
       {
         "internalType": "address",
         "name": "tokenAddress_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint16",
+        "name": "tokenId_",
+        "type": "uint16"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxApprovedPaymentTokenDefaultAmount_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "paymentRouterAddress_",
         "type": "address"
       }
     ],
@@ -709,14 +880,27 @@
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "getAllAvailableWhitelistedTokens",
+    "outputs": [
       {
-        "internalType": "uint256",
-        "name": "index",
-        "type": "uint256"
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
       }
     ],
-    "name": "getAvaliableWhitelistedTokenByIndex",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "tokenId_",
+        "type": "uint16"
+      }
+    ],
+    "name": "getAvailableWhitelistedTokenAddressById",
     "outputs": [
       {
         "internalType": "address",
@@ -728,8 +912,94 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index_",
+        "type": "uint256"
+      }
+    ],
+    "name": "getAvailableWhitelistedTokenByIndex",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint16",
+            "name": "tokenId",
+            "type": "uint16"
+          },
+          {
+            "internalType": "address",
+            "name": "tokenAddress",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct IVaultRegistry.WhitelistedTokenData",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "tokenId_",
+        "type": "uint16"
+      }
+    ],
+    "name": "getAvailableWhitelistedTokenMaxApprovedPaymentTokenDefaultAmountById",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "page_",
+        "type": "uint16"
+      },
+      {
+        "internalType": "uint16",
+        "name": "pageSize_",
+        "type": "uint16"
+      }
+    ],
+    "name": "getAvailableWhitelistedTokens",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint16",
+            "name": "tokenId",
+            "type": "uint16"
+          },
+          {
+            "internalType": "address",
+            "name": "tokenAddress",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct IVaultRegistry.WhitelistedTokenData[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
-    "name": "getAvaliableWhitelistedTokensCount",
+    "name": "getAvailableWhitelistedTokensCount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -748,6 +1018,19 @@
         "internalType": "uint16",
         "name": "",
         "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getExchangeGatewayAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -785,12 +1068,12 @@
           },
           {
             "internalType": "uint256",
-            "name": "maxProtocolAmountSingle",
+            "name": "maxPaymentAmountSingle",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "maxProtocolAmountDaily",
+            "name": "maxPaymentAmountDaily",
             "type": "uint256"
           },
           {
@@ -849,12 +1132,12 @@
           },
           {
             "internalType": "uint256",
-            "name": "maxProtocolAmountSingle",
+            "name": "maxPaymentAmountSingle",
             "type": "uint256"
           },
           {
             "internalType": "uint256",
-            "name": "maxProtocolAmountDaily",
+            "name": "maxPaymentAmountDaily",
             "type": "uint256"
           },
           {
@@ -898,8 +1181,33 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "getProtocolTokenAddress",
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "tokenId_",
+        "type": "uint16"
+      }
+    ],
+    "name": "getPaymentRouterAddressByPaymentTokenId",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenAddress_",
+        "type": "address"
+      }
+    ],
+    "name": "getPaymentRouterAddressByWhitelistedTokenAddress",
     "outputs": [
       {
         "internalType": "address",
@@ -912,7 +1220,7 @@
   },
   {
     "inputs": [],
-    "name": "getProtocolTokenProcessPaymentReservationTimeOutDuration",
+    "name": "getPaymentTokenProcessPaymentReservationTimeOutDuration",
     "outputs": [
       {
         "internalType": "uint256",
@@ -925,12 +1233,38 @@
   },
   {
     "inputs": [],
-    "name": "getProtocolTokenWithdrawalReservationLockDuration",
+    "name": "getPaymentTokenWithdrawalReservationLockDuration",
     "outputs": [
       {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getPluginManagerAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getProtocolTokenAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1076,8 +1410,13 @@
             "type": "uint16"
           },
           {
+            "internalType": "uint16",
+            "name": "paymentTokenId",
+            "type": "uint16"
+          },
+          {
             "internalType": "uint256",
-            "name": "protocolTokenAvaliableBalance",
+            "name": "paymentTokenAvailableBalance",
             "type": "uint256"
           }
         ],
@@ -1141,8 +1480,13 @@
             "type": "uint16"
           },
           {
+            "internalType": "uint16",
+            "name": "paymentTokenId",
+            "type": "uint16"
+          },
+          {
             "internalType": "uint256",
-            "name": "protocolTokenAvaliableBalance",
+            "name": "paymentTokenAvailableBalance",
             "type": "uint256"
           }
         ],
@@ -1187,8 +1531,69 @@
             "type": "uint16"
           },
           {
+            "internalType": "uint16",
+            "name": "paymentTokenId",
+            "type": "uint16"
+          },
+          {
             "internalType": "uint256",
-            "name": "protocolTokenAvaliableBalance",
+            "name": "paymentTokenAvailableBalance",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IVaultRegistry.VaultResult",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vaultAddress_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint16",
+        "name": "tokenId_",
+        "type": "uint16"
+      }
+    ],
+    "name": "getVaultDataByTokenId",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "vaultAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint16",
+            "name": "vaultVersion",
+            "type": "uint16"
+          },
+          {
+            "internalType": "address",
+            "name": "ownerAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint16",
+            "name": "vaultKYCLevel",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint16",
+            "name": "paymentTokenId",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint256",
+            "name": "paymentTokenAvailableBalance",
             "type": "uint256"
           }
         ],
@@ -1264,8 +1669,13 @@
             "type": "uint16"
           },
           {
+            "internalType": "uint16",
+            "name": "paymentTokenId",
+            "type": "uint16"
+          },
+          {
             "internalType": "uint256",
-            "name": "protocolTokenAvaliableBalance",
+            "name": "paymentTokenAvailableBalance",
             "type": "uint256"
           }
         ],
@@ -1285,6 +1695,25 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenAddress_",
+        "type": "address"
+      }
+    ],
+    "name": "getWhitelistedTokenId",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
       }
     ],
     "stateMutability": "view",
@@ -1366,6 +1795,11 @@
       },
       {
         "internalType": "address",
+        "name": "exchangeGatewayAddress_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "feeVaultAddress_",
         "type": "address"
       }
@@ -1415,7 +1849,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "isMerchantPaymentIdAvaliable",
+    "name": "isMerchantPaymentIdAvailable",
     "outputs": [
       {
         "internalType": "bool",
@@ -1453,7 +1887,7 @@
         "type": "address"
       }
     ],
-    "name": "isVaultAvaliable",
+    "name": "isVaultAvailable",
     "outputs": [
       {
         "internalType": "bool",
@@ -1543,6 +1977,29 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "nftAddress_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "to_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenId_",
+        "type": "uint256"
+      }
+    ],
+    "name": "salvageNftFromContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "tokenAddress_",
         "type": "address"
       },
@@ -1579,6 +2036,19 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "exchangeGatewayAddress_",
+        "type": "address"
+      }
+    ],
+    "name": "setExchangeGatewayAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "feeVaultAddress_",
         "type": "address"
       }
@@ -1597,12 +2067,12 @@
       },
       {
         "internalType": "uint256",
-        "name": "maxProtocolAmountSingle_",
+        "name": "maxPaymentAmountSingle_",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "maxProtocolAmountDaily_",
+        "name": "maxPaymentAmountDaily_",
         "type": "uint256"
       },
       {
@@ -1612,6 +2082,24 @@
       }
     ],
     "name": "setKYCLevel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "tokenId_",
+        "type": "uint16"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxApprovedPaymentTokenDefaultAmount_",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxApprovedPaymentTokenDefaultAmount",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1652,12 +2140,30 @@
   {
     "inputs": [
       {
+        "internalType": "uint16",
+        "name": "tokenId_",
+        "type": "uint16"
+      },
+      {
+        "internalType": "address",
+        "name": "paymentRouterAddress_",
+        "type": "address"
+      }
+    ],
+    "name": "setPaymentRouterAddressForWhitelistedToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "timeOutDuration_",
         "type": "uint256"
       }
     ],
-    "name": "setProtocolTokenProcessPaymentReservationTimeOutDuration",
+    "name": "setPaymentTokenProcessPaymentReservationTimeOutDuration",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1670,7 +2176,20 @@
         "type": "uint256"
       }
     ],
-    "name": "setProtocolTokenWithdrawalReservationLockDuration",
+    "name": "setPaymentTokenWithdrawalReservationLockDuration",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pluginManagerAddress_",
+        "type": "address"
+      }
+    ],
+    "name": "setPluginManagerAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

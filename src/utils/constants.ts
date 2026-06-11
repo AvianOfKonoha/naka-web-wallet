@@ -1,3 +1,8 @@
+import polygonVaultAbi from '@/assets/abi/PolygonVault.json';
+import polygonRegistryAbi from '@/assets/abi/PolygonVaultRegistry.json';
+import avaxVaultAbi from '@/assets/abi/AvaxVault.json';
+import avaxRegistryAbi from '@/assets/abi/AvaxVaultRegistry.json';
+
 export enum NetworkEnum {
   ETHEREUM = 0,
   GOERLI = 5,
@@ -163,6 +168,9 @@ export const CHAINS = [
     contract: POLYGON_CONTRACT_ADDRESS_PRODUCTION,
     name: 'Polygon',
     gas: 'https://gasstation.polygon.technology/v2',
+    vaultAbi: polygonVaultAbi,
+    registryAbi: polygonRegistryAbi,
+    balanceCall: 'getProtocolTokenBalances',
     rpcs: [
       {
         name: 'Tenderly',
@@ -195,6 +203,9 @@ export const CHAINS = [
     contract: AVAX_CONTRACT_ADDRESS_PRODUCTION,
     name: 'Avalanche (C-Chain)',
     gas: 'https://cdn.routescan.io/api/evm/43114/gas-price?',
+    vaultAbi: avaxVaultAbi,
+    registryAbi: avaxRegistryAbi,
+    balanceCall: 'getPaymentTokenBalances',
     rpcs: [
       {
         name: 'PublicNode',

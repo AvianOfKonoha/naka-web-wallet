@@ -128,6 +128,9 @@ export interface IChain {
   rpcs: IRpc[];
   gas: string;
   currencies: IToken[];
+  vaultAbi: ContractAbi;
+  registryAbi: ContractAbi;
+  balanceCall: string;
 }
 
 export interface IContractsStore {

@@ -12,7 +12,7 @@ import type {
   IWallet,
   IWithdrawal
 } from '@/types/contracts.ts';
-import {Contract, Web3, type ContractAbi, type EIP1193Provider} from 'web3';
+import {Contract, Web3, type ContractAbi} from 'web3';
 import {toast} from 'vue3-toastify';
 import {
   avalancheMainnet,
@@ -21,8 +21,6 @@ import {
   polygonMainnet
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
-import VaultABI from '@/assets/abi/Vault.json';
-import VaultRegistryABI from '@/assets/abi/VaultRegistry.json';
 import usdcABI from '@/assets/abi/USDC.json';
 import xautABI from '@/assets/abi/XAUT.json';
 import type {
@@ -593,6 +591,92 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
+    async getVaultBalance() {
+      if (!this.vaultContract) {
+        return;
+      }
+
+      if (!this.activeChain) {
+        return;
+      }
+
+      try {
+        console.log('get vault balance. ', this.vaultContract);
+        /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
+        const balanceMethod = this.activeChain.balanceCall;
+        this.vaultBalance =
+          await this.vaultContract.methods[balanceMethod]().call();
+
+        console.log(
+          `get vault balance from ${this.vaultContract}: `,
+          this.vaultBalance
+        );
+
+        this.tokens = [this.activeChain.currencies[0]];
+
+        /** Set USDC balance */
+        const usdcBalance = (await this.usdc.contract?.methods
+          .balanceOf(this.vaultAddress)
+          .call()) as bigint;
+        this.usdc.balance = formatUint256toNumber(usdcBalance);
+        if (this.usdc.balance) {
+          this.tokens = [
+            ...this.tokens,
+            {
+              name: 'USDC',
+              value:
+                this.activeChain.currencies.find((item) => item.name === 'USDC')
+                  ?.value || ''
+            }
+          ];
+        }
+
+        /** Set XAUT balance */
+        const xautBalance = (await this.xaut.contract?.methods
+          .balanceOf(this.vaultAddress)
+          .call()) as bigint;
+        this.xaut.balance = formatUint256toNumber(xautBalance);
+        if (this.xaut.balance) {
+          this.tokens = [
+            ...this.tokens,
+            {
+              name: 'XAUT0',
+              value:
+                this.activeChain.currencies.find(
+                  (item) => item.name === 'XAUT0'
+                )?.value || ''
+            }
+          ];
+        }
+
+        /** Check if the currency token currently active still has balance in the vault. If not reset the selection to the first item in the currency array */
+        const currencyTokenActive = this.tokens.some(
+          (item) => item.value === this.currencyToken
+        );
+        if (!currencyTokenActive) {
+          this.currencyToken = this.tokens[0].value;
+        }
+
+        if (!this.vaultBalance) {
+          return;
+        }
+
+        const converted = formatUint256toNumber(this.vaultBalance.balance);
+
+        this.contractBalance = {
+          ...this.contractBalance,
+          usdt: converted
+        };
+
+        console.log('contract balance: ', this.contractBalance.usdt);
+      } catch (error) {
+        console.error(
+          'Error fetching vault balance: ',
+          (error as Error).message
+        );
+      }
+    },
+
     async getEstimatedGas(
       contract: unknown,
       method: string,
@@ -826,92 +910,6 @@ export const useContractsStore = defineStore('contracts', {
       }
     },
 
-    async getVaultBalance() {
-      if (!this.vaultContract) {
-        return;
-      }
-
-      if (!this.activeChain) {
-        return;
-      }
-
-      try {
-        console.log('get vault balance. ', this.vaultContract);
-        /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
-        this.vaultBalance = await this.vaultContract.methods
-          .getProtocolTokenBalances()
-          .call();
-
-        console.log(
-          `get vault balance from ${this.vaultContract}: `,
-          this.vaultBalance
-        );
-
-        this.tokens = [this.activeChain.currencies[0]];
-
-        /** Set USDC balance */
-        const usdcBalance = (await this.usdc.contract?.methods
-          .balanceOf(this.vaultAddress)
-          .call()) as bigint;
-        this.usdc.balance = formatUint256toNumber(usdcBalance);
-        if (this.usdc.balance) {
-          this.tokens = [
-            ...this.tokens,
-            {
-              name: 'USDC',
-              value:
-                this.activeChain.currencies.find((item) => item.name === 'USDC')
-                  ?.value || ''
-            }
-          ];
-        }
-
-        /** Set XAUT balance */
-        const xautBalance = (await this.xaut.contract?.methods
-          .balanceOf(this.vaultAddress)
-          .call()) as bigint;
-        this.xaut.balance = formatUint256toNumber(xautBalance);
-        if (this.xaut.balance) {
-          this.tokens = [
-            ...this.tokens,
-            {
-              name: 'XAUT0',
-              value:
-                this.activeChain.currencies.find(
-                  (item) => item.name === 'XAUT0'
-                )?.value || ''
-            }
-          ];
-        }
-
-        /** Check if the currency token currently active still has balance in the vault. If not reset the selection to the first item in the currency array */
-        const currencyTokenActive = this.tokens.some(
-          (item) => item.value === this.currencyToken
-        );
-        if (!currencyTokenActive) {
-          this.currencyToken = this.tokens[0].value;
-        }
-
-        if (!this.vaultBalance) {
-          return;
-        }
-
-        const converted = formatUint256toNumber(this.vaultBalance.balance);
-
-        this.contractBalance = {
-          ...this.contractBalance,
-          usdt: converted
-        };
-
-        console.log('contract balance: ', this.contractBalance.usdt);
-      } catch (error) {
-        console.error(
-          'Error fetching vault balance: ',
-          (error as Error).message
-        );
-      }
-    },
-
     async estimateBlocksPerHour(sampleSize = 20) {
       if (!this.web3) {
         return;
@@ -943,14 +941,14 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getWithdrawRequests() {
-      if (!this.vaultContract) {
+      if (!this.vaultContract || !this.activeChain) {
         return;
       }
 
       /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
       const web3Instance = new Web3(this.rpc.url);
       const vaultContract = new web3Instance.eth.Contract(
-        VaultABI,
+        this.activeChain.vaultAbi,
         this.vaultAddress
       );
 
@@ -1152,10 +1150,14 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getCancelledWithdrawals() {
+      if (!this.activeChain) {
+        return;
+      }
+
       /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
       const web3Instance = new Web3(this.rpc.url);
       const vaultContract = new web3Instance.eth.Contract(
-        VaultABI,
+        this.activeChain.vaultAbi,
         this.vaultAddress
       );
 
@@ -1209,10 +1211,14 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getCompletedWithdrawals() {
+      if (!this.activeChain) {
+        return;
+      }
+
       /** Connect to another RPC - the default RPC for the Polygon mainnet isn't indexing properly in certain timezones */
       const web3Instance = new Web3(this.rpc.url);
       const vaultContract = new web3Instance.eth.Contract(
-        VaultABI,
+        this.activeChain.vaultAbi,
         this.vaultAddress
       );
 
@@ -1315,7 +1321,10 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Set the vault contract state from vault abi and vault address fetched from Vault SC */
-        this.vaultContract = new this.web3.eth.Contract(VaultABI, address);
+        this.vaultContract = new this.web3.eth.Contract(
+          this.activeChain.vaultAbi,
+          address
+        );
 
         /** Set USDC contract */
         this.usdc.contract = new this.web3.eth.Contract(
@@ -1365,7 +1374,7 @@ export const useContractsStore = defineStore('contracts', {
 
       /** Initialize factory contract by providing the registry ABI and the factory contract's address to the contract class then save it to the global state */
       this.factoryContract = new this.web3.eth.Contract(
-        VaultRegistryABI,
+        this.activeChain.registryAbi,
         this.activeChain.contract
       );
 
