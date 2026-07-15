@@ -604,6 +604,7 @@ export const useContractsStore = defineStore('contracts', {
         console.log('get vault balance. ', this.vaultContract);
         /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
         const balanceMethod = this.activeChain.balanceCall;
+
         this.vaultBalance =
           await this.vaultContract.methods[balanceMethod]().call();
 
@@ -661,7 +662,7 @@ export const useContractsStore = defineStore('contracts', {
           return;
         }
 
-        const converted = formatUint256toNumber(this.vaultBalance.balance);
+        const converted = formatUint256toNumber(this.vaultBalance.avaliableBalance);
 
         this.contractBalance = {
           ...this.contractBalance,
