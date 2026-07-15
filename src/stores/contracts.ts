@@ -662,7 +662,8 @@ export const useContractsStore = defineStore('contracts', {
           return;
         }
 
-        const converted = formatUint256toNumber(this.vaultBalance.avaliableBalance);
+        const balanceKey = this.activeChain.id === 137 ? 'avaliableBalance' : 'availableBalance';
+        const converted = formatUint256toNumber(this.vaultBalance[balanceKey as keyof typeof this.vaultBalance] ?? 0);
 
         this.contractBalance = {
           ...this.contractBalance,

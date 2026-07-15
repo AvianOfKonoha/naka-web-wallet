@@ -1,5 +1,5 @@
 export interface IVaultBalance {
-  avaliableBalance: bigint;
+  availableBalance: bigint;
   balance: bigint;
   processPaymentReservation: bigint;
   withdrawalReservation: bigint;
