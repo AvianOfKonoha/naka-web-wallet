@@ -212,6 +212,10 @@ export const CHAINS = [
     reservationLockCall: 'getPaymentTokenWithdrawalReservationLockDuration',
     rpcs: [
       {
+        name: 'DRPC',
+        url: 'https://avalanche.drpc.org'
+      },
+      {
         name: 'PublicNode',
         url: 'https://avalanche-c-chain-rpc.publicnode.com'
       },
@@ -232,8 +236,8 @@ export const CHAINS = [
         url: 'https://api.avax.network/ext/bc/C/rpc'
       },
       {
-        name: 'DRPC',
-        url: 'https://avalanche.drpc.org'
+        name: 'MeowRPC',
+        url: 'https://avax.meowrpc.com'
       }
     ],
     currencies: [
