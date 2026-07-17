@@ -497,6 +497,32 @@
       font-weight: 300;
       line-height: 1;
     }
+    &--tabs {
+      @include framework.flex-layout(
+        inline-flex,
+        unset,
+        center,
+        framework.$defaultGridGap
+      );
+      flex-wrap: wrap;
+      .tab {
+        padding: calc(#{framework.$defaultPadding} / 2);
+        background-color: map.get(framework.$colors, 'gray-50');
+        border-radius: framework.$defaultRem;
+        &.active {
+          border: 2px solid map.get(framework.$colors, 'orange-400');
+        }
+      }
+    }
+    &--tabs-wrap {
+      @include framework.grid-gap(calc(#{framework.$defaultGridGap} / 2));
+      .tab {
+        &__title {
+          @include framework.font-style('20', 'gray-800');
+          font-weight: 500;
+        }
+      }
+    }
     &--subtitle {
       @include framework.font-style('24', 'gray-400');
     }

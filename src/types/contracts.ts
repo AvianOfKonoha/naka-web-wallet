@@ -124,7 +124,7 @@ export interface IChain {
   id: number;
   hexId: string;
   name: string;
-  contract: string;
+  contract: string[];
   rpcs: IRpc[];
   gas: string;
   currencies: IToken[];
@@ -155,7 +155,7 @@ export interface IContractsStore {
   wallets: IContractsWallets;
   error: IContractsErrors;
   vaultContract: Contract<ContractAbi> | null;
-  factoryContract: Contract<ContractAbi> | null;
+  factoryContract: Contract<ContractAbi>[];
   transactionGas: ITransactionGas;
   activeRequest: IWithdrawal | null;
   lastBlock: number;
@@ -163,6 +163,7 @@ export interface IContractsStore {
   completedWithdrawals: IWithdrawal[];
   cancelledWithdrawals: IWithdrawal[];
   vaultAddress: string;
+  availableVaults: string[];
   blocksOffset: number;
   daysOffset: number;
   thresholdPrompt: string;
@@ -172,4 +173,5 @@ export interface IContractsStore {
   currencyToken: string;
   tokens: IToken[];
   activeChain: IChain | null;
+  contractIndex: number;
 }

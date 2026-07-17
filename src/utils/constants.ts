@@ -151,6 +151,8 @@ export const POLYGON_CONTRACT_ADDRESS_PRODUCTION =
   '0x9ac93245367975b06013C1EE0204A5E42e91b57B';
 //issuer 1: 0x68eA8A05D52CFe66031383FEA4e3256cFE9ff5Ce
 //issuer 2 and 3: 0x9ac93245367975b06013C1EE0204A5E42e91b57B
+export const POLYGON_CONTRACT_ADDRESS_PRODUCTION_ISSUER_1 =
+  '0x68eA8A05D52CFe66031383FEA4e3256cFE9ff5Ce';
 
 export const AVAX_CONTRACT_ADDRESS_STAGING =
   '0x410e7c2c6d717445215734D3d7c9CC0c6D043B8d';
@@ -165,7 +167,10 @@ export const CHAINS = [
     //Polygon
     id: 137,
     hexId: polygonMainnet.chainId,
-    contract: POLYGON_CONTRACT_ADDRESS_PRODUCTION,
+    contract: [
+      POLYGON_CONTRACT_ADDRESS_PRODUCTION,
+      POLYGON_CONTRACT_ADDRESS_PRODUCTION_ISSUER_1
+    ],
     name: 'Polygon',
     gas: 'https://gasstation.polygon.technology/v2',
     vaultAbi: polygonVaultAbi,
@@ -202,7 +207,7 @@ export const CHAINS = [
     /*Avalanche*/
     id: 43114,
     hexId: avalancheMainnet.chainId,
-    contract: AVAX_CONTRACT_ADDRESS_PRODUCTION,
+    contract: [AVAX_CONTRACT_ADDRESS_PRODUCTION],
     name: 'Avalanche (C-Chain)',
     gas: 'https://cdn.routescan.io/api/evm/43114/gas-price?',
     vaultAbi: avaxVaultAbi,

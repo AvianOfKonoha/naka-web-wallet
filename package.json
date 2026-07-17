@@ -11,7 +11,9 @@
     "build:naka": "vite build --config vite.config.naka.ts",
     "deploy:origin": "gh-pages -d dist",
     "deploy:naka": "gh-pages -d dist --remote naka",
-    "deploy:both": "pnpm run deploy:origin && pnpm run deploy:naka"
+    "deploy:both": "pnpm run deploy:origin && pnpm run deploy:naka",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@metamask/sdk": "^0.33.1",
@@ -30,11 +32,13 @@
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/tsconfig": "^0.7.0",
     "gh-pages": "^6.3.0",
+    "happy-dom": "^20.10.6",
     "npm-run-all2": "^7.0.2",
     "sass": "^1.93.2",
     "typescript": "~5.8.3",
     "vite": "^7.1.10",
     "vite-plugin-vue-devtools": "^7.7.7",
+    "vitest": "^4.1.10",
     "vue-tsc": "^2.2.12"
   },
   "prettier": {

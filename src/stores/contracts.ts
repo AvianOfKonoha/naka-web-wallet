@@ -121,7 +121,7 @@ export const useContractsStore = defineStore('contracts', {
       connected: false,
       externalAddress: false
     },
-    factoryContract: null,
+    factoryContract: [],
     vaultContract: null,
     transactionGas: {
       gas: 0,
@@ -152,7 +152,9 @@ export const useContractsStore = defineStore('contracts', {
     },
     currencyToken: '',
     tokens: [],
-    activeChain: null
+    activeChain: null,
+    contractIndex: 0,
+    availableVaults: []
   }),
   getters: {
     activeNetwork: (state): IActiveNetwork => {
@@ -482,7 +484,7 @@ export const useContractsStore = defineStore('contracts', {
         usdt: 0
       };
       this.vaultContract = null;
-      this.factoryContract = null;
+      this.factoryContract = [];
       this.vaultBalance = null;
       sessionStorage.removeItem('firstSign');
       this.resetWithdrawalsList();
@@ -495,6 +497,7 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       this.provider.on('chainChanged', async (chainId: string) => {
+        this.contractIndex = 0;
         console.log('chainId changed', chainId);
         /** Init loading history */
         this.updateLoading({history: true});
@@ -662,8 +665,11 @@ export const useContractsStore = defineStore('contracts', {
           return;
         }
 
-        const balanceKey = this.activeChain.id === 137 ? 'avaliableBalance' : 'availableBalance';
-        const converted = formatUint256toNumber(this.vaultBalance[balanceKey as keyof typeof this.vaultBalance] ?? 0);
+        const balanceKey =
+          this.activeChain.id === 137 ? 'avaliableBalance' : 'availableBalance';
+        const converted = formatUint256toNumber(
+          this.vaultBalance[balanceKey as keyof typeof this.vaultBalance] ?? 0
+        );
 
         this.contractBalance = {
           ...this.contractBalance,
@@ -769,7 +775,7 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      /** If the request for withdrawal failed the user has been sent to the retry screen. The retry function takes the user back to the beginning of the form and resets the state */
+      /** If the request for withdrawal failed, the user has been sent to the retry screen. The retry function takes the user back to the beginning of the form and resets the state */
       if (this.error.connected) {
         this.resetConnectedForm();
         return;
@@ -847,7 +853,7 @@ export const useContractsStore = defineStore('contracts', {
         return;
       }
 
-      /** If the request for withdrawal failed the user has been sent to the retry screen. The retry function takes the user back to the beginning of the form and resets the state */
+      /** If the request for withdrawal failed, the user has been sent to the retry screen. The retry function takes the user back to the beginning of the form and resets the state */
       if (this.error.external) {
         this.resetExternalForm();
         return;
@@ -978,7 +984,7 @@ export const useContractsStore = defineStore('contracts', {
 
     async getActiveRequest() {
       if (
-        !this.factoryContract ||
+        !this.factoryContract.length ||
         !this.vaultContract ||
         !this.web3 ||
         !this.activeChain
@@ -1002,7 +1008,7 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Fetch a lock duration of the withdrawal request from the factory contract */
         const lockDuration: bigint =
-          await this.factoryContract.methods[
+          await this.factoryContract[this.contractIndex].methods[
             this.activeChain.reservationLockCall
           ]().call();
 
@@ -1010,13 +1016,13 @@ export const useContractsStore = defineStore('contracts', {
         const thresholdPassed =
           Date.now() > Number(reservationStatus.unlockTime) * 1000;
 
-        /** Fetch withdraw requests from WithdrawRequest event */
+        /** Fetch withdraw requests from the WithdrawRequest event */
         await this.getWithdrawRequests();
 
         /** Take the latest WithdrawalRequest event as the active request */
         const latestRequest = this.withdrawalRequests?.at(-1);
 
-        /** If for whatever reason the public indexer doesn't work open a prompt notifying the user he has an outstanding withdrawal request */
+        /** If for whatever reason the public indexer doesn't work, open a prompt notifying the user he has an outstanding withdrawal request */
         if (!latestRequest && thresholdPassed) {
           this.thresholdPrompt =
             'We have detected you have an outstanding withdrawal request. Please note that a small gas fee is required to cancel your withdrawal.';
@@ -1024,12 +1030,12 @@ export const useContractsStore = defineStore('contracts', {
           return;
         }
 
-        /** In case there is no withdrawal request stop propagation */
+        /** In case there is no withdrawal request, stop propagation */
         if (!latestRequest) {
           return;
         }
 
-        /** In order to access the recipient address used as a second argument in withdrawRequest method we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
+        /** In order to access the recipient address used as a second argument in withdrawRequest method, we need to first access the transaction from the web3. The transactionHash used to index a transaction can be found in the emitted event WithdrawRequest */
         const blockRequest = (await this.web3.eth.getBlock(
           latestRequest.blockNumber,
           true
@@ -1282,7 +1288,7 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     async getWithdrawalHistory() {
-      if (!this.vaultContract || !this.factoryContract || !this.web3) {
+      if (!this.vaultContract || !this.factoryContract.length || !this.web3) {
         return;
       }
 
@@ -1382,18 +1388,48 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       /** Initialize factory contract by providing the registry ABI and the factory contract's address to the contract class then save it to the global state */
-      this.factoryContract = new this.web3.eth.Contract(
-        this.activeChain.registryAbi,
-        this.activeChain.contract
-      );
+
+      console.log('chain: ', this.activeChain.id);
+
+      this.factoryContract = this.activeChain.contract.map((factory) => {
+        return new this.web3!.eth.Contract(
+          this.activeChain!.registryAbi,
+          factory
+        );
+      });
+      console.log('factory: ', this.factoryContract);
 
       const loadingToast = toast.loading('Connecting to the contract...');
 
       try {
         /** Check if the currently connected wallet address already created a Vault smart contract. Stop propagation if so, otherwise create a new Vault smart contract. */
-        this.vaultAddress = await this.factoryContract.methods
+        const available = (await Promise.all(
+          this.factoryContract.map(async (factory) => ({
+            factory: factory,
+            vaultAddress: await factory.methods
+              .getVaultAddressByOwner(this.connectedAccount)
+              .call()
+          }))
+        )) as unknown as {factory: any; vaultAddress: string}[];
+        console.log('available: ', available);
+
+        /** Check if there are multiple contracts on several factory contracts on the same chain and output the available vault addresses */
+        const availableVaults = available.filter(
+          (avC) =>
+            validateAddress(avC.vaultAddress) && parseInt(avC.vaultAddress, 16)
+        );
+        console.log('available vaults: ', availableVaults);
+
+        this.availableVaults = availableVaults.map((item) => item.vaultAddress);
+        const availableFactories = availableVaults.map((item) => item.factory);
+
+        console.log('available factories: ', availableFactories);
+
+        /** Set the vault address of the current address (if there are multiple there is a selector in UI) */
+        this.vaultAddress = await availableFactories[this.contractIndex].methods
           .getVaultAddressByOwner(this.connectedAccount)
           .call();
+        console.log('vault address: ', this.vaultAddress);
         const vaultExists =
           validateAddress(this.vaultAddress) && parseInt(this.vaultAddress, 16);
 
@@ -1405,12 +1441,16 @@ export const useContractsStore = defineStore('contracts', {
         }
 
         /** Fetch estimated gas */
-        await this.getEstimatedGas(this.factoryContract, 'createVault', [
-          this.connectedAccount
-        ]);
+        await this.getEstimatedGas(
+          this.factoryContract[this.contractIndex],
+          'createVault',
+          [this.connectedAccount]
+        );
 
         /** Make a request to "createVault" method on the factory contract to create a new Vault contract that will connect to the wallet address and the user will be able to withdraw funds from */
-        const factoryTransaction = await this.factoryContract.methods
+        const factoryTransaction = await this.factoryContract[
+          this.contractIndex
+        ].methods
           .createVault(this.connectedAccount)
           .send({
             from: this.connectedAccount,
@@ -1456,6 +1496,11 @@ export const useContractsStore = defineStore('contracts', {
       } finally {
         toast.remove(loadingToast);
       }
+    },
+
+    async updateActiveVault(vaultId: number) {
+      this.contractIndex = vaultId;
+      await this.connectContract();
     },
 
     async completeWithdraw() {

@@ -8,6 +8,7 @@ import WithdrawBox from '@/components/Withdraw/Content/WithdrawBox.vue';
 import Card from '@/components/Withdraw/Content/Card.vue';
 import {bottomToast, formatWithAtLeastTwoDecimals} from '@/utils/helpers.ts';
 import HistoryList from '@/components/Withdraw/List/HistoryList.vue';
+import Tabs from '@/components/Withdraw/Content/Tabs.vue';
 
 /*Global state*/
 const contractsStore = useContractsStore();
@@ -207,6 +208,9 @@ const closeOvertimeModal = () => {
           Choose your withdrawal method and get your funds in just a few steps.
         </div>
       </div>
+
+      <Tabs v-if="contractsStore.availableVaults.length > 1" />
+
       <div class="withdraw__screen--row withdraw__screen--connect">
         <WithdrawBox
           @click="openConnectedModal"
