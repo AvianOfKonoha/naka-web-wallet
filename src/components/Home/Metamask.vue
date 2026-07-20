@@ -191,7 +191,7 @@ onMounted(() => {
         </div>
         <div class="info__details">
           <div class="info__details--title">
-            Connect the Wallet Created With Your NAKA Pay Recovery Phrase
+            Connect the Wallet Created With Your NAKA Pay Recovery Phrase!
           </div>
           <div class="info__details--text">
             Create a new MetaMask wallet by importing your NAKA Pay recovery
