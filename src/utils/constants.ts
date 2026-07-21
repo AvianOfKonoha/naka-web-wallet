@@ -217,32 +217,24 @@ export const CHAINS = [
     reservationLockCall: 'getPaymentTokenWithdrawalReservationLockDuration',
     rpcs: [
       {
+        name: 'Tenderly v1',
+        url: 'https://avalanche-mainnet.gateway.tenderly.co'
+      },
+      {
+        name: 'Tenderly v2',
+        url: 'https://avalanche.gateway.tenderly.co'
+      },
+      {
         name: 'DRPC',
         url: 'https://avalanche.drpc.org'
-      },
-      {
-        name: 'PublicNode',
-        url: 'https://avalanche-c-chain-rpc.publicnode.com'
-      },
-      {
-        name: 'Chainstack',
-        url: 'https://avalanche-c-chain.publicnode.com'
       },
       {
         name: '1rpc',
         url: 'https://1rpc.io/avax/c'
       },
       {
-        name: 'OmniaTech',
-        url: 'https://endpoints.omniatech.io/v1/avax/mainnet/public'
-      },
-      {
         name: 'Avax Network',
         url: 'https://api.avax.network/ext/bc/C/rpc'
-      },
-      {
-        name: 'MeowRPC',
-        url: 'https://avax.meowrpc.com'
       }
     ],
     currencies: [

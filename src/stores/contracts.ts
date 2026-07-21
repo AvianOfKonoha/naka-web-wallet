@@ -46,6 +46,7 @@ export const useContractsStore = defineStore('contracts', {
     connectedAccount: '',
     balance: '',
     vaultBalance: null,
+    amountDecimalPoints: 6,
     contractBalance: {
       eth: 0,
       usdt: 0
@@ -157,6 +158,9 @@ export const useContractsStore = defineStore('contracts', {
     availableVaults: []
   }),
   getters: {
+    amountDecimals: (state): string => {
+      return `0.${'0'.repeat(state.amountDecimalPoints - 1)}1`
+    },
     activeNetwork: (state): IActiveNetwork => {
       if (!state.activeChain) {
         return {

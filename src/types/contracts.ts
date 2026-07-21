@@ -142,6 +142,7 @@ export interface IContractsStore {
   balance: string;
   contractBalance: IContractBalance;
   vaultBalance: IVaultBalance | null;
+  amountDecimalPoints: number;
   inputs: IContractsInputs;
   loading: IContractsLoading;
   transactionHash: IContractsHash;
