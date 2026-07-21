@@ -73,7 +73,7 @@ watch(
           :required="props.amountData.required"
           min="0"
           @input="preventNegative"
-          step="0.00001"
+          step="0.000001"
           v-model="props.amountData.value"
         />
         <button
