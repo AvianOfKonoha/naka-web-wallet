@@ -648,7 +648,7 @@ export const useContractsStore = defineStore('contracts', {
         /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
         const balanceMethod = this.activeChain.balanceCall;
         this.vaultBalance =
-          await this.vaultContract.methods[balanceMethod]().call();
+          await this.vaultContract?.methods[balanceMethod]().call();
 
         this.tokens = [this.activeChain.currencies[0]];
 
@@ -729,7 +729,7 @@ export const useContractsStore = defineStore('contracts', {
 
       try {
         /** Estimate gas needed for specific method */
-        const estimatedGas = await (contract as Contract<ContractAbi>).methods[
+        const estimatedGas = await (contract as Contract<ContractAbi>)?.methods[
           method
         ](...args).estimateGas({from: this.connectedAccount});
 
@@ -827,7 +827,7 @@ export const useContractsStore = defineStore('contracts', {
           ]);
 
           /** Make a withdrawal request to Vault SC */
-          await this.vaultContract.methods
+          await this.vaultContract?.methods
             .withdrawRequest(
               this.currencyToken,
               this.connectedAccount,
@@ -911,7 +911,7 @@ export const useContractsStore = defineStore('contracts', {
           ]);
 
           /** Make a withdrawal request to Vault SC */
-          await this.vaultContract.methods
+          await this.vaultContract?.methods
             .withdrawRequest(
               this.currencyToken,
               this.web3.utils.toChecksumAddress(
@@ -1040,7 +1040,7 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Fetch a lock duration of the withdrawal request from the factory contract */
         const lockDuration: bigint =
-          await this.factoryContract[this.contractIndex].methods[
+          await this.factoryContract[this.contractIndex]?.methods[
             this.activeChain.reservationLockCall
           ]().call();
 
@@ -1450,7 +1450,9 @@ export const useContractsStore = defineStore('contracts', {
         const availableFactories = availableVaults.map((item) => item.factory);
 
         /** Set the vault address of the current address (if there are multiple there is a selector in UI) */
-        this.vaultAddress = await availableFactories[this.contractIndex].methods
+        this.vaultAddress = await availableFactories[
+          this.contractIndex
+        ]?.methods
           .getVaultAddressByOwner(this.connectedAccount)
           .call();
         const vaultExists =
@@ -1465,15 +1467,15 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Fetch estimated gas */
         await this.getEstimatedGas(
-          this.factoryContract[this.contractIndex],
+          availableFactories[this.contractIndex],
           'createVault',
           [this.connectedAccount]
         );
 
         /** Make a request to "createVault" method on the factory contract to create a new Vault contract that will connect to the wallet address and the user will be able to withdraw funds from */
-        const factoryTransaction = await this.factoryContract[
+        const factoryTransaction = await availableFactories[
           this.contractIndex
-        ].methods
+        ]?.methods
           .createVault(this.connectedAccount)
           .send({
             from: this.connectedAccount,
@@ -1543,7 +1545,7 @@ export const useContractsStore = defineStore('contracts', {
         ]);
 
         /** Make withdraw request */
-        await this.vaultContract.methods
+        await this.vaultContract?.methods
           .withdraw(
             this.currencyToken,
             this.activeRequest.address,
@@ -1606,7 +1608,7 @@ export const useContractsStore = defineStore('contracts', {
         );
 
         /** Make a request to the Vault smart contract to cancel the active withdraw request. It takes in one argument - currency token address */
-        await this.vaultContract.methods
+        await this.vaultContract?.methods
           .cancelWithdrawRequest(this.currencyToken)
           .send({
             from: this.connectedAccount,
