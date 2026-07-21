@@ -1467,13 +1467,13 @@ export const useContractsStore = defineStore('contracts', {
 
         /** Fetch estimated gas */
         await this.getEstimatedGas(
-          availableFactories[this.contractIndex],
+          this.factoryContract[this.contractIndex],
           'createVault',
           [this.connectedAccount]
         );
 
         /** Make a request to "createVault" method on the factory contract to create a new Vault contract that will connect to the wallet address and the user will be able to withdraw funds from */
-        const factoryTransaction = await availableFactories[
+        const factoryTransaction = await this.factoryContract[
           this.contractIndex
         ]?.methods
           .createVault(this.connectedAccount)
