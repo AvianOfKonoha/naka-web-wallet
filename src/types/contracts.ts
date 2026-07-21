@@ -135,6 +135,11 @@ export interface IChain {
   reservationLockCall: string;
 }
 
+export interface ITime {
+  text: string;
+  value: number;
+}
+
 export interface IContractsStore {
   web3: Web3 | null;
   connectedAccount: string;
@@ -175,4 +180,6 @@ export interface IContractsStore {
   tokens: IToken[];
   activeChain: IChain | null;
   contractIndex: number;
+  timeList: ITime[];
+  withdrawalListTime: number;
 }

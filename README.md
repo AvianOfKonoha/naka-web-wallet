@@ -165,7 +165,6 @@ async function connectMetaMask() {
    try {
       web3 = new Web3(window.ethereum);
       accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      console.log("Connected account:", accounts[0]);
    } catch (error) {
       console.error(error)
    }
@@ -184,7 +183,6 @@ async function createVault() {
    try {
       const owner = accounts[0];
       const tx = await registry.methods.createVault(owner).send({ from: owner });
-      console.log("Vault created, receipt:", tx);
       // Vault address is in tx.events.VaultCreated.returnValues.vaultAddress
    } catch (error) {
       console.error(error)
@@ -206,7 +204,6 @@ async function depositToVault(vaultAddress: string, tokenAddress: string, amount
          from: accounts[0],
          value: tokenAddress === "0x0..." ? amountWei : "0"
       });
-      console.log("Deposit successful");
    } catch (error) {
       console.error(error)
    }
@@ -217,7 +214,6 @@ async function requestWithdrawFromVault(vaultAddress: string, tokenAddress: stri
 
    try {
       await vault.methods.withdraw(tokenAddress, recipient, amountUsdt).send({ from: accounts[0] });
-      console.log("Withdrawal successful");
    } catch (error) {
       console.error(error)
    }
@@ -228,7 +224,6 @@ async function withdrawFromVault(vaultAddress: string, tokenAddress: string, rec
 
    try {
       await vault.methods.withdraw(tokenAddress, recipient, amountUsdt).send({ from: accounts[0] });
-      console.log("Withdrawal successful");
    } catch (error) {
       console.error(error)
    }

@@ -18,7 +18,9 @@ import {
   avalancheMainnet,
   CHAINS,
   NETWORKS,
-  polygonMainnet
+  polygonMainnet,
+  THIS_YEAR_DAYS,
+  TODAY_TIME
 } from '@/utils/constants.ts';
 import {metamaskSdk} from '@/utils/metamask.ts';
 import usdcABI from '@/assets/abi/USDC.json';
@@ -155,11 +157,38 @@ export const useContractsStore = defineStore('contracts', {
     tokens: [],
     activeChain: null,
     contractIndex: 0,
-    availableVaults: []
+    availableVaults: [],
+    timeList: [
+      {
+        text: 'Last hour',
+        value: 1 / 24
+      },
+      {
+        text: 'Today',
+        value: TODAY_TIME
+      },
+      {
+        text: '5 days',
+        value: 5
+      },
+      {
+        text: '10 days',
+        value: 10
+      },
+      {
+        text: 'This month',
+        value: new Date().getDate()
+      },
+      {
+        text: 'This year',
+        value: THIS_YEAR_DAYS + TODAY_TIME
+      }
+    ],
+    withdrawalListTime: TODAY_TIME
   }),
   getters: {
     amountDecimals: (state): string => {
-      return `0.${'0'.repeat(state.amountDecimalPoints - 1)}1`
+      return `0.${'0'.repeat(state.amountDecimalPoints - 1)}1`;
     },
     activeNetwork: (state): IActiveNetwork => {
       if (!state.activeChain) {
@@ -290,6 +319,15 @@ export const useContractsStore = defineStore('contracts', {
       this.updateWallet('connected', {step: 1});
       this.updateFormField(null, 'connected', 'amount');
       this.updateLoading({withdrawConnected: false});
+    },
+
+    updateHistoryList() {
+      if (this.loading.history) {
+        return;
+      }
+      this.resetWithdrawalsList();
+      this.daysOffset = this.withdrawalListTime;
+      this.getWithdrawalHistory();
     },
 
     resetExternalForm() {
@@ -489,7 +527,7 @@ export const useContractsStore = defineStore('contracts', {
       this.factoryContract = [];
       this.vaultBalance = null;
       this.daysOffset =
-          (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24;
+        (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24;
       sessionStorage.removeItem('firstSign');
       this.resetWithdrawalsList();
     },
@@ -502,7 +540,6 @@ export const useContractsStore = defineStore('contracts', {
 
       this.provider.on('chainChanged', async (chainId: string) => {
         this.contractIndex = 0;
-        console.log('chainId changed', chainId);
         /** Init loading history */
         this.updateLoading({history: true});
 
@@ -608,17 +645,10 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       try {
-        console.log('get vault balance. ', this.vaultContract);
         /** Set the balance (in USDT) by calling the "getProtocolTokenBalances" from the Vault SC */
         const balanceMethod = this.activeChain.balanceCall;
-
         this.vaultBalance =
           await this.vaultContract.methods[balanceMethod]().call();
-
-        console.log(
-          `get vault balance from ${this.vaultContract}: `,
-          this.vaultBalance
-        );
 
         this.tokens = [this.activeChain.currencies[0]];
 
@@ -679,8 +709,6 @@ export const useContractsStore = defineStore('contracts', {
           ...this.contractBalance,
           usdt: converted
         };
-
-        console.log('contract balance: ', this.contractBalance.usdt);
       } catch (error) {
         console.error(
           'Error fetching vault balance: ',
@@ -1392,16 +1420,12 @@ export const useContractsStore = defineStore('contracts', {
       }
 
       /** Initialize factory contract by providing the registry ABI and the factory contract's address to the contract class then save it to the global state */
-
-      console.log('chain: ', this.activeChain.id);
-
       this.factoryContract = this.activeChain.contract.map((factory) => {
         return new this.web3!.eth.Contract(
           this.activeChain!.registryAbi,
           factory
         );
       });
-      console.log('factory: ', this.factoryContract);
 
       const loadingToast = toast.loading('Connecting to the contract...');
 
@@ -1415,25 +1439,20 @@ export const useContractsStore = defineStore('contracts', {
               .call()
           }))
         )) as unknown as {factory: any; vaultAddress: string}[];
-        console.log('available: ', available);
 
         /** Check if there are multiple contracts on several factory contracts on the same chain and output the available vault addresses */
         const availableVaults = available.filter(
           (avC) =>
             validateAddress(avC.vaultAddress) && parseInt(avC.vaultAddress, 16)
         );
-        console.log('available vaults: ', availableVaults);
 
         this.availableVaults = availableVaults.map((item) => item.vaultAddress);
         const availableFactories = availableVaults.map((item) => item.factory);
-
-        console.log('available factories: ', availableFactories);
 
         /** Set the vault address of the current address (if there are multiple there is a selector in UI) */
         this.vaultAddress = await availableFactories[this.contractIndex].methods
           .getVaultAddressByOwner(this.connectedAccount)
           .call();
-        console.log('vault address: ', this.vaultAddress);
         const vaultExists =
           validateAddress(this.vaultAddress) && parseInt(this.vaultAddress, 16);
 

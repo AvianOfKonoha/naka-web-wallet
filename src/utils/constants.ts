@@ -256,3 +256,9 @@ export const CHAINS = [
 
 export const POLYGON_USDT_ADDRESS_STAGING =
   '0x5DC14a664d551F24e9f7A4C9c6215a84E44f0f1E';
+
+export const TODAY_TIME = (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24;
+export const THIS_YEAR_DAYS = Math.floor(
+    (new Date().getTime() - new Date(new Date().getFullYear(), 0, 1).getTime()) /
+    (1000 * 60 * 60 * 24)
+);
