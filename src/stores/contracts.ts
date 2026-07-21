@@ -278,8 +278,6 @@ export const useContractsStore = defineStore('contracts', {
       this.cancelledWithdrawals = [];
       this.completedWithdrawals = [];
       this.withdrawals = [];
-      this.daysOffset =
-        (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24;
     },
 
     resetConnectedForm() {
@@ -490,6 +488,8 @@ export const useContractsStore = defineStore('contracts', {
       this.vaultContract = null;
       this.factoryContract = [];
       this.vaultBalance = null;
+      this.daysOffset =
+          (Date.now() - new Date().setHours(0, 0, 0, 0)) / 36e5 / 24;
       sessionStorage.removeItem('firstSign');
       this.resetWithdrawalsList();
     },
