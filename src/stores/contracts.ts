@@ -516,6 +516,7 @@ export const useContractsStore = defineStore('contracts', {
     },
 
     disconnectMetamask() {
+      this.contractIndex = 0;
       this.connectedAccount = '';
       this.vaultAddress = '';
       this.balance = '';
@@ -1441,8 +1442,6 @@ export const useContractsStore = defineStore('contracts', {
           }))
         )) as unknown as {factory: any; vaultAddress: string}[];
 
-        console.log('available: ', available);
-
         /** Check if there are multiple contracts on several factory contracts on the same chain and output the available vault addresses */
         const availableVaults = available.filter(
           (avC) =>
@@ -1451,8 +1450,6 @@ export const useContractsStore = defineStore('contracts', {
 
         this.availableVaults = availableVaults.map((item) => item.vaultAddress);
         const availableFactories = availableVaults.map((item) => item.factory);
-
-        console.log('connected account: ', this.connectedAccount);
 
         /** Set the vault address of the current address (if there are multiple there is a selector in UI) */
         if (availableFactories.length > 0) {
