@@ -10,6 +10,14 @@ const props = defineProps<{
 
 /*Global state*/
 const contractStore = useContractsStore();
+
+/*Methods*/
+const closeModal = () => {
+  setTimeout(() => {
+    contractStore.updateModal({withdrawConnected: false});
+    contractStore.updateModal({withdrawExternal: false});
+  }, 0);
+};
 </script>
 
 <template>
@@ -30,7 +38,9 @@ const contractStore = useContractsStore();
       </div>
     </div>
     <div class="process__button">
-      <button type="submit" aria-label="Close the modal">I understand</button>
+      <button type="submit" aria-label="Close the modal" @click="closeModal">
+        I understand
+      </button>
     </div>
   </div>
 </template>
